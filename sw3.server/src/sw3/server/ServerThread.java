@@ -269,4 +269,9 @@ public class ServerThread extends Thread
         myHandler.setFormatter(new LoggingFormatter());
         log.addHandler(myHandler);
     }
+
+    public void logFinest(String msg)
+    {
+        log.finest(msg);
+    }
 }
