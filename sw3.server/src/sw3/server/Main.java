@@ -11,7 +11,7 @@ public class Main
 	 */
 	public static void main(String[] args)
 	{
-		Server server = new Server();
+		ServerThread server = new ServerThread();
 		server.start();
 	}
 }
