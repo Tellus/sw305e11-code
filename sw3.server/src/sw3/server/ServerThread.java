@@ -52,6 +52,11 @@ public class ServerThread extends Thread
         return _mode;
     }
     
+    protected void setMode(ServerModeEnum newMode)
+    {
+        _mode = newMode;
+    }
+    
     public ServerThread()
     {
         // Important. Start by creating a logger we can see.
@@ -87,13 +92,12 @@ public class ServerThread extends Thread
     }
     
     /**
-     * Runs the scanne section of a loop. The scanner reads
+     * Runs the scanner section of a loop. The scanner reads
      * console input and reacts to it, if applicable.
      * May change loopSignal if applicable.
      */
     protected void runScanner()
     {
-        
         // If the scanner has registered some user input, we start reacting to it.
         if (input.hasNext())
         {
@@ -104,6 +108,8 @@ public class ServerThread extends Thread
             
             // If the command is quit, however, we return the term signal.
             if (cmd.compareToIgnoreCase("quit") == 0) loopSignal = CommandOpEnum.TERM;
+            
+            System.out.print(">");
         }
     }
     
@@ -111,6 +117,7 @@ public class ServerThread extends Thread
     {
         try
         {
+            log.info("Shutting down the server thread.");
             serverSocket.close();
         }
         catch (IOException e)
@@ -166,6 +173,9 @@ public class ServerThread extends Thread
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
+        // Now we have the config file prepped. Let's get important data.
+        setMode(ServerModeEnum.ACTIVE);
     }
     
     /**
