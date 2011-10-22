@@ -9,5 +9,8 @@ package sw3.server;
  */
 public enum CommandOpEnum
 {
-    NOOP, TERM
+    NOOP, // Used to denote that no particular action is necessary.
+    TERM,   // Term signal, making the server shut down on its next iteration.
+    NEWCONF, // Signifies that a new config file has been created. Causes term to force configuration.
+    STARTUPERR // Signifies a severe error during startup. The server will shut down.
 }
