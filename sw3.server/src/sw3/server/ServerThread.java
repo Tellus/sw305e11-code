@@ -37,6 +37,7 @@ public class ServerThread extends Thread
     public final String CONFIG_DB = "db";
     public final String CONFIG_DBPORT = "dbport";
     public final String CONFIG_SERVERMODE = "servermode";
+    public final String CONFIG_SERVERPORT = "serverport";
 
     public Properties config = new Properties();
 
@@ -127,6 +128,7 @@ public class ServerThread extends Thread
             // e.printStackTrace();
             log.severe("Failed to connect to the backend database:\n"
                     + e.getMessage());
+            e.printStackTrace();
             shutdown();
         }
     }
@@ -226,7 +228,7 @@ public class ServerThread extends Thread
     {
         try
         {
-            serverSocket = new ServerSocket(Integer.parseInt(getConf(CONFIG_DBPORT)));
+            serverSocket = new ServerSocket(Integer.parseInt(getConf(CONFIG_SERVERPORT)));
         } catch (NumberFormatException e)
         {
             // TODO Auto-generated catch block
@@ -310,12 +312,13 @@ public class ServerThread extends Thread
         Properties p = new Properties();
 
         // TODO: Change these to constant references instead.
-        p.setProperty(CONFIG_DBPORT, "16489");
+        p.setProperty(CONFIG_DBPORT, "3306");
         p.setProperty(CONFIG_SERVERMODE, "active");
         p.setProperty(CONFIG_DBHOST, "localhost");
-        p.setProperty(CONFIG_DBUSER, "giraf");
-        p.setProperty(CONFIG_DBPASS, "secret");
-        p.setProperty(CONFIG_DB, "girafweb");
+        p.setProperty(CONFIG_DBUSER, "giraf_web");
+        p.setProperty(CONFIG_DBPASS, "cookie");
+        p.setProperty(CONFIG_DB, "girafplace");
+        p.setProperty(CONFIG_SERVERPORT, "2093");
 
         try
         {
