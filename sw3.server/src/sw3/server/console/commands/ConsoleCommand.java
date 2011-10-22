@@ -5,6 +5,8 @@ package sw3.server.console.commands;
 
 import java.io.IOException;
 
+import javax.naming.OperationNotSupportedException;
+
 import sw3.server.ServerThread;
 
 /**
@@ -59,7 +61,10 @@ public abstract class ConsoleCommand
      * @param params    List of parameters from the scanner. While the data type
      * is String, several parameters may be parsed as other data types.
      */
-    public abstract void execute(String[] params);
+    public static void execute(String[] params) throws OperationNotSupportedException
+    {
+        throw new OperationNotSupportedException("ConsoleCommand.execute() was called directly.");
+    }
     
     /**
      * Retrieves all sub classes of ConsoleCommand, either within the

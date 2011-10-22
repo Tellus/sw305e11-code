@@ -8,8 +8,6 @@ import java.net.SocketTimeoutException;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.omg.CORBA.TIMEOUT;
-
 import sw6.lib.girafplace.Application;
 import sw6.lib.girafplace.UserProfile;
 
