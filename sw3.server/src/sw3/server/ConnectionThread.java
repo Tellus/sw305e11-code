@@ -5,6 +5,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.Timestamp;
+import java.util.List;
+
+import server.SqlManager;
+import sw6.lib.girafplace.Application;
+import sw6.lib.girafplace.UserProfile;
 
 /**
  * The ConnectionThread class represents a single
@@ -157,9 +162,48 @@ public class ConnectionThread extends Thread
                 {
                     loopSignal = CommandOpEnum.TERM;
                 }
+                }
+                else if (isMatch(msg, "TIMESTAMP"))
+                {
+                    doTimestamp();
+                }
+                else if (isMatch(msg, "IDENT"))
+                {
+                    doIdent();
+                }
+                else if (isMatch(msg, "BYE"))
+                {
+                    loopSignal = CommandOpEnum.TERM;
+                }
+                else if (isMatch(msg, "SIGNOUT")) // Legacy signout support.
+                {
+                    output.writeUTF("KTHXBYE");
+                    output.flush();
+                    loopSignal = CommandOpEnum.TERM;
+                }
+                else if (isMatch(msg, "GETPASS"))
+                {
+                    List<Application> applications;
+                    UserProfile profile = (UserProfile) in.readObject();
+
+                    try
+                    {
+                        applications = Parent.girafDb.getApplications(profile);
+                        log(String.format(
+                                "Writing %1$d applications into the stream",
+                                applications.size()));
+                        output.writeObject(applications);
+                        output.flush();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
             }
             else
             {
+                // Our protocol version.
                 if (isMatch(msg, "HELLO"))
                 {
                     try
@@ -178,17 +222,14 @@ public class ConnectionThread extends Thread
                         hasHandshake = true;
                     }
                 }
-                else if (isMatch(msg, "TIMESTAMP"))
+                else if (isMatch(msg, "HANDSHAKE")) // Legacy support.)
                 {
-                    doTimestamp();
-                }
-                else if (isMatch(msg, "IDENT"))
-                {
-                    doIdent();
-                }
-                else if (isMatch(msg, "BYE"))
-                {
-                    loopSignal = CommandOpEnum.TERM;
+                    // This is legacy handshake support from GirafPlaceClient.
+                    // We should clean up those few lines of Android code if we
+                    // have time.
+                    String legacyVersion = input.readUTF(); // Aaand dump their version.
+                    log("Legacy client connected with version " + legacyVersion);
+                    output.writeUTF("WELCOME"); // Legacy support is just... well... non-changing.
                 }
             }
         }

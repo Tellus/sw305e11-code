@@ -1,5 +1,6 @@
 package sw3.server;
 
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,6 +10,9 @@ import java.util.List;
 
 import sw3.lib.girafweb.Device;
 import sw3.lib.girafweb.Profile;
+import sw6.lib.girafplace.Application;
+import sw6.lib.girafplace.State;
+import sw6.lib.girafplace.UserProfile;
 
 /**
  * The GirafSqlHelper subclass takes the base caretaking functionality of
@@ -169,5 +173,121 @@ public class GirafSqlHelper extends SqlHelper
             e.printStackTrace();
             return ret; // Empty set.
         }
+    }
+    
+    /**
+     * Gets the applications from the database, that should be available for the
+     * provided UserProfile
+     * 
+     * @param user
+     *            The UserProfile that should be used to filter the applications
+     * @return The applications from the database that the UserProfile is
+     *         capable of using.
+     * @throws SQLException
+     *             If there is a problem with the SQL.
+     * @throws ClassNotFoundException
+     *             If the driver class is not found.
+     */
+    public List<Application> getApplications(UserProfile user)
+            throws SQLException, ClassNotFoundException {
+        String query = "SELECT * FROM applications WHERE ";
+
+        if (!user.canDragAndDrop()) {
+            query += " canDragAndDrop = 0 AND";
+        }
+
+        if (!user.canHear()) {
+            query += " canHear = 0 AND";
+        }
+
+        if (!user.requiresSimpleVisualEffects()) {
+            query += " requiresSimpleVisualEffects = 0 AND";
+        }
+
+        if (!user.canAnalogTime()) {
+            query += " canAnalogTime = 0 AND";
+        }
+
+        if (!user.canDigitalTime()) {
+            query += " canDigitalTime = 0 AND";
+        }
+
+        if (!user.canRead()) {
+            query += " canRead = 0 AND";
+        }
+
+        if (!user.hasBadVision()) {
+            query += " hasBadVision = 0 AND";
+        }
+
+        if (!user.requiresLargeButtons()) {
+            query += " requiresLargeButtons = 0 AND";
+        }
+
+        if (!user.canSpeak()) {
+            query += " canSpeak = 0 AND";
+        }
+
+        if (!user.canNumbers()) {
+            query += " canNumbers = 0 AND";
+        }
+
+        if (!user.canUseKeyboard()) {
+            query += " canUseKeyboard = 0 AND";
+        }
+
+        query += " state='LIVE'";
+
+        // Omitted. We have persistent connections right now.
+        // getConnection();
+        Statement statement = connection.createStatement();
+
+        List<Application> returnValue = new ArrayList<Application>();
+
+        if (statement.execute(query)) {
+            ResultSet result = statement.getResultSet();
+            result.beforeFirst();
+
+            while (result.next()) {
+                final int id = result.getInt(1);
+                final String name = result.getString(2);
+                final String description = result.getString(3);
+                final String package_ = result.getString(5);
+                final int version = result.getInt(6);
+                final String versionString = result.getString(7);
+                final State state = State.LIVE;
+                final boolean canRead = result.getBoolean(9);
+                final boolean canDragAndDrop = result.getBoolean(10);
+                final boolean canHear = result.getBoolean(11);
+                final boolean requiresSimpleVisualEffects = result
+                        .getBoolean(12);
+                final boolean canAnalogTime = result.getBoolean(13);
+                final boolean canDigitalTime = result.getBoolean(14);
+                final boolean hasBadVision = result.getBoolean(15);
+                final boolean requiresLargeButtons = result.getBoolean(16);
+                final boolean canSpeak = result.getBoolean(17);
+                final boolean canNumbers = result.getBoolean(18);
+                final boolean canUseKeyboard = result.getBoolean(19);
+
+                Application app = new Application(id, name, description,
+                        package_, version, versionString, state);
+
+                app.setCanRead(canRead);
+                app.setCanDragAndDrop(canDragAndDrop);
+                app.setCanHear(canHear);
+                app.setRequiresSimpleVisualEffects(requiresSimpleVisualEffects);
+                app.setCanAnalogTime(canAnalogTime);
+                app.setCanDigitalTime(canDigitalTime);
+                app.setHasBadVision(hasBadVision);
+                app.setRequiresLargeButtons(requiresLargeButtons);
+                app.setCanSpeak(canSpeak);
+                app.setCanNumbers(canNumbers);
+                app.setCanUseKeyboard(canUseKeyboard);
+
+                returnValue.add(app);
+            }
+            return returnValue;
+        } else
+            return null;
     }
 }
