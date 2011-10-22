@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.sql.Timestamp;
 import java.util.List;
+
+import org.omg.CORBA.TIMEOUT;
 
 import sw6.lib.girafplace.Application;
 import sw6.lib.girafplace.UserProfile;
@@ -47,6 +50,12 @@ public class ConnectionThread extends Thread
     {
         return _threadId;
     }
+    
+    /**
+     * The default timeout period. A single connection will time out after
+     * 30 seconds.
+     */
+    public static final int DEFAULT_TIMEOUT = 30 * 1000;
     
     /**
      * Sets the thread id. Should only be settable by the
@@ -119,6 +128,8 @@ public class ConnectionThread extends Thread
     {
         try
         {
+            // Set a timeout after which we screw it and close the connection.
+            clientSocket.setSoTimeout(DEFAULT_TIMEOUT);
             // For some reason, the order and method of initiation is crucial...
             output = new ObjectOutputStream(clientSocket.getOutputStream());
             output.flush();
@@ -129,10 +140,6 @@ public class ConnectionThread extends Thread
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        finally
-        {
-            log("Successfully created network streams.");
-        }
     }
     
     @Override
@@ -141,16 +148,21 @@ public class ConnectionThread extends Thread
         // Set this to true once we've done the initial handshake.
         boolean hasHandshake = false;
         String msg = "";
-        while (loopSignal != CommandOpEnum.TERM)
+        while (loopSignal != CommandOpEnum.TERM && !clientSocket.isClosed())
         {
             try
             {
                 msg = input.readUTF();
             }
+            catch (SocketTimeoutException e)
+            {
+                log("Connection timed out.");
+                close();
+            }
             catch (IOException inputE)
             {
                 // e1.printStackTrace();
-                log("Failed to read from the stream:\n" + inputE.getMessage());
+                log("Failed to read from the stream: " + inputE.getMessage());
                 panic();
                 return;
             }
@@ -159,7 +171,7 @@ public class ConnectionThread extends Thread
             {
                 if (msg.compareToIgnoreCase("BYE") == 0)
                 {
-                    loopSignal = CommandOpEnum.TERM;
+                    close();
                 }
                 else if (isMatch(msg, "TIMESTAMP"))
                 {
@@ -169,23 +181,18 @@ public class ConnectionThread extends Thread
                 {
                     doIdent();
                 }
-                else if (isMatch(msg, "BYE"))
-                {
-                    loopSignal = CommandOpEnum.TERM;
-                }
                 else if (isMatch(msg, "SIGNOUT")) // Legacy signout support.
                 {
                     try
                     {
-                        output.writeUTF("KTHXBYE");
-                        output.flush();
+                        writeString("KTHXBYE");
                     }
-                    catch (Exception e)
+                    catch (IOException e)
                     {
                         // Oh, no! Exception! I don't care!
                     }
                     
-                    loopSignal = CommandOpEnum.TERM;
+                    close();
                 }
                 else if (isMatch(msg, "GETPASS"))
                 {
@@ -237,8 +244,8 @@ public class ConnectionThread extends Thread
                         // We should clean up those few lines of Android code if we
                         // have time.
                         String legacyVersion = input.readUTF(); // Aaand dump their version.
+                        writeString("WELCOME"); // Legacy support is just... well... non-changing.
                         log("Legacy client connected with version " + legacyVersion);
-                        output.writeUTF("WELCOME"); // Legacy support is just... well... non-changing.
                     }
                     catch (IOException e)
                     {
@@ -252,7 +259,7 @@ public class ConnectionThread extends Thread
                 }
             }
         }
-        close();
+        shutdown();
     }
     
     protected void doIdent()
@@ -291,8 +298,6 @@ public class ConnectionThread extends Thread
             e.printStackTrace();
         }
     }
-
-    
     
     /**
      * Shorthand for (one.compareToIgnoreCase(two) == 0) OR
@@ -380,21 +385,27 @@ public class ConnectionThread extends Thread
     }
     
     /**
+     * Proper shutdown method. This one picks pieces apart while {@link close}
+     * only serves to signal a shutdown.
+     */
+    protected void shutdown()
+    {
+        try
+        {
+            clientSocket.close();            
+        }
+        catch (IOException e)
+        {
+            Parent.log.fine("Proper socket shutdown failed.");
+        }
+    }
+    
+    /**
      * Closes the connection as gracefully as is almost possible.
      */
     public void close()
     {
-        try
-        {
-            // Close the socket.
-            clientSocket.close();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            // e.printStackTrace();
-            log("Failed to gracefully close socket... whatever");
-        }
+        loopSignal = CommandOpEnum.TERM;
     }
     
     /**
@@ -404,6 +415,6 @@ public class ConnectionThread extends Thread
      */
     protected void log(String msg)
     {
-        Parent.logFinest("(" + getThreadId() + ") " + msg);
+        Parent.log.finest("(" + getThreadId() + ") " + msg);
     }
 }

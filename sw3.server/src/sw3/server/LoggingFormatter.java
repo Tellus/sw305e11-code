@@ -17,7 +17,7 @@ public class LoggingFormatter extends Formatter
         // TODO Auto-generated method stub
         String output = "";
         
-        output += "[" + rec.getLevel().getLocalizedName() + "]: ";
+        output += "[" + rec.getLevel().getName() + "]: ";
         
         output += rec.getMessage() + "\n";
         

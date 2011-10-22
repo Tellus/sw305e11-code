@@ -6,7 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
@@ -39,22 +42,57 @@ public class ServerThread extends Thread
     public final String CONFIG_SERVERMODE = "servermode";
     public final String CONFIG_SERVERPORT = "serverport";
 
+    /**
+     * Properties object that contains all the configuration data garnered from
+     * the local config.ini file or default values.
+     */
     public Properties config = new Properties();
 
+    /**
+     * Path to the config file.
+     */
     public String configPath = "./config.ini";
 
+    /**
+     * Primary socket for incoming connections.
+     */
+    public ServerSocket serverSocket;
+    
+    /**
+     * The logger used to display and control information as it pours onto the
+     * terminal screen.
+     */
     public Logger log;
 
-    public ServerSocket serverSocket;
-
+    /**
+     * Used together with log to create a command-line interface for the server.
+     */
     public Scanner input;
 
+    /**
+     * Determines whether the server offers an active console or not.
+     */
     private ServerModeEnum _mode;
 
+    /**
+     * Reference to the
+     */
     public GirafSqlHelper girafDb;
 
+    /**
+     * Current signal for the server thread. Use this to communicate desired
+     * changes without the need for methods or heavy chaining. Just change the
+     * signal and wait a cycle.
+     */
     protected CommandOpEnum loopSignal;
 
+    /**
+     * Separate thread that listens for, and accepts, incoming connections.
+     */
+    public SocketThread connectionListener;
+    
+    public ArrayList<ConnectionThread> connections;
+    
     /**
      * Get the current running mode of the server. Can be "daemon" for
      * non-interactive mode or "active" for an active console-based mode.
@@ -85,6 +123,10 @@ public class ServerThread extends Thread
 
             // Create the server socket.
             _createServerSocket();
+            
+            // Creates the connection listener.
+            _createListener();
+            
             // Activate the input scanner if
             if (getConf(CONFIG_SERVERMODE).compareToIgnoreCase("active") == 0)
                 _createScanner();
@@ -95,7 +137,8 @@ public class ServerThread extends Thread
                     + "\nThe server will now shut down");
             e.printStackTrace();
             loopSignal = CommandOpEnum.STARTUPERR;
-        } finally
+        }
+        finally
         {
             log.info("LOG: Server has started up. Be happy!");
         }
@@ -104,6 +147,19 @@ public class ServerThread extends Thread
         // at which point run is called and we start out server loop.
     }
 
+    /**
+     * Creates the socket listener thread.
+     */
+    private void _createListener()
+    {
+        connections = new ArrayList<ConnectionThread>();
+        
+        ServerThread.SocketThread listen = this.new SocketThread();
+        connectionListener = listen;
+        connectionListener.start();
+        log.finer("Listener thread started.");
+    }
+    
     /**
      * Creates the SqlHelper specific for giraf, loads up parameters from the
      * config file and tries to connect.
@@ -209,13 +265,16 @@ public class ServerThread extends Thread
         try
         {
             log.info("Shutting down the server thread.");
+            connectionListener.close();
             if (serverSocket != null)
                 serverSocket.close();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             // TODO Auto-generated catch block
             // log.warning("The socket could not be closed:\n" +
-            // e.getMessage());
+            log.warning(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -229,6 +288,7 @@ public class ServerThread extends Thread
         try
         {
             serverSocket = new ServerSocket(Integer.parseInt(getConf(CONFIG_SERVERPORT)));
+            serverSocket.setSoTimeout(500);
         } catch (NumberFormatException e)
         {
             // TODO Auto-generated catch block
@@ -255,13 +315,15 @@ public class ServerThread extends Thread
         try
         {
             config.load(new FileInputStream(getConfigFile()));
-            log.info("Configuration file loaded successfully from path:\n"
-                    + getConfigFile().getAbsolutePath());
-        } catch (FileNotFoundException e)
+            // log.info("Configuration file loaded successfully from path:\n"
+                    // + getConfigFile().getAbsolutePath());
+        }
+        catch (FileNotFoundException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -272,16 +334,12 @@ public class ServerThread extends Thread
     }
 
     /**
-     * Retrieves a File object with a path leading to the config file proper -
-     * calling this method ensures existance of the file.
-     * 
+     * Retrieves a File object with a path leading to the config file prope.
+     * Be aware that the file may not exist.
      * @return Handler to the config file.
      */
     public File getConfigFile()
     {
-        if (!configExists())
-            createConfig();
-
         return new File(configPath);
     }
 
@@ -362,8 +420,6 @@ public class ServerThread extends Thread
     protected void _createLogger()
     {
         log = Logger.getLogger("sw3server");
-        log.setLevel(Level.ALL);
-        log.setUseParentHandlers(false);
 
         Handler[] handlers = log.getHandlers();
         if (handlers.length > 2)
@@ -378,10 +434,75 @@ public class ServerThread extends Thread
         ConsoleHandler myHandler = new ConsoleHandler();
         myHandler.setFormatter(new LoggingFormatter());
         log.addHandler(myHandler);
+        log.setLevel(Level.ALL);
+        log.setUseParentHandlers(false);
+        myHandler.setLevel(Level.ALL);
     }
-
-    public void logFinest(String msg)
+    
+    /**
+     * This is a helper thread for the Server class that
+     * simply listens for incoming connections, assigns them
+     * a new socket instance and sets them off on their good
+     * tides, while logging the occurrences as necessary.
+     * @author Johannes Lindhart Borresen
+     */
+    private class SocketThread extends Thread
     {
-        log.finest(msg);
+        /**
+         * Simple bool to determine whether we're shutting down.
+         */
+        protected boolean isDone = false;
+        
+        /**
+         * Signals the thread to shut down after its next iteration.
+         * Note that this will *not* shut down the existing connections.
+         * They can be terminated one by one within the Server.
+         */
+        public void close()
+        {
+            log.info("Closing network socket.");
+            isDone = true;
+            try
+            {
+                if (serverSocket != null)
+                    serverSocket.close();
+            }
+            catch (IOException e)
+            {
+                log.warning("Failed to properly close the network socket:\n" + e.getMessage());
+            }
+        }
+        
+        @Override
+        public void run()
+        {
+            log.fine("Now listening for connections.");
+            while (!isDone)
+            {
+                try
+                {
+                    // log.info("Finding connection...");
+                    Socket client = serverSocket.accept();
+                    
+                    // Once we get an inbound connection, we switch it on.
+                    ConnectionThread ct = new ConnectionThread(client, ServerThread.this);
+                    
+                    connections.add(ct);
+                    ct.start();
+                }
+                catch (SocketException e)
+                {
+                    log.finest("Socket timeout. Restarting.");
+                }
+                catch (IOException e)
+                {
+                    // log.warning("Could not accept connection from client:\n" + e.getMessage());
+                    // We've gotta assume a Socket Exception for the time being.
+                    
+                }
+            }
+            log.info("Listener shutting down.");
+        };
+
     }
 }
