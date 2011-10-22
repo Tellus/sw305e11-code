@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.sql.Timestamp;
 import java.util.List;
 
-import server.SqlManager;
 import sw6.lib.girafplace.Application;
 import sw6.lib.girafplace.UserProfile;
 
@@ -162,7 +161,6 @@ public class ConnectionThread extends Thread
                 {
                     loopSignal = CommandOpEnum.TERM;
                 }
-                }
                 else if (isMatch(msg, "TIMESTAMP"))
                 {
                     doTimestamp();
@@ -177,17 +175,26 @@ public class ConnectionThread extends Thread
                 }
                 else if (isMatch(msg, "SIGNOUT")) // Legacy signout support.
                 {
-                    output.writeUTF("KTHXBYE");
-                    output.flush();
+                    try
+                    {
+                        output.writeUTF("KTHXBYE");
+                        output.flush();
+                    }
+                    catch (Exception e)
+                    {
+                        // Oh, no! Exception! I don't care!
+                    }
+                    
                     loopSignal = CommandOpEnum.TERM;
                 }
                 else if (isMatch(msg, "GETPASS"))
                 {
                     List<Application> applications;
-                    UserProfile profile = (UserProfile) in.readObject();
-
+                    
                     try
                     {
+                        UserProfile profile = (UserProfile) input.readObject();
+                        
                         applications = Parent.girafDb.getApplications(profile);
                         log(String.format(
                                 "Writing %1$d applications into the stream",
@@ -224,12 +231,24 @@ public class ConnectionThread extends Thread
                 }
                 else if (isMatch(msg, "HANDSHAKE")) // Legacy support.)
                 {
-                    // This is legacy handshake support from GirafPlaceClient.
-                    // We should clean up those few lines of Android code if we
-                    // have time.
-                    String legacyVersion = input.readUTF(); // Aaand dump their version.
-                    log("Legacy client connected with version " + legacyVersion);
-                    output.writeUTF("WELCOME"); // Legacy support is just... well... non-changing.
+                    try
+                    {
+                        // This is legacy handshake support from GirafPlaceClient.
+                        // We should clean up those few lines of Android code if we
+                        // have time.
+                        String legacyVersion = input.readUTF(); // Aaand dump their version.
+                        log("Legacy client connected with version " + legacyVersion);
+                        output.writeUTF("WELCOME"); // Legacy support is just... well... non-changing.
+                    }
+                    catch (IOException e)
+                    {
+                        // Oh no, exception! I don't care!
+                        // e.printStackTrace();
+                    }
+                    finally
+                    {
+                        hasHandshake = true;
+                    }
                 }
             }
         }
