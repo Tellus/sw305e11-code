@@ -14,6 +14,16 @@ public class SqlHelper
 {
     public java.sql.Connection connection;
     
+    private String _hostname;
+    
+    private int _port;
+    
+    private String _username;
+    
+    private String _password;
+    
+    private String _database;
+    
     /**
      * Creates a new inactive SqlHelper instance.
      */
@@ -47,7 +57,10 @@ public class SqlHelper
     public SqlHelper(String connectionString, String user, String pass) throws SQLException
     {
         this();
-        connection = DriverManager.getConnection(connectionString, user, pass);
+        parseUrl(connectionString);
+        _username = user;
+        _password = pass;
+        connect();
     }
     
     /**
@@ -64,8 +77,99 @@ public class SqlHelper
     {
         this();
         
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + database;
-        connection = DriverManager.getConnection(url, user, pass);
+        _hostname = user;
+        _port = port;
+        _username = user;
+        _password = pass;
+        _database = database;
+        
+        connect();
+    }
+    
+    /**
+     * Attempts to parse a JDBC connection string (URL) into its smaller pieces
+     * for local storage.
+     * @param url The URL to attempt to parse.
+     */
+    public void parseUrl(String url)
+    {
+        // TODO: Test this method. I'm pretty sure it stores some wrong chars.
+        _hostname = url.substring(url.indexOf("://"), url.lastIndexOf(':'));
+        _database = url.substring(url.lastIndexOf('/')+1);
+        _port = Integer.parseInt(url.substring(url.indexOf(":"), url.lastIndexOf('/')));
+    }
+    
+    /**
+     * Concatenates a connection string from the details given at construction.
+     * @return
+     */
+    public String getUrl()
+    {
+        return "jdbc:mysql://" + _hostname + ":" + _port + "/" + _database;
+    }
+    
+    /**
+     * Connects to the database if the connection is not active.
+     * @return
+     */
+    public Connection connect()
+    {
+        try
+        {
+            // If the connection is valid, return it.
+            if (connection.isValid(7))
+            {
+                return connection;
+            }
+            else
+            {
+                connection = DriverManager.getConnection(getUrl(), _username, _password);
+                return connection;
+            }
+        } catch (SQLException e)
+        {
+            // I've no clue what exception would come from being this caucious,
+            // but there it is.
+            e.printStackTrace();
+            // Let me re-iterate. This should *never* happen!
+            return null;
+        }
+    }
+    
+    /**
+     * Closes the active connection object or just nulls it out.
+     */
+    public void disconnect()
+    {
+        try
+        {
+            connection.close();
+        } catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        connection = null;
+    }
+    
+    /**
+     * Shorthand for Connection.createStatement with the added benefit of
+     * checking for a proper connection.
+     * @return  A new Statement object.
+     */
+    public Statement createStatement()
+    {
+        try
+        {
+            connect();
+            return connection.createStatement();
+        }
+        catch (SQLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
     }
     
     /**
@@ -80,12 +184,21 @@ public class SqlHelper
     {
         Statement stat;
 
-        stat = connection.createStatement();
+        // stat = connection.createStatement();
+        stat = createStatement();
         
         if (stat.execute(sql))
         {
             return stat.getResultSet();
         }
         else return null;
+    }
+    
+    @Override
+    protected void finalize() throws Throwable
+    {
+        // TODO Auto-generated method stub
+        super.finalize();
+        disconnect();
     }
 }

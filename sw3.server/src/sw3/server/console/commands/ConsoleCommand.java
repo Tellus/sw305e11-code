@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.naming.OperationNotSupportedException;
 
+import sw3.server.IServerProtocolCommand;
 import sw3.server.ServerThread;
 
 /**
@@ -18,13 +19,13 @@ import sw3.server.ServerThread;
  *  In the case of multiple commands, the ConsoleCommand may choose to further
  *  branch execution.
  */
-public abstract class ConsoleCommand
+public abstract class ConsoleCommand implements IServerProtocolCommand
 {
     /**
      * List of text commands that this command class responds to. I haven't
      * designer a proper response for conflicts yet.
      */
-    protected String[] _offeredCommands;
+    protected String[] _Commands;
     
     /**
      * The primary identifier of the command.
@@ -44,7 +45,7 @@ public abstract class ConsoleCommand
      * be defined by the class itself and not outsiders.
      * @return
      */
-    public String[] getOfferedCommands(){return _offeredCommands;}
+    public String[] getCommands(){return _Commands;}
     
     /**
      * Reference to the server thread that this command is bound to. Ugly,
@@ -61,37 +62,23 @@ public abstract class ConsoleCommand
      * @param params    List of parameters from the scanner. While the data type
      * is String, several parameters may be parsed as other data types.
      */
-    public static void execute(String[] params) throws OperationNotSupportedException
+    @Override
+    public void execute(String params) throws OperationNotSupportedException
     {
         throw new OperationNotSupportedException("ConsoleCommand.execute() was called directly.");
     }
     
-    /**
-     * Retrieves all sub classes of ConsoleCommand, either within the
-     * sw3.lib.console.commands package (where all built-in commands reside) or
-     * the entire classpath (slow!).
-     * @param searchClassPath If true, the method will search the entire class
-     * path, and not just a single package. 
-     * @return An array of Classes that were found in the search path. May be
-     * (but shouldn't be) empty.
-     * @throws IOException 
-     */
-    public Class[] getSubclasses(Boolean searchClassPath) throws IOException
-    {
-        // TODO: This method is still not implemented.
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        
-        // Set the package path.
-        String path = "sw3/server/console/commands";
-        
-        // Retrieve all resources in this path.
-        cl.getResources(path);
-        
-        return null;
-    }
+    @Override
+    public abstract void setParent(sw3.server.ConnectionThread parent);
     
-    public ConsoleCommand(ServerThread newParent)
-    {
-        parent = newParent;
-    }
+    @Override
+    public abstract void setServer(ServerThread server);
+    
+    /**
+     * Creates a new ConsoleCommand instance. Must be overridden and supply
+     * meaningful data with setCommands (or addCommand/addCommands) and setName,
+     * besides implementing execute.
+     * @param newParent
+     */
+    public ConsoleCommand(ServerThread newParent){};
 }

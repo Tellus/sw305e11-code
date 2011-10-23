@@ -66,7 +66,7 @@ public class GirafSqlHelper extends SqlHelper
         String sql = "SELECT * FROM " + TABLE_PROFILES + " WHERE profileId=" + dev.getOwnerId();
         
         // Hopefully we only get one owner of an ident :)
-        ResultSet result = connection.createStatement().executeQuery(sql);
+        ResultSet result = createStatement().executeQuery(sql);
         
         // If there are no hits, bail out.
         if (!result.first()) return null;
@@ -101,7 +101,8 @@ public class GirafSqlHelper extends SqlHelper
     {
         String sql = "SELECT * FROM " + TABLE_DEVICES + " WHERE ident='" + ident + "'";
         
-        Statement s = connection.createStatement();
+        Statement s = createStatement();
+                
         ResultSet result = s.executeQuery(sql);
         
         if (!result.first()) return null;
@@ -125,7 +126,9 @@ public class GirafSqlHelper extends SqlHelper
     public Boolean hasIdent(String ident) throws SQLException
     {
         String sql = "SELECT COUNT(ident) AS hits FROM " + TABLE_DEVICES + " WHERE ident='" + ident + "'";
-        Statement s = connection.createStatement();
+        
+        Statement s = createStatement();
+        
         ResultSet found = s.executeQuery(sql);
         
         // If the result set is empty (first() returns false), then we have no hits.
@@ -240,7 +243,7 @@ public class GirafSqlHelper extends SqlHelper
 
         // Omitted. We have persistent connections right now.
         // getConnection();
-        Statement statement = connection.createStatement();
+        Statement statement = createStatement();
 
         List<Application> returnValue = new ArrayList<Application>();
 
