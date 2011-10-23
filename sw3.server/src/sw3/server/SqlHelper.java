@@ -77,7 +77,7 @@ public class SqlHelper
     {
         this();
         
-        _hostname = user;
+        _hostname = host;
         _port = port;
         _username = user;
         _password = pass;
@@ -117,7 +117,7 @@ public class SqlHelper
         try
         {
             // If the connection is valid, return it.
-            if (connection.isValid(7))
+            if (connection != null && connection.isValid(7))
             {
                 return connection;
             }
