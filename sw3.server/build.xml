@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="default" name="Create Runnable Jar for Project sw3.server">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+	
+	<target name="default">
+       <condition property="targetDir" value="//j-space.dk/tellus/servers/giraf">
+         <equals arg1="Johannes" arg2="${user.name}"/>
+       </condition>
+        <property name="targetDir" value="${user.home}" />
+		<echo>johSet: ${targetDir}</echo>
+		<ant target="create_run_jar" />
+	</target>
+	
+    <target name="create_run_jar">
+        <propertyfile file="version.properties" comment="Build version info">
+            <entry id="buildNumber" key="buildNum" default="0" type="int" operation="+" value="1"/>
+        	<entry key="buildDate" type="date" value="now"/>
+        </propertyfile>
+        <loadproperties srcFile="version.properties"/>
+        <echoproperties />
+        <echo>Build number: ${buildNum}</echo>
+    	<echo>Building towards ${targetDir}</echo>
+        <jar destfile="${targetDir}/sw3server-${majorBuild}.${minorBuild}.${buildNum}.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="sw3.server.Main"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="D:/git/sw305e11-code/sw3.server/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="D:/git/sw305e11-code/sw3.server/lib/mysql-connector-java-5.1.18-bin.jar"/>
+            <fileset dir="D:/sw6android/sw6android/sw6.lib/branches/dev/bin"/>
+        </jar>
+    </target>
+</project>
