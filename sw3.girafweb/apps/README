@@ -1,0 +1,5 @@
+This directory is intended to contain all metadata of added Android applications.
+
+Data currently pulled from .apk files:
+    - settings.xml: contains templates for what kind of settings a single app contains.
+    - template.php: uses the girafweb API to present the web-interface for managing the app online.
