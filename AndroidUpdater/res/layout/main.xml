@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="1">
+    
+    <TextView android:layout_height="wrap_content" 
+    	android:id="@+id/TxtLog" 
+    	android:layout_width="match_parent" 
+    	android:text="@string/hello" 
+    	android:layout_weight="1.00">
+    </TextView>
+    
+    
+    <Button android:id="@+id/Btn_connect" 
+    	android:layout_width="match_parent" 
+    	android:layout_height="wrap_content" 
+    	android:text="@string/btn_connect"
+    	android:onClick="connect_onClick"
+    	>
+    </Button> 
+
+</LinearLayout>
