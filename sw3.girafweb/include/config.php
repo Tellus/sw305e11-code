@@ -1,3 +1,5 @@
+<?php
+
 /* The config file should, quite simply, set constants that will be used throughout
  * the execution of the scripts and that are of global interest.
  */
@@ -20,3 +22,4 @@ $db_port = 3306;
 // Optionally, a global table prefix.
 $db_table_prefix = ""; 
 
+?>
