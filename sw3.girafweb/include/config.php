@@ -22,4 +22,12 @@ $db_port = 3306;
 // Optionally, a global table prefix.
 $db_table_prefix = ""; 
 
+// Defines to make them globally available constants.
+define("db_user", $db_user);
+define("db_pass", $db_pass);
+define("db_db", $db_db);
+define("db_host", $db_host);
+define("db_port", $db_port);
+define("db_table_prefix", $db_table_prefix);
+
 ?>
