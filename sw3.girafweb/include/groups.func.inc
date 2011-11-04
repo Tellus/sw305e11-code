@@ -42,5 +42,30 @@ class groups
         
         return false; // We should never reach this line.
     }
+
+    /*
+    * Retrieves groupId from the database table "groups", and returns it as an array
+    * \return Returns an array of group id's
+    */
+
+    function getGroups()
+    {
+	    $result = sql_helper::selectQuery("SELECT groupId FROM " . TABLE_GROUPS );
+	
+	    if(!$result) return false;
+	
+	    $retval = array();
+	
+	    $iter = 0;
+	
+	    while($row = $result->fetch_assoc())
+	    {
+		    $retval[$iter] = $row["groupId"];
+		
+		    $iter++;
+		
+	    }
+	    return $retval;
+    }
 }
 ?>
