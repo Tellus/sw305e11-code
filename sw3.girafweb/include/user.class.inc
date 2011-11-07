@@ -16,6 +16,74 @@ class GirafUser
     public $lastaction;
     
     /**
+     * Contains the actual data from the database.
+     */
+    private $data;
+    
+    /**
+     * Array of booleans that denote whether their corresponding data in the $data array have been changed and thus need to be committed.
+     */
+    private $dirty_bits;
+    
+    function __constructor()
+    {
+        /* We dynamically prep the internal data array with the exact
+         * field names from the database itself.
+         */
+        $data = new Array();
+        
+        /**
+         * The DESCRIBE statement is akin to a SELECT statement, only for table structure, not table data.
+         */
+        $result = sql_helper::selectQuery("DESCRIBE " . TABLE_USERS);
+        
+        if (!$result)
+        {
+            throw new Exception("The users table '" . TABLE_USERS . "' does not exist!");
+        }
+        
+        while ($row = $result->fetch_assoc())
+        {
+            $data[$row["Field"]] = "";
+        }
+        
+        return;
+    }
+    
+    /**
+     * Gets the data associated with a particular field.
+     * \param key Name of the field you want data from.
+     * \return The value associated with that field. May be null.
+     * \throws Exception If an invalid key is requested, an exception is thrown.
+     */
+    public function __get($key)
+    {
+        if (!array_key_exists($key, $data))
+            throw new Exception("The requested key does not exist.");
+        else
+            return $data[$key];
+    }
+    
+    /**
+     * Sets a value on the user. This will automatically also register that value to be committed to the database.
+     * Note that only keys matching fields on the underlying table will be accepted.
+     * \param key The key (field) to set a value to.
+     * \param val The data to apply to the key.
+     * \warning At this time, neither type nor writability is performed. As such, you may get erratic behaviour if you try to apply a string to the userId field (which is read-only - and an int).
+     * \throws Exception Throws an exception if an invalid field is requested.
+     */
+    public function __set($key, $val)
+    {
+        if (!array_key_exists($key))
+            throw new Exception("The requested key does not exist.");
+        else
+        {
+            $data[$key] = $val;
+            $dirty_bits[$key] = true;
+        } 
+    }
+    
+    /**
      * Attempts to retrieve an existing user from the database and returns them
      * as a GirafUser instance.
      * /param uId the userId in the database corresponding to the user you want.
