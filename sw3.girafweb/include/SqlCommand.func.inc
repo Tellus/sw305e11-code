@@ -97,13 +97,48 @@ class SqlUpdateCommand extends SqlCommand
     
     /**
      * Adds a simple binary condition to the list of conditions for the statement.
-     * \param col The field (column) to place a condition for.
-     * \param val The comparison value.
+     * \param $col The field (column) to place a condition for.
+     * \param $val The comparison value.
      * \param condType The type of comparison operator to use. Valid operators are "=", "<", ">" and the like.
      */
-    public function addCondition($col, $valm, $condType = "=")  
+    public function addCondition($col, $val, $condType = "=")  
     {
-        $conditions[$col] = $val;
+        $conditions[$col] = new Array("value" => $val, "condType" => $condType);
+    }
+    
+    /**
+     * Executes the SQL command as it is prepared.
+     */
+    public function execute()
+    {
+        $this->$sql = combine();
+        parent::execute();
+    }
+    
+    /**
+     * Combines columns and conditions to a complete SQL statement, ready for execution.
+     */
+    protected function combine()
+    {
+        $sql = "UPDATE " . $this->$table . " SET (";
+        
+        foreach ($changes as $key => $val)        
+        {
+            $sql .= sql_helper::escapeString($key) . "=" . sql_helper::escapeString($val) . ",";
+        }
+        
+        $sql = substr($sql, strlen($sql) - 1); // Removes the last comma.
+        $sql .= ") WHERE ";
+        
+        foreach ($conditions => $key => $val)
+        {
+            $sql .= sql_helper::escapeString($key) . $val["condType"] . sql_helper::escapeString($val["value"]) . ",";
+        }
+        
+        $sql = substr($sql, strlen($sql) - 1); // Removes the last comma.
+        $sql .= ")";
+        
+        return $sql;
     }
 }
 

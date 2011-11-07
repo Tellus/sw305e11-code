@@ -117,7 +117,8 @@ class GirafUser
      * Commits changes made to the GirafUser back to the database. Handy for
      * changes like name, mail and the like when no further actions are needed.
      * \return true on success, false otherwise (check sql_helper::error).
-     * \sa {}sql_helper::getErrMsg()}
+     * \sa sql_helper::getErrMsg()
+     * \todo Not written yet, but SqlUpdateCommand has been implemented to facilitate this.
      */
     public function commit()
     {

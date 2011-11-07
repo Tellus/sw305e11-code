@@ -87,6 +87,16 @@ class sql_helper
     {
         return self::_baseQuery($sql);
     }
+    
+    /**
+     * Proxy call to real_escape_string for the internal connection object.
+     * \param $in The string to escape.
+     * \return An escaped string proper to the current connection.
+     */
+    public static function escapeString($in)
+    {
+        return self::$connection->real_escape_string($in);
+    }
 }
 sql_helper::staticConstructor();
 
