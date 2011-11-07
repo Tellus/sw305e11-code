@@ -1,7 +1,7 @@
 <?php
 
-require_once("sql_helper.inc");
-require_once("constants.inc");
+require_once(__DIR__ . "/sql_helper.inc");
+require_once(__DIR__ . "/constants.inc");
 
 /**
  * This file contains various authentication functions.

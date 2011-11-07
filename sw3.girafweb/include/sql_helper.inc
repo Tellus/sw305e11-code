@@ -1,7 +1,7 @@
 <?php
 
-require_once("config.php");
-require_once("constants.inc");
+require_once(__DIR__ . "/config.php");
+require_once(__DIR__ . "/constants.inc");
 
 /**
  * A base helper class for running basic SQL queries with no
@@ -15,6 +15,11 @@ class sql_helper
      * We attempt to make this persistent.
      */
     protected static $connection;
+    
+    public function getConnection()
+    {
+        return self::$connection;
+    }
     
     private static $lastError;
     
@@ -59,8 +64,6 @@ class sql_helper
     private static function _baseQuery($sql)
     {
         self::_checkInit();
-        
-//        $sql = self::$connection->real_escape_string($sql);
         
         return self::$connection->query($sql);   
     }
