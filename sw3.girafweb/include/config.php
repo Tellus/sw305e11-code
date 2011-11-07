@@ -4,6 +4,7 @@
  * the execution of the scripts and that are of global interest.
  */
 
+/** Database values **/
 // Username for the MySQL database.
 $db_user = "giraf_web";
 
@@ -22,6 +23,14 @@ $db_port = 3306;
 // Optionally, a global table prefix.
 $db_table_prefix = ""; 
 
+/** Optional configs **/
+/* Your own salt to improve entropy when hashing passwords. Warning! Changing
+ * this AFTER taking the system into use will immediately make all existing
+ * logins impossible to access without admin intervention.
+ */
+$crypt_salt = "ergf0h34280hufdg097h324";
+
+
 // Defines to make them globally available constants.
 define("db_user", $db_user);
 define("db_pass", $db_pass);
@@ -29,5 +38,6 @@ define("db_db", $db_db);
 define("db_host", $db_host);
 define("db_port", $db_port);
 define("db_table_prefix", $db_table_prefix);
+define("crypt_salt", $crypt_salt);
 
 ?>

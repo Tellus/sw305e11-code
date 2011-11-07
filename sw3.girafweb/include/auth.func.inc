@@ -9,12 +9,20 @@ require_once("constants.inc");
 class auth
 {
     /**
-     * Hashes a string to fit with our authentication scheme.
-     * \todo{Actually write this function}
+     * Hashes a string to fit with our authentication scheme. The function strips
+     * out the hashing parameters typically output.
+     * \param input The string to hash.
      */
     public static function hashString($input)
     {
-        return $input;
+        $hash = crypt($input, '$6$rounds=5000$' . crypt_salt . '$');
+	    $hash = substr($hash, strlen('$6$rounds=5000$'));
+	    $hash = substr($hash, 0, strlen($hash)-1);
+	
+	    // Current hash seems to end up at about 102 characters.
+	    // echo('Key length: ' . strlen($hash));
+	
+	    return $hash;
     }
 
     /**
