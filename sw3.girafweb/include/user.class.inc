@@ -7,14 +7,7 @@ require_once(__DIR__ . "/sql_helper.inc");
  * parents, kindergarten eachers and admins.
  */
 class GirafUser
-{
-    public $id;
-    public $username;
-    public $fullname;
-    public $userrole;
-    public $usermail;
-    public $lastaction;
-    
+{   
     /**
      * Contains the actual data from the database.
      */
@@ -30,7 +23,7 @@ class GirafUser
         /* We dynamically prep the internal data array with the exact
          * field names from the database itself.
          */
-        $data = new Array();
+        $data = Array();
         
         /**
          * The DESCRIBE statement is akin to a SELECT statement, only for table structure, not table data.
