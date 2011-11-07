@@ -18,12 +18,26 @@ class GirafUser
      */
     private $dirty_bits;
     
-    function __constructor()
+    /**
+     * Sets all the dirty bits to a boolean value.
+     * \param state New state, false/true.
+     */
+    protected function setDirtyState($state)
+    {
+        $len = count($this->dirty_bits);
+        for($i = 0; $i < $len; $i++)
+        {
+            $this->dirty_bits[$i] = $state;
+        }
+    }
+    
+    function __construct()
     {
         /* We dynamically prep the internal data array with the exact
          * field names from the database itself.
          */
-        $data = Array();
+        $this->data = Array();
+        $this->dirty_bits = Array();
         
         /**
          * The DESCRIBE statement is akin to a SELECT statement, only for table structure, not table data.
@@ -37,7 +51,8 @@ class GirafUser
         
         while ($row = $result->fetch_assoc())
         {
-            $data[$row["Field"]] = "";
+            $this->data[$row["Field"]] = "";
+            $this->dirty_bits[$row["Field"]] = false;
         }
         
         return;
@@ -51,10 +66,10 @@ class GirafUser
      */
     public function __get($key)
     {
-        if (!array_key_exists($key, $data))
+        if (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
         else
-            return $data[$key];
+            return $this->datas[$key];
     }
     
     /**
@@ -67,12 +82,12 @@ class GirafUser
      */
     public function __set($key, $val)
     {
-        if (!array_key_exists($key))
+        if (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
         else
         {
-            $data[$key] = $val;
-            $dirty_bits[$key] = true;
+            $this->data[$key] = $val;
+            $this->dirty_bits[$key] = true;
         } 
     }
     
@@ -96,12 +111,12 @@ class GirafUser
         // Set the result into a new object.
         $newU = new GirafUser();
         
-        $newU->id = $row["userId"];
-        $newU->username = $row["username"];
-        $newU->fullname = $row["fullname"];
-        $newU->userrole = $row["userRole"];
-        $newU->usermail = $row["userMail"];
-        $newU->lastaction = $row["lastAction"];
+        foreach ($row as $key=>$val)
+        {
+            $newU->$key = $val;
+        }
+        
+        $newU->setDirtyState(false);
         
         return $newU;
     }
