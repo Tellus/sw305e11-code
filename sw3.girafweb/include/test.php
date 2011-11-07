@@ -1,6 +1,6 @@
 <?php
 
-require_once("debug_helpers.inc");
+require_once(__DIR__ . "/debug_helpers.inc");
 
 // Volatile testing file.
 

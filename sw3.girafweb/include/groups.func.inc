@@ -1,10 +1,10 @@
 <?php
  
 // Need SQL access.
-require_once("sql_helper.inc");
+require_once(__DIR__ . "/sql_helper.inc");
 
 // Need table constants.
-require_once("constants.inc");
+require_once(__DIR__ . "/constants.inc");
 
 /**
  * Contains functions specific for handling group-centric actions.
