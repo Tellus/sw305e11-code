@@ -30,6 +30,13 @@ $db_table_prefix = "";
  */
 $crypt_salt = "ergf0h34280hufdg097h324";
 
+/**
+ * Define number of rounds the crypt function should run a string before
+ * completion.
+ * WARNING: Changing this after users have been registered, those users need new
+ * passwords as the old passwords cannot be verified any more.
+ */
+$crypt_rounds = 5000;
 
 // Defines to make them globally available constants.
 define("db_user", $db_user);
@@ -39,5 +46,6 @@ define("db_host", $db_host);
 define("db_port", $db_port);
 define("db_table_prefix", $db_table_prefix);
 define("crypt_salt", $crypt_salt);
+define("crypt_rounds", $crypt_rounds);
 
 ?>
