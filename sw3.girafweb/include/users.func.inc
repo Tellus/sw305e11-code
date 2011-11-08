@@ -46,6 +46,10 @@ class users
         {
             return sql_helper::getErrMsg();
         }
+        else
+        {
+            return true;
+        }
     }
     
     public static function getUserData($userId)

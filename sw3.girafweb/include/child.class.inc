@@ -1,18 +1,13 @@
 <?php
 
-require_once(__DIR__ . "/sql_helper.inc");
-require_once(__DIR__ . "/constants.inc");
+require_once(__DIR__ . "/record.class.inc"); // Base class.
+require_once(__DIR__ . "/constants.inc"); // Table constants.
 
 /**
  * Data container class for a child in the system.
  */
-public class GirafChild
+class GirafChild extends GirafRecord
 {
-    public $id;
-    public $name;
-    public $birthday;
-    public $updateTimestamp;
-
     /**
      * Gets the first device associated with the child.
      * \return A GirafDevice associated with the child, or null.
@@ -23,9 +18,9 @@ public class GirafChild
         return null;
     }
     
-    function __constructor()
+    function __construct()
     {
-    
+        parent::__construct(TABLE_CHILDREN, "GirafChild");
     }
     
     /**
@@ -33,20 +28,9 @@ public class GirafChild
      * id.
      * \param childId ID of the child we're retrieving.
      */
-    public static function getChild($childId)
+    public static function getGirafChild($childId)
     {
-        $result = sql_helper::selectQuery("SELECT * FROM " . TABLE_CHILDREN . " WHERE profileId=" . $childId);
-        
-        if (!result) return null;
-        
-        $row = $result->fetch_assoc();
-        $ret = new GirafChild();
-        $ret->$id = $row["profileId"];
-        $ret->$name = $row["profileName"];
-        $ret->$birthday = $row["age"];
-        $ret->$updateTimestamp = $row["lastUpdated"];
-        
-        return $ret;
+        return parent::getInstance($childId);
     }
 }
 

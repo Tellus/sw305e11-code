@@ -11,6 +11,10 @@ require_once(__DIR__ . "/constants.inc");
  */
 class groups
 {
+    const RETURN_GROUP = "RETURN_GROUP";
+    const RETURN_RESULTSET = "RETURN_RESULTSET";
+    const RETURN_ROW = "RETURN_ROW";
+
     /**
      * Retrieves a group's immediate data and returns it.
      * \param groupId The ID of the group to retrieve.
@@ -18,7 +22,7 @@ class groups
      * which returns a GirafClass object, "RESULTSET" which returns the raw result set or
      * "ROW" which is the single returned row.
      */
-    public static function getGroupData($groupId, $returnAs = "GROUP_INSTANCE")
+    public static function getGroupData($groupId, $returnAs = self::RETURN_GROUP)
     {
         $result = sql_helper::selectQuery("SELECT * FROM " . TABLE_GROUPS . " WHERE groupId=" . $groupId);
         
@@ -27,15 +31,15 @@ class groups
         
         switch($returnAs)
         {
-            case "GROUP_INSTANCE":
+            case self::RETURN_GROUP:
                 $row = $result->fetch_assoc();
-                $group = new GirafGroup($row["groupId"], $row["groupName"], $row["adminKey"]);
+                $group = GirafGroup::getGirafGroup($row["groupId"]);
                 return $group;
                 break;
-            case "RESULTSET":
+            case self::RETURN_RESULTSET:
                 return $result;
                 break;
-            case "ROW":
+            case self::RETURN_ROW:
                 return $result->fetch_assoc();
                 break;
         }

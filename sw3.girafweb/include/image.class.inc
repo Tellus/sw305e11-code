@@ -31,6 +31,10 @@ class StorageTypes
 
 class GirafImage
 {
+    const ROTATE_90 = 90;
+    const ROTATE_180 = 180;
+    const ROTATE_270 = 270;
+
     public $id;
     public $uri;
     
@@ -60,6 +64,11 @@ class GirafImage
     public static function getImage($imageId)
     {
         
+    }
+    
+    public function rotateImage($degrees = self::ROTATE_90)
+    {
+    
     }
 }
 

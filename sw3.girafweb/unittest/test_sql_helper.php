@@ -10,17 +10,17 @@ class TestSqlHelper extends UnitTestCase
 {
 	function testInitialization()
     {
-        $this->assertNotNull(sql_helper::getConnection());
+        $this->assertNotNull(sql_helper::getConnection(), "Testing auto-connect.");
 	}
 	
 	function testGoodQuery()
 	{
-	    $this->assertNotNull(sql_helper::selectQuery("SELECT * FROM errors"));
+	    $this->assertNotNull(sql_helper::selectQuery("SELECT * FROM errors"), "Testing good query response.");
 	}
 	
 	function testBadQuery()
 	{
-	    $this->assertFalse(sql_helper::selectQuery("SELECT MY ASS FROM YOUR MOMMA )!¤(/"));
+	    $this->assertFalse(sql_helper::selectQuery("SELECT MY ASS FROM YOUR MOMMA )!¤(/"), "Testing bad query response.");
 	}
 }
 

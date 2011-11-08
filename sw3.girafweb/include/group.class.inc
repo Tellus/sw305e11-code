@@ -3,28 +3,16 @@
 /**
  * Data container class for group data.
  */
-public class GirafGroup
+class GirafGroup extends GirafRecord
 {
-    /**
-     * The group's name.
-     */
-    public $name;
-    
-    /**
-     * The group's database identifier.
-     */
-    public $id;
-    
-    /**
-     * User key to the superuser of the group.
-     */
-    public $adminId;
-    
-    function __constructor($gId = null, $gName = "", $gAdmin = null)
+    function __construct()
     {
-        $name = $gName;
-        $id = $gId;
-        $adminId = $gAdmin;
+        parent::__construct(TABLE_GROUPS, "GirafGroup");
+    }
+    
+    public static function getGirafGroup($gId)
+    {
+        return parent::getInstance($gId);
     }
 }
 
