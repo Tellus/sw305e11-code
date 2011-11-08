@@ -10,7 +10,7 @@ class users
 {
 
     /**
-     * 
+     * Retrieves the user currently logged in through the active session.
      */
     function getCurrentUser()
     {
@@ -52,17 +52,21 @@ class users
         }
     }
     
-    public static function getUserData($userId)
+    /**
+     * Changes the password of a user.
+     * \param $userId Id of the user to modify.
+     * \param $newPass New password, either hashed or clear.
+     * \param $doCrypt If true, $newPass will be hashed. If false, it will be used as-is.
+     * \return True on success, false otherwise.
+     */
+    public static function changePassword($userId, $newPass, $doCrypt = true)
     {
-        $result = sql_helper::selectQuery("SELECT * FROM " . TABLE_USERS .  " WHERE userId=$userId");
+        if ($doCrypt) $newPass = auth::hashString($newPass);
+    
+        sql_helper::updateQuery("UPDATE " . TABLE_USERS . " SET password='$newPass' WHERE userId=$userId");
         
-    }
-    
-    public static function upatePassword($userId, $newPass, $doCrypt = true)
-    {
-        
-    
-    
+        if (sql_helper::getLastError()) return false;
+        else return true;
     }
 }
 ?>

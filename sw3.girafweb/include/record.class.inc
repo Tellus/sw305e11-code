@@ -127,33 +127,40 @@ abstract class GirafRecord
     
     /**
      * Retrieves an instance of the object from the database, or an empty
-     * object if not found.
+     * object if not set.
+     * \param $id If set, the id will be retrieved from the database. if omitted, a new object is created.
+     * \return A new object of the proper subclass. If an id was requested, the data fields will be set. If not, an empty object is returned.
      */
-    protected static function getInstance($id)
+    protected static function getInstance($id = null)
     {
-        // Retrieve on hit matching the user.
-        $result = sql_helper::selectQuery("SELECT * FROM " . self::$sourceTable . " WHERE " . self::$primaryKey . "=$id");
-        
-        // If an error occurred or we got no hits, return false.
-        if (!$result || $result->num_rows == 0) return false;
-        
-        // Retrieve the result.
-        $row = $result->fetch_assoc();
-        
-        // Set the result into a new object.
-        // $newU = new GirafUser();
-        
         // Use reflection to get subclass info.
-        // echo "Getting subclass " . self::$subClass;
         $refl = new ReflectionClass(self::$subClass);
         
         // Create a new subclass instance.
         $newU = $refl->newInstance();
-        
-        // Insert query data into the new instance.
-        foreach ($row as $key=>$val)
+    
+        // Quick stop. If no ID was requested. Quickly create something new.
+        if (!isset($id))
         {
-            $newU->$key = $val;
+            $newU->__set(self::$primaryKey, -1); // Set the primary key to a known invalid value, -1.
+            return $newU;
+        }
+        else
+        {
+            // Retrieve on hit matching the user.
+            $result = sql_helper::selectQuery("SELECT * FROM " . self::$sourceTable . " WHERE " . self::$primaryKey . "=$id");
+            
+            // If an error occurred or we got no hits, return false.
+            if (!$result || $result->num_rows == 0) return false;
+            
+            // Retrieve the result.
+            $row = $result->fetch_assoc();
+            
+            // Insert query data into the new instance.
+            foreach ($row as $key=>$val)
+            {
+                $newU->$key = $val;
+            }
         }
         
         // Reset all the dirty bits for proper commit support.
@@ -172,7 +179,63 @@ abstract class GirafRecord
      */
     public function commit()
     {
+        if ($this->data[$this->primaryKey] > 0) commitUpdate();
+        else commitInsert();
+    }
+    
+    /**
+     * Called by GirafRecord::commit() when the data is an update of current record.
+     */
+    private function commitUpdate()
+    {
+        $sql = "UPDATE " . self::$sourceTable . " SET (";
         
+        foreach ($this->dirty_bits as $name=>$isDirty)
+        {
+            if($isDirty)
+            {
+                $sql .= "$name='" . $this->data[$name] . "',";
+            }
+        }
+        $sql = substr($sql, 0, strlen($sql) - 1); // Remove final colon.
+        
+        $sql .= ") WHERE " . self::$primaryKey . "=" . $this->data[self::$primaryKey];
+    
+        sql_helper::updateQuery($sql);
+    }
+    
+    /**
+     * Called by GirafRecord::commit() when the data is a new record.
+     */
+    private function commitInsert()
+    {
+        $sql = "INSERT INTO " . self::$sourceTable . " (";
+        
+        $values = "";
+        
+        // Insert column names.
+        foreach ($this->data as $name=>$val)
+        {
+            $sql .= "$name, ";
+            $values .= "'$val',";
+        }
+        
+        $sql = trim($sql, ","); // Trim final comma.
+        $value = trim($value, ","); // Trim final comma.
+        
+        
+        $sql .= ") VALUES ($values)";
+    
+        sql_helper::insertQuery($sql);
+    }
+    
+    /**
+     * Convenience function to construct and return the condition in a WHERE
+     * statement that refers specifically to the current instance's id.
+     */
+    protected function getSelfCondition()
+    {
+        return self::$primaryKey . "=" . $this->data[self::$primaryKey];
     }
 }
 

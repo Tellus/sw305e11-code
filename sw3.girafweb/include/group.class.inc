@@ -1,5 +1,7 @@
 <?php
 
+require_once(__DIR__ . "/record.class.inc");
+
 /**
  * Data container class for group data.
  */

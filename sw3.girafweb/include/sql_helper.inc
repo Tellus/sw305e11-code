@@ -7,6 +7,7 @@ require_once(__DIR__ . "/constants.inc");
  * A base helper class for running basic SQL queries with no
  * specialisation or fluff. Will self-instantiate with data
  * found in config.php.
+ * \todo Use bind_params and the like to make more secure SQL transactions.
  */
 class sql_helper
 {
@@ -96,6 +97,26 @@ class sql_helper
     public static function escapeString($in)
     {
         return self::$connection->real_escape_string($in);
+    }
+    
+    /**
+     * Proxy call for $connection->prepare().
+     * \param $query The query to prepare.
+     */
+    public static function prepare($query)
+    {
+        return self::$connection->prepare($query);
+    }
+    
+    /**
+     * Performs a single query on the database and returns the first part of the first result.
+     * \param $query The query to perform.
+     * \return The first result.
+     */
+    public static function simpleQuery($query)
+    {
+        $row = self::$connection->query($query)->fetch_assoc();
+        return $row[0];
     }
 }
 sql_helper::staticConstructor();
