@@ -1,6 +1,8 @@
 <?php
 
 require_once(__DIR__ . "/record.class.inc");
+require_once(__DIR__ . "/constants.inc");
+require_once(__DIR__ . "/group.class.inc");
 
 /**
  * Data container class for a user of the GIRAF system. This is typically
@@ -8,24 +10,39 @@ require_once(__DIR__ . "/record.class.inc");
  */
 class GirafUser extends GirafRecord
 {
-    // The user is currently online and visible.
+    /**
+     * The user is currently online and visible.
+     */
     const STATUS_ONLINE = 0;
     
-    // The user is offline.
+    /**
+     * The user is offline.
+     */
     const STATUS_OFFLINE = 1;
     
-    // The user is away.
+    /**
+     * The user is away.
+     */
     const STATUS_AWAY = 2;
     
-    // The user is busy.
+    /**
+     * The user is busy.
+     */
     const STATUS_BUSY = 3;
     
-    // The user is online but invisible.
+    /**
+     * The user is online but invisible.
+     */
     const STATUS_HIDDEN = 4;
-
-    function __construct()
+    
+    public static function getSourceTable()
     {
-        parent::__construct(TABLE_USERS, "GirafUser");
+        return TABLE_USERS;
+    }
+    
+    public static function getPrimaryKey()
+    {
+        return "userId";
     }
     
     /**
@@ -45,7 +62,11 @@ class GirafUser extends GirafRecord
      */
     public function setOnlineStatus($status = null)
     {
-        sql_helper::simpleQuery("UPDATE " . self::$sourceTable . " WHERE " . $this->getSelfCondition());
+        $sql = "UPDATE ". self::getSourceTable() . " SET statusKey=$status WHERE {$this->getSelfCondition()}";
+        // echo $sql;
+        $res = sql_helper::updateQuery($sql);
+        if (!$res) die(sql_helper::getErrMsg());//return false;
+        else return true;
     }
     
     /**
@@ -54,7 +75,65 @@ class GirafUser extends GirafRecord
      */
     public function getOnlineStatus()
     {
-        return sql_helper::simpleQuery("SELECT statusKey FROM " . self::$sourceTable . " WHERE " . $this->getSelfCondition());
+        $sql = "SELECT statusKey FROM " . self::getSourceTable() . " WHERE {$this->getSelfCondition()}";
+        // echo $sql;
+        return sql_helper::simpleQuery($sql);
+    }
+    
+    /**
+     * Retrieves a list of the groups that this user is a member of.
+     * \return Array of groupIds.
+     */
+    public function getUserGroups()
+    {
+        $sql = "SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey={$this->id}";
+        // echo $sql;
+        $keys = sql_helper::selectQuery($sql);
+        
+        // We shouldn't expect this error.
+        if(!$keys) die(sql_helper::getErrMsg());
+        
+        $ret = array();
+        $iter = 0;
+        while($row = $keys->fetch_row())
+        {
+            $ret[$iter++] = $row[0];
+        }
+        
+        return $ret;
+    }
+    
+    /**
+     * Adds the current user to a group.
+     * \param Either name or ID of the group that the user is to be added to.
+     * \return True on success, false otherwise.
+     * \throws Exception If the group does not exist or the user has not yet
+     * been added to the database, an exception is thrown.
+     */
+    public function addToGroup($gId)
+    {
+        // First, make sure the group exists. We do this indirectly by creating
+        // a GirafGroup instance or getting the id based on name.
+        if (is_numeric($gId))
+            $g = GirafGroup::getGroup($gId);
+        else
+        {
+            $gk = sql_helper::simpleQuery("SELECT " . GirafGroup::getPrimaryKey() . " FROM " . TABLE_GROUPS . " WHERE groupName='$gId'");
+            $g = GirafGroup::getGroup($gId);
+        }
+        
+        if ($g == null || $g == false) throw new Exception("Bad group id.");
+    
+        $sql = "INSERT INTO " . TABLE_USER_GROUP_KEYS . " (groupKey, userKey) VALUES ({$g->id}, {$this->id})";
+        
+        $result = sql_helper::insertQuery($sql);
+        
+        if (!result) throw new Exception(sql_helper::getErrMsg());
+    }
+    
+    public function removeFromGroup($gId)
+    {
+    
     }
 }
 

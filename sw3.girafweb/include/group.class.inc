@@ -7,14 +7,24 @@ require_once(__DIR__ . "/record.class.inc");
  */
 class GirafGroup extends GirafRecord
 {
-    function __construct()
+    public static function getSourceTable()
     {
-        parent::__construct(TABLE_GROUPS, "GirafGroup");
+        return TABLE_GROUPS;
+    }
+    
+    public static function getPrimaryKey()
+    {
+        return "groupId";
     }
     
     public static function getGirafGroup($gId)
     {
         return parent::getInstance($gId);
+    }
+    
+    public static function getGirafGroups($cond = null, $return_as = self::RETURN_PRIMARYKEY)
+    {
+        return parent::getRecords($cond, $return_as);
     }
 }
 

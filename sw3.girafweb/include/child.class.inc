@@ -18,9 +18,14 @@ class GirafChild extends GirafRecord
         return null;
     }
     
-    function __construct()
+    public static function getPrimaryKey()
     {
-        parent::__construct(TABLE_CHILDREN, "GirafChild");
+        return "profileId";
+    }
+    
+    public static function getSourceTable()
+    {
+        return TABLE_CHILDREN;
     }
     
     /**
@@ -37,9 +42,9 @@ class GirafChild extends GirafRecord
 	{
 		$result = sql_helper::selectQuery("SELECT childKey FROM" . TABLE_CHILD_GROUP . "WHERE groupKey=" . $groupId);
 		
-		if(!$result) return false
+		if(!$result) return false;
 		
-		$profilIds = array();
+		$profilIds = Array();
 		
 		$iter = 0; 
 		
@@ -49,6 +54,8 @@ class GirafChild extends GirafRecord
 			
 			$iter++;
 		}
+		
+		return $profilIds;
 	}
 }
 

@@ -28,7 +28,7 @@ abstract class GirafRecord
      * Name of the primary key in the underlying table. Used for calls to
      * createInstance().
      */
-    protected static $primaryKey;
+    protected $primaryKey;
    
     /**
      * Contains the actual data from the database.
@@ -42,14 +42,9 @@ abstract class GirafRecord
     private $dirty_bits;
     
     /**
-     * List of fields in the underlying table of the class.
-     */
-    protected static $fields;
-    
-    /**
      * Name of the subclass that inherited this GirafRecord.
      */
-    protected static $subClass = null;
+    protected $subclass = null;
     
     /**
      * Name of the table that data comes from. Since merely changing the
@@ -57,7 +52,7 @@ abstract class GirafRecord
      * setSourceTable to make a proper change.
      * \sa GirafRecord::setSourceTable()
      */
-    private static $sourceTable = null;
+    private $sourceTable = null;
       
     /**
      * Whether the current record object is new (that is, not yet in the
@@ -87,67 +82,27 @@ abstract class GirafRecord
      * by the class definitions' file. There is no method of forcing the second
      * requirement, but the code will fail miserably if you try :D
      */
-    protected static abstract function staticConstructor();
+    protected static final function staticConstructor(){}
     
-    /**
-     * Sets all the static data associated with a given record subclass. We
-     * define the staticConstructor as an abstract method to force subclasses to
-     * register themselves with this mechanism. A powerful trait of this
-     * approach is that it frees up the instance constructors to do less
-     * redundant work and more specific work.
-     * \param $table Name of the table that contains the underlying data.
-     * \param $subclass Name of the subclass of GirafRecord that calls this constructor.
-     */
-    protected static function setStatics($table, $subclass)
+    public function __construct()//, $subclass)
     {
-        echo "Setting up as $subclass";
-        // Set subclass data for later instantiations.
-        self::$subClass = $subclass;
-        self::$sourceTable = $table;
-        self::setSourceTable();
-    }
-    
-    public function __construct()
-    {
-        $this->setDataArrays();    
+        // echo "Constructing from " . get_called_class();
+        $this->subclass = get_called_class();
+        $this->setSourceTable($this->getSourceTable());
     }
     
     /**
-     * Returns the name of the table associated with this record type.
-     * \return The name of the table as it is found in the database.
+     * Returns the name of the table associated with this record type. Must be
+     * overridden in subclasses where they define their source table.
      */
-    public function getSourceTable()
-    {
-        return self::$sourceTable;
-    }
+    public abstract static function getSourceTable();
     
     /**
      * Returns the name of the primary key on the database table for this record
      * type.
      * \return The primary key's field name as it is found in the database.
      */
-    public function getPrimaryKey()
-    {
-        return self::$primaryKey;
-    }
-    
-    /**
-     * Resets the local data and dirty_bits arrays to an initial state.
-     */
-    protected function setDataArrays()
-    {
-        /* We dynamically prep the internal data array with the exact
-         * field names from the database itself.
-         */
-        $this->data = Array();
-        $this->dirty_bits = Array();
-        
-        foreach (self::$fields as $field)
-        {
-            $this->data[$field] = "";
-            $this->dirty_bits[$field] = false;
-        }
-    }
+    public abstract static function getPrimaryKey();
     
     /**
      * Sets the class' source table information, field data and such.
@@ -155,13 +110,18 @@ abstract class GirafRecord
      * a class' execution lifetime.
      * \param $table Name of the table to scan in.
      */
-    protected function setSourceTable($table = null)
+    protected function setSourceTable($table)
     {
         // Set subclass data for later instantiations. If it wasn't set, get it
         // from the class itself.
         
-        if (isset($table)) self::$sourceTable = $table;
-        else $table = self::$sourceTable;
+        /* We dynamically prep the internal data array with the exact
+         * field names from the database itself.
+         */
+        $this->data = Array();
+        $this->dirty_bits = Array();
+        
+        $this->sourceTable = $table;
         
         /**
          * The DESCRIBE statement is akin to a SELECT statement, only for table structure, not table data.
@@ -177,9 +137,11 @@ abstract class GirafRecord
         $fields = array();
         while ($row = $result->fetch_assoc())
         {
-            self::$fields[$iter++] = $row["Field"];
+            $field = $row["Field"];
+            $this->data[$field] = "";
+            $this->dirty_bits[$field] = false;
             
-            if($row["Key"] == "PRI") self::$primaryKey = $row["Field"];
+            // if($row["Key"] == "PRI") $this->$primaryKey = $row["Field"];
         }
         
         return;
@@ -196,7 +158,7 @@ abstract class GirafRecord
         // First check if the universal id value is requested. This is shorthand for this->data[$primaryKey]
         // echo $key;
         if ($key == "id")
-            return $this->data[self::$primaryKey];
+            return $this->data[static::getPrimaryKey()];
         // Second, check if the requested key is another field. Throw a antrum if not.
         elseif (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
@@ -216,7 +178,7 @@ abstract class GirafRecord
     public function __set($key, $val)
     {
         // echo "Setting $key";
-        if ($key == self::$primaryKey)
+        if ($key == static::getPrimaryKey())
             throw new Exception("The primary key value is write-protected.");
         if (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
@@ -234,7 +196,7 @@ abstract class GirafRecord
      */
     private function setId($id)  
     {
-            $this->data[self::$primaryKey] = $id;
+            $this->data[static::getPrimaryKey()] = $id;
     }
     
     /**
@@ -246,7 +208,7 @@ abstract class GirafRecord
     protected static function getInstance($id = null)
     {
         // Use reflection to get subclass info.
-        $refl = new ReflectionClass(self::$subClass);
+        $refl = new ReflectionClass(get_called_class());
         
         // Create a new subclass instance.
         $newU = $refl->newInstance();
@@ -261,7 +223,7 @@ abstract class GirafRecord
         else
         {
             // Retrieve on hit matching the user.
-            $result = sql_helper::selectQuery("SELECT * FROM " . self::$sourceTable . " WHERE " . self::$primaryKey . "=$id");
+            $result = sql_helper::selectQuery("SELECT * FROM " . static::getSourceTable() . " WHERE " . static::getPrimaryKey() . "=$id");
             
             // If an error occurred or we got no hits, return false.
             if (!$result || $result->num_rows == 0) return false;
@@ -272,7 +234,7 @@ abstract class GirafRecord
             // Insert query data into the new instance.
             foreach ($row as $key=>$val)
             {
-                if($key != self::$primaryKey) $newU->$key = $val;
+                if($key != static::getPrimaryKey()) $newU->$key = $val;
                 else $newU->setId($val);
             }
         }
@@ -302,7 +264,7 @@ abstract class GirafRecord
      */
     private function commitUpdate()
     {
-        $sql = "UPDATE " . self::$sourceTable . " SET (";
+        $sql = "UPDATE " . static::getSourceTable() . " SET (";
         
         foreach ($this->dirty_bits as $name=>$isDirty)
         {
@@ -313,7 +275,7 @@ abstract class GirafRecord
         }
         $sql = substr($sql, 0, strlen($sql) - 1); // Remove final colon.
         
-        $sql .= ") WHERE " . self::$primaryKey . "=" . $this->data[self::$primaryKey];
+        $sql .= ") WHERE " . $this->getSelfCondition();
     
         sql_helper::updateQuery($sql);
     }
@@ -323,7 +285,7 @@ abstract class GirafRecord
      */
     private function commitInsert()
     {
-        $sql = "INSERT INTO " . self::$sourceTable . " (";
+        $sql = "INSERT INTO " . static::getSourceTable() . " (";
         
         $values = "";
         
@@ -349,7 +311,7 @@ abstract class GirafRecord
      */
     protected function getSelfCondition()
     {
-        return self::$primaryKey . "=" . $this->data[self::$primaryKey];
+        return static::getPrimaryKey() . "=" . $this->id;
     }
     
     /**
@@ -363,23 +325,25 @@ abstract class GirafRecord
      */
     public function getRecords($condition = null, $return_as = self::RETURN_PRIMARYKEY)
     {
-        $sql = "SELECT " . self::$primaryKey . " FROM " . self::$sourceTable;
+        // Start by getting all the keys. We'll need them regardless.
+        $sql = "SELECT " . static::getPrimaryKey() . " FROM " . static::getSourceTable();
         
+        // If we have a specific condition, set that up.
         if (isset($condition)) $sql .= " WHERE $condition";
         
+        // Execute the query.
         $keys = sql_helper::selectQuery($sql);
         
-        if (!$keys)
-        {
-            throw new Exception(sql_helper::getLastError());
-        }
+        // If something bad happened, throw a tantrum.
+        if (!$keys) throw new Exception(sql_helper::getLastError());
         
+        // Insert all the keys from the result as integers into an array.
         $key_array = Array();
         $iter = 0;
         // Turn into array.
         while ($row = $keys->fetch_row())
         {
-            $key_array[$iter] = $row[0];
+            $key_array[$iter] = intval($row[0]);
             $iter++;
         }
         
@@ -396,7 +360,7 @@ abstract class GirafRecord
             $iter++;
         }
         
-        var_dump($records);
+        // var_dump($records);
         
         return $records;
     }

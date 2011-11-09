@@ -31,10 +31,14 @@ class sql_helper
     }
     
     /**
+     * \internal
      * Static "constructor" that preps the connection for consequent usage.
+     * Should never be called outside this file!
      */
     public static function staticConstructor()
     {
+        if (self::$connection != null) return; // Optimize, yeah!
+    
         // Note the "p:" prefix. We request a persistent connection for ease of use.
         self::$connection = new mysqli("p:" . db_host, db_user, db_pass, db_db, db_port);
         
@@ -90,6 +94,17 @@ class sql_helper
     }
     
     /**
+     * Performs an update query on the database.
+     * \param sql the <b>complete</b> query (including the UPDATE). Will be
+     *            escaped.
+     * \return The result of the query.
+     */
+    public static function updateQuery($sql)
+    {
+        return self::_baseQuery($sql);
+    }
+    
+    /**
      * Proxy call to real_escape_string for the internal connection object.
      * \param $in The string to escape.
      * \return An escaped string proper to the current connection.
@@ -109,13 +124,17 @@ class sql_helper
     }
     
     /**
-     * Performs a single query on the database and returns the first part of the first result.
+     * Performs a single query on the database and returns the first part of the
+     * first result.
      * \param $query The query to perform.
      * \return The first result.
      */
     public static function simpleQuery($query)
     {
-        $row = self::$connection->query($query)->fetch_assoc();
+        $result = self::$connection->query($query);
+        if (!$result) return false;
+        
+        $row = $result->fetch_row();
         return $row[0];
     }
 }

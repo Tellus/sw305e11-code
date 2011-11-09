@@ -1,39 +1,35 @@
 <?php
 require_once(__DIR__ . "/config.php");
 
-require_once(PATH_CODE . "include/groups.func.inc");
+require_once(PATH_CODE . "include/group.class.inc");
 
 require_once(__DIR__ . "/simpletest/autorun.php");
 
 class TestGirafGroups extends UnitTestCase
 {
     /**
-     * Tests the three variants (and outcomes) of groups::getGroupData().
+     * Tests group retrieval
      */
-	function testGetGroupData()
+	function testGetGroup()
     {
-        $groupType = groups::getGroupData(1, groups::RETURN_GROUP);
-        $this->assertIsA($groupType, "GirafGroup");
-        
-        $resultType = groups::getGroupData(1, groups::RETURN_RESULTSET);
-        $this->assertIsA($resultType, "MySQLi_Result");
-        
-        $rowType = groups::getGroupData(1, groups::RETURN_ROW);
-        $this->assertIsA($rowType, "array");
+        $group = GirafGroup::getGirafGroup(1);
 	}
 	
 	/**
-	 * Tests the groups::getGroups() function. Tests array return type and
-	 * numeric data type within the array.
+	 * Tests the GirafGroup:getGirafGroups() function to retrieve arrays of
+	 * groups. Both versions are tested.
 	 */
 	function testGetGroupList()
 	{
-	    $result = groups::getGroups();
-	    $this->assertIsA($result, "Array");
-	    foreach ($result as $single)
-	    {
-	        $this->assertTrue(is_numeric($single));
-	    }
+	    $result = GirafGroup::getGirafGroups(null, GirafGroup::RETURN_PRIMARYKEY);
+	    
+	    $this->assertIsA($result, "array");
+	    $this->assertIsA($result[0], "int");
+	    
+	    $result = GirafGroup::getGirafGroups(null, GirafGroup::RETURN_RECORD);
+	    
+	    $this->assertIsA($result, "array");
+	    $this->assertIsA($result[0], "GirafGroup");
 	}
 }
 
