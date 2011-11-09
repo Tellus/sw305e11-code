@@ -68,5 +68,22 @@ class users
         if (sql_helper::getLastError()) return false;
         else return true;
     }
+	
+	/*
+	* Uses the username to find the id of the user.
+	* \param Takes the username of the user as input
+	* \return Returns the id of the user with the inputted username
+	*/
+	
+	
+	public static function getUserId($username);
+	{
+		$result = sql_helper::selectQuery("SELECT userId FROM" . TABLE_USERS . "WHERE username=" . $username);
+		
+		if (!$result) return false;
+		
+		return result;
+	
+	}
 }
 ?>
