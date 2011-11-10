@@ -13,6 +13,7 @@ define("TABLE_APP_SETTINGS", "appSetings");
 define("TABLE_CHILD_GROUP", "childGroupKey");
 define("TABLE_IMAGE_RESOURCES", "imageResources");
 define("TABLE_USER_GROUP_KEYS", "userGroupKeys");
+define("TABLE_NEWSPOSTS", "newsPosts");
 
 /** SETTINGS CONSTANTS. **/
 define("SETTING_LOCAL_IMAGE_PATH", "local_image_path");

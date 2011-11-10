@@ -331,11 +331,13 @@ abstract class GirafRecord
         // If we have a specific condition, set that up.
         if (isset($condition)) $sql .= " WHERE $condition";
         
+        // echo $sql;
+        
         // Execute the query.
         $keys = sql_helper::selectQuery($sql);
         
         // If something bad happened, throw a tantrum.
-        if (!$keys) throw new Exception(sql_helper::getLastError());
+        if (!$keys) throw new Exception(sql_helper::getErrMsg());
         
         // Insert all the keys from the result as integers into an array.
         $key_array = Array();

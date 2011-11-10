@@ -7,12 +7,12 @@
  */
 class GirafSession
 {
-    public static function __get($name)
+    public static function get($name)
     {
         return $_SESSION[$name];
     }
     
-    public static function __set($name, $val)
+    public static function set($name, $val)
     {
         $_SESSION[$name] = $val;
     }
@@ -33,12 +33,23 @@ class GirafSession
     }
     
     /**
+     * Closes the currently active sesion.
+     * \sa session_close()
+     */ 
+    public static function close()
+    {
+        session_destroy();
+    }
+    
+    /**
      * Returns the database ID of the user currently logged into this session.
      * \return The databse ID if the user is logged in, false otherwise.
      */
     public static function getCurrentUser()
     {
-        return isset($this->$userId) ? $this->$userId : false;
+        $v = self::get("userId");
+
+        return isset($v) ? $v : null;
     }
 }
 
