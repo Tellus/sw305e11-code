@@ -2,6 +2,7 @@
 
 require_once(__DIR__ . "/sql_helper.inc");
 require_once(__DIR__ . "/constants.inc");
+require_once(__DIR__ . "/user.class.inc");
 
 /**
  * This file contains various authentication functions.
@@ -56,18 +57,32 @@ class auth
      */
     public static function matchPassword($userId, $pass, $doHash = true)
     {
-        $result = sql_helper::selectQuery("SELECT password FROM " . TABLE_USERS . " WHERE userId=$userId");    
-    
-        if ($row = $result->fetch_assoc())
+        if (is_numeric($userId))
         {
-            if ($doHash) $pass = auth::hashString($pass);
-            
-            return $pass == $row["password"] ? true : false;
+            $cond = GirafUser::getPrimaryKey() . "=$userId";
         }
         else
         {
-            return false;
+            $cond = "username='$userId'";
         }
+        $sql = "SELECT password FROM " . TABLE_USERS . " WHERE $cond";
+    
+        $result = sql_helper::selectQuery($sql);    
+
+        // echo $sql;
+
+        if (!$result) throw new Exception(sql_helper::getErrMsg());
+    
+        if ($result->num_rows == 0) return false;
+    
+        $row = $result->fetch_assoc();
+        if ($doHash) $pass = auth::hashString($pass);
+            
+        $matches = ($pass == $row["password"]);
+            
+        // echo $pass . "<br/> versus <br/>" . $row["password"] . "<br/>Match : " . $matches;
+            
+        return $pass == $row["password"] ? true : false;
     }
 }
 ?>
