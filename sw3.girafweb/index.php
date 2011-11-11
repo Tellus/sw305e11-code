@@ -10,6 +10,8 @@ require_once(__DIR__ . "/include/html.func.inc");
 
 // echo "<html>";
 
+$marker_match = '/\${[A-Za-z0-9:]+}/';
+
 function getTplFunc($input)
 {
     // Expects ${tEXt:for:FUNCTION}
@@ -32,25 +34,30 @@ $template = file(__DIR__ . "/themes/default/" . $_GET["page"] . ".tpl", FILE_IGN
 
 // echo "Loading template";
 
-foreach($template as $line)
+// We run through the template, line by line. Any matches on the marker template
+// will be instantly handled by 
+$output = "<html>";
+
+$file = file_get_contents(__DIR__ . "/themes/default/". $_GET["page"] . ".tpl");
+
+while(preg_match($marker_match, $file, $match) > 0)
 {
-    // echo "Testing $line<br/>";
-    if(preg_match('/\${[A-Za-z0-9:]+}/', $line) > 0)
-    {
-        // echo "Template on $line<br/>";
-        $cmd = getTplFunc($line);
-        // echo "Command : " . $cmd;
-        if (method_exists("html", $cmd))
-        {
-            html::$cmd();
-        }
-        else
-        {
-            echo("ERROR: the template command $cmd is unknown<br/>");
-        }
+    $cmd = getTplFunc($match[0]);
+    if (method_exists("html", $cmd))
+    {   
+        html::$cmd();
+        $replacements = 1;
     }
+    else
+    {
+        echo '<span class="__girafweberrortext">The command ' . $cmd . ' is unknown.</span>';
+    }
+    // Finally, remove the marker.
+    $file = str_replace($match, "", $file, $replacements);
 }
 
-// echo "</html>";
+$file .= "</html>";
+
+echo $file;
 
 ?>
