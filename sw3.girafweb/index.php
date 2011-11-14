@@ -13,23 +13,19 @@ require_once(__DIR__ . "/include/script.class.inc");
 
 $parser = new GirafScriptParser("login");
 
-// $markers = $parser->getMarkers();
+/*
+var_dump($parser->markers);
 
-$file = file_get_contents("./themes/default/login.tpl");
+echo "Trying to get markers" . PHP_EOL;
+while (false != $mrk = $parser->getNextMarker())
+{
+    echo "MARKER:" . PHP_EOL;
+    var_dump($mrk);
+}
+echo "Done dumping markers" . PHP_EOL;
+var_dump($parser);
+*/
 
-$marker = '/\$\{(\w+)\|(?:(?<=)(\w+))+\}/';
-
-echo "Hits: " . preg_match_all($marker, $file, $matches, PREG_SET_ORDER) . PHP_EOL;
-
-var_dump($matches);
-
-$commands = GirafScriptParser::parseMarker('${FUNC|CLASS:METHOD,PARAM,PARAM}');
-
-$eval = $commands[1] . "::" . $commands[2] . "();";
-var_dump($eval);
-eval($eval);
-
-// This should fail.
-eval("echo(\"Hello\");");
+echo $parser->parseTemplate();
 
 ?>

@@ -10,4 +10,9 @@ ${LOOP|VAR:END}
 Loop with variable reference.
 ${LOOP|${VREF|NAME}:START}
 Conditional
+${ENDLOOP}
 ${IF|TRUE==TRUE}
+This is visible if true
+${ELSE}
+This is if true is false.
+${ENDIF}

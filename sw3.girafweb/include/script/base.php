@@ -33,7 +33,7 @@ abstract class GirafScriptCommand
      * tags.
      * \return The full body, modified as needed by the script.
      */
-    public abstract function invoke($body);
+    public abstract function invoke();
     
     /**
      * Sets the current marker in use for the script instance.

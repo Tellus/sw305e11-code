@@ -21,11 +21,13 @@ class func extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invoke($body)
+    public function invoke()
     {
+        echo "FUNC invoked" . PHP_EOL;
         // We need to have the class initialised.
         if (class_exists($this->cmdClass))
         {
+            echo "Requested class does not exist." . PHP_EOL;
             $method = $input[2]; // We need to have this method available on the class.
             if (method_exists($this->cmdClass, $this->method))
             {
