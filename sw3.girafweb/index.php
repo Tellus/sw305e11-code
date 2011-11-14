@@ -1,6 +1,7 @@
 <?php
 
 require_once(__DIR__ . "/include/html.func.inc");
+require_once(__DIR__ . "/include/script.class.inc");
 
 /**
  * Base index file. Takes several post or session arguments to determin what
@@ -8,56 +9,27 @@ require_once(__DIR__ . "/include/html.func.inc");
  * the controllers should be invoked by index.php.
  */ 
 
-// echo "<html>";
+// if (!isset($_GET["page"])) die("No page was requested.");
 
-$marker_match = '/\${[A-Za-z0-9:]+}/';
+$parser = new GirafScriptParser("login");
 
-function getTplFunc($input)
-{
-    // Expects ${tEXt:for:FUNCTION}
-    // Outputs text_for_function
-    $input = substr($input, 2, strlen($input)-3);
-    
-    $input = str_replace(":", "_", $input);
-    
-    $input = strtolower($input);
-    
-    return $input;
-}
+// $markers = $parser->getMarkers();
 
-if (!isset($_GET["page"])) die("No page was requested.");
+$file = file_get_contents("./themes/default/login.tpl");
 
-// Time to parse a template!
-$template = file(__DIR__ . "/themes/default/" . $_GET["page"] . ".tpl", FILE_IGNORE_NEW_LINES);
+$marker = '/\$\{(\w+)\|(?:(?<=)(\w+))+\}/';
 
-// var_dump($template);
+echo "Hits: " . preg_match_all($marker, $file, $matches, PREG_SET_ORDER) . PHP_EOL;
 
-// echo "Loading template";
+var_dump($matches);
 
-// We run through the template, line by line. Any matches on the marker template
-// will be instantly handled by 
-$output = "<html>";
+$commands = GirafScriptParser::parseMarker('${FUNC|CLASS:METHOD,PARAM,PARAM}');
 
-$file = file_get_contents(__DIR__ . "/themes/default/". $_GET["page"] . ".tpl");
+$eval = $commands[1] . "::" . $commands[2] . "();";
+var_dump($eval);
+eval($eval);
 
-while(preg_match($marker_match, $file, $match) > 0)
-{
-    $cmd = getTplFunc($match[0]);
-    if (method_exists("html", $cmd))
-    {   
-        html::$cmd();
-        $replacements = 1;
-    }
-    else
-    {
-        echo '<span class="__girafweberrortext">The command ' . $cmd . ' is unknown.</span>';
-    }
-    // Finally, remove the marker.
-    $file = str_replace($match, "", $file, $replacements);
-}
-
-$file .= "</html>";
-
-echo $file;
+// This should fail.
+eval("echo(\"Hello\");");
 
 ?>
