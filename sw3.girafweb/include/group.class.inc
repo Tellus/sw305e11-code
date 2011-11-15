@@ -26,6 +26,26 @@ class GirafGroup extends GirafRecord
     {
         return parent::getRecords($cond, $return_as);
     }
+	
+	public static function getChildrenInGroup($groupId)
+	{
+		$result = sql_helper::selectQuery("SELECT childKey FROM" . TABLE_CHILD_GROUP . "WHERE groupKey=" . $groupId);
+		
+		if(!$result) return false;
+		
+		$profilIds = Array();
+		
+		$iter = 0; 
+		
+		while ($row = $result->fetch_assoc())
+		{
+			$profilIds[iter] = $row["childKey"];
+			
+			$iter++;
+		}
+		
+		return $profilIds;
+	}
 }
 
 ?>
