@@ -38,6 +38,8 @@ class GirafChild extends GirafRecord
         return parent::getInstance($childId);
     }
 	
+	public static function getChildsAbilities($childId)
+	
 
 }
 
