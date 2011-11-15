@@ -7,10 +7,10 @@ require_once("base.php");
 /**
  * 
  */
-class func extends GirafScriptCommand
+class sloop extends GirafScriptCommand
 {
-    public $cmdClass;
-    public $method;
+    public $iter;
+    public $iterName;
 
     /**
      * Calls the func marker command that will, in turn, attempt to call the
@@ -23,6 +23,31 @@ class func extends GirafScriptCommand
      */
     public function invoke()
     {
+        $iter = $this->iter;
+        $name = $this->iterName;
+        if ($this->iter == null)
+        {
+            $this->replaceMarker("The array '$name' is not defined.");
+            return;
+        }
+        
+        // Remember the index so we can properly reverse every time we re-loop.
+        $startIndex = $this->parent->getMarkerIndex();
+        
+        // The prefab is the base template for the contents between the two loop
+        // markers.
+        $prefab = $this->parent->file_contents;
+        $curMark = $this->parent->getCurrentMarker();
+        $prefab = substr($prefab, $curMark["start"], strpos($prefab, '${ENDLOOP}') - strlen('${ENDLOOP}'));
+        
+        var_dump($prefab);
+        throw new \Exception();
+        
+        while ('${ENDLOOP}' != $marker = $this->parent->getNextMarker())
+        {
+        
+        }
+    
         // echo "FUNC invoked" . PHP_EOL;
         // We need to have the class initialised.
         if (class_exists($this->cmdClass))
@@ -48,9 +73,9 @@ class func extends GirafScriptCommand
     
     public function getParameters()
     {
-        $this->cmdClass = $this->marker[1];
-        $this->method = $this->marker[2];
-        $this->parameters = array_slice($this->marker, 3);
+        // We just need one parameter. An array.
+        $this->iter = $this->parent->getVar($this->marker[1]);
+        $this->iterName = $this->marker[1];
     }
 }
 

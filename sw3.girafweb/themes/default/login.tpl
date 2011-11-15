@@ -1,18 +1,26 @@
-Function call test.
-${FUNC|CLASS:METHOD}
-Variable declaration.
-${VDEC|NAME:VALUE}
-Advanced Variable declaration.
-${VDEC|NAME:${FUNC|CLASS:METHOD}}
-Loop test.
-${LOOP|VAR:START}
-${LOOP|VAR:END}
-Loop with variable reference.
-${LOOP|${VREF|NAME}:START}
-Conditional
-${ENDLOOP}
-${IF|TRUE==TRUE}
-This is visible if true
-${ELSE}
-This is if true is false.
-${ENDIF}
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="themes/default/css/girafbase.css" />
+</head>
+<body>
+    ${VREF|POST:username}
+    <div class="centerbox">
+    <form method="POST" action="index.php?page=login">
+    <table>
+        <tr>
+            <td>Username:</td>
+            <td><input type="text" name="username" /></td>
+        </tr>
+        <tr>
+            <td>Password:</td>
+            <td><input type="password" name="password" /></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Go" /></td>
+        </tr>
+    </table>
+    </form>
+    </div>
+    ${ENDWHEN}
+</body>
+</html>

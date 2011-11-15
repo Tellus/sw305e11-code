@@ -25,7 +25,7 @@ class GirafScriptParser
     /**
      * String containing the full contents of the template.
      */
-    private $file_contents;
+    public $file_contents;
     
     /**
      * The current theme for the parser. Matches the directory which is used to
@@ -52,13 +52,10 @@ class GirafScriptParser
     protected $filePosition;
     
     /**
-     * Returns the current index of the marker array.
-     * \return $markerIndex from within the class.
+     * Array of variables used within a single template parse. Currently used by
+     * VREF and VDEC, but could have uses elsewhere.
      */
-    public function getMarkerIndex()
-    {
-        return $this->$filePosition;
-    }
+    protected $templateVars;
     
     /**
      * Constructs a new parser, prepared to run through a particluar page of
@@ -82,8 +79,18 @@ class GirafScriptParser
         // echo "Loading $file";
         $this->file_path = $file;
         $this->file_contents = file_get_contents($file);    
-        $this->markers = $this->getMarkers();
+        $this->getNewMarkers();
         $this->markerIndex = -1;
+    }
+    
+    public function getNewMarkers()
+    {
+        // echo "Previous markers: " . PHP_EOL;
+        // var_dump($this->markers);
+        $this->markers = $this->getMarkers();
+        $this->resetMarker();
+        // echo "New markers: " . PHP_EOL;
+        // var_dump($this->markers);
     }
     
     /**
@@ -145,27 +152,27 @@ class GirafScriptParser
     }
     
     /**
-     * An out-of-memory alternative to getNedstedMarkers and getMarkers. It uses
-     * a safer approach to marker parsing that should hopefully reduce the
-     * entropy we experience from the regular full-file mechanism.
-     * \param $file Path to the file we want markers from.
-     * \return  An array of full markers. They are thus still in an embedded
-     * state if they contain something from one another.
-     * \warning Currently I cannot guarantee that markers on the same line are
-     * read in proper sequence. There's an issue with the position iteration.
+     * Gets the value associated with a key, or null if the key did not exist.
      */
-    public static function getMarkersFromFile($file)
+    public function getVar($key)
     {
-        $toRead = file($file, FILE_IGNORE_NEW_LINES + FILE_SKIP_EMPTY_LINES);
-        
-        $ret = array();
-        foreach($toRead as $line)
+        if (array_key_exists($key, $this->templateVars))
         {
-            $new_markers = self::getNestedMarkers($input);
-            if (!$new_markers) continue;
-            
-            
+            return $this->templateVars[$key];
         }
+        else
+        {
+            return null;
+        }
+    }
+    
+    /**
+     * Sets the value of a particular key.
+     */
+    public function setVar($key, $val)
+    {
+        $this->templateVars[$key] = $val;
+        return null;
     }
     
     /**
@@ -280,14 +287,18 @@ class GirafScriptParser
 
         // This basic regex pattern retrieves all regular characters between
         // irregular characters. More simply: alphanumerics, not curly braces.
-        $marker_reg = '/(\w+)(?:[:,]{0,1})/';
+        // $marker_reg = '/(.+)(?:[:,]{0,1})/';
+        $marker_reg = '/([A-Za-z0-9=!<>]+)/';
         
         $matches = array();
         $matches[0] = $cmd;
         $hits = preg_match_all($marker_reg, $input, $matchesb);//, PREG_SET_ORDER);
         
         $matches = array_merge($matches, $matchesb[1]);
-        
+        /*
+        var_dump($matches);
+        echo "<br/>";
+        */
         return $matches;
     }
     
@@ -327,6 +338,82 @@ class GirafScriptParser
         
         // Create a new subclass instance.
         $newU = $refl->newInstance($this);
+        
+        return $newU;
+    }
+    
+    /**
+     * Seeks out a balanced body of text from a string, given start and end
+     * marks (which will be balanced) and an optional offset.
+     * \param $input The string to search in.
+     * \param $start The starting marker. Start and end markers will be balanced.
+     * \param $end The ending marker. Start and end markers will be balanced.
+     * \param $offset Optional offset to start at.
+     * \param $trim If true, the marks will be removed from the start and end of the body.
+     * \return The full body of text between the two marks. The marks themselves
+     * will be removed if trim was passed as true.
+     */
+    public static function getBalancedText($input, $startMark, $endMark, $offset = 0, $trim = false)
+    {
+        // Global file position. Used to search progressively through the file.
+        // Modified by the offset.
+        $position = strpos($input, $startMark, $offset);
+        // var_dump($input, $startMark, $endMark, $position);
+
+        // Counter to keep track of nesting level.
+        $level = 0;
+        
+        // These denote the starting points of the two most outer markers.
+        $body_start = $body_end = $position;
+        
+        // Saves a lot of overhead.
+        $input_len = strlen($input);
+        
+        $done = false;
+        
+        
+        // echo "Starting run-through." . PHP_EOL;
+        while (!$done && $position < $input_len - 1)
+        {
+            // Find the starting position of a possible nesting point.
+            $start = strpos($input, $startMark, $position);
+            // Find the position of the next ending mark.
+            $end = strpos($input, $endMark, $position);
+            // if (!$start) echo "No start found" . PHP_EOL;
+            // if (!$end) echo "No end found" . PHP_EOL;
+
+            // Start tag is closer than end tag. Increase nesting.
+            if ($start != false && $start < $end)
+            {
+                $level++;
+                // echo "($position) Increasing level to $level" . PHP_EOL;
+                $position = $start + strlen($start);
+                // echo "($position) Fragment: " . substr($input, $position-2, 5) . PHP_EOL;
+            }
+            else
+            {
+                // End tag is closer. Reduce level.
+                $level--;
+                // echo "Decreasing level to $level" . PHP_EOL;
+                $position = $end + strlen($endMark);
+                // echo "($position) Fragment: " . substr($input, $position-strlen($endMark), strlen($endMark)) . PHP_EOL;
+            }
+            
+            // If we're at square one, we're done.
+            if ($level <= 0)
+            {
+                // $new_marker = substr($input, $body_start, $position + strlen($endMark));
+                // If we end up at level 0 again, we're done. Fully. Badam. Return the substring.
+                $done = true;
+            }
+        }
+        $ret = substr($input, $body_start, $position - $body_start);
+        if ($trim)
+        {
+            $ret = substr($ret, strlen($startMark));
+            $ret = substr($ret, 0, strlen($ret) - strlen($endMark));
+        }
+        return $ret;
     }
     
     /**
@@ -349,6 +436,14 @@ class GirafScriptParser
     {
         if($this->currentMarker < 0 || $this->currentMarker > count($this->markers) - 1) return false;
         return $this->markers[$this->currentMarker];
+    }
+    
+    /**
+     * Retrieves the current index of the marker array.
+     */
+    public function getMarkerIndex()
+    {
+        return $this->currentMarker;
     }
     
     /**
@@ -382,19 +477,27 @@ class GirafScriptParser
     }
     
     /**
+     * Resets the array marker.
+     */
+    public function resetMarker()
+    {
+        $this->currentMarker = -1;
+    }
+    
+    /**
      * Fully parses an input template and returns the newly generated content.
      * \return The modified file in its entirety, ripe for printage.
      */
     public function parseTemplate($file = null)
     {
-        // var_dump($this->markers);
-        
         $pos = 0;
         
         // While we have markers to process.
         $this->currentMarker = -1;
         while($marker = $this->getNextMarker())
         {
+            // echo '(' . $this->currentMarker . '): ' . $marker["marker"] . "<br/>" . PHP_EOL;
+        
             // echo "Handling " . $marker["marker"];
             // Find the next marker.
             // $pos = strpos($file, $marker, $pos + strlen($marker));
@@ -411,40 +514,18 @@ class GirafScriptParser
                 // Give the instance a marker.
                 $handler->setMarker($markerArray);
                 
-                echo "Calling $markerArray[0]";
+                // echo "Calling $markerArray[0]";
                 // Invoke it. It has a parent reference and can work it as necessary.
                 $handler->invoke();   
             }
             elseif ($handler == false)
             {
-                $errText = "<span class='girafscriptError'>The marker command '" . $marker["marker"] . "' is unknown</span>";
+                $debug_mark = str_replace('$', '', $marker["marker"]);
+                $errText = "<span class='giraferror'>The marker command '" . $debug_mark . "' is unknown</span>";
                 // echo "Replacing '" . $marker["marker"] . "' with '$errText'";
                 $this->file_contents = str_replace($marker["marker"], $errText, $this->file_contents);
                 continue;
             }
-            
-            /*
-            if ($endMarker = $handler->getEndMarker()) // If the handler class defines an end marker, we need more text.
-            {
-                // The length is the amount of characters from the first character
-                // in the start marker to the final character in the end marker.
-                // $body_length = strpos($this->file_contents, $endMarker) + strlen($endMarker) - strpos($this->file_contents, $marker);
-                for ($i = $this->currentMarker+1; $i < count($this->markers); $i++)
-                {
-                    $finalMarker = $this->markers[$i];
-                    if ($finalMarker["marker"] === $endMarker)
-                    {
-                        echo "Matching end marker found.<br/>";
-                        $body_length = $finalMarker["end"] - $marker["start"];
-                    }
-                }
-                $this->file_contents = str_replace(substr($file, $marker["start"], $finalMarker["end"] - $marker["start"]), $handler->invoke(), $this->file_contents);
-            }
-            else
-            {
-                $body_length = strlen($marker);
-                $this->file_contents = str_replace($marker, $this->runMarker($markerArray), $this->file_contents);
-            }*/
         }
         
         // At this point, $this->file_contents is hopefully fully replaced.

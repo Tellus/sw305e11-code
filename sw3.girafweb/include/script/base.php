@@ -43,18 +43,42 @@ abstract class GirafScriptCommand
      */
     public function setMarker($marker)
     {
-        if (is_a($marker, "array"))
+        if (is_array($marker))
         {
             $this->marker = $marker;
         }
         elseif (is_a($marker, "string"))
         {
-            $this->marker = $parent->parseMarker($marker);
+            $this->marker = $this->parent->parseMarker($marker);
         }
-        else throw new Exception("Invalid marker type " . get_class($marker) . " passed.");
+        else throw new \Exception("Invalid marker type '$marker' passed.");
         
         // Draw out the parameters.
         $this->getParameters();
+    }
+    
+    /**
+     * Replaces the marker's text in the template file. This is a simple
+     * baseline method for all atomic markers.
+     * \param $repl The replacement text to insert.
+     * \param $toRepl Optionally override the marker search with text of your
+     * own choosing. This effectively makes replaceMarker a simple proxy call
+     * for str_replace().
+     */
+    public function replaceMarker($repl, $toRepl = null)
+    {
+        if (!isset($toRepl))
+        {
+            $toRepl = $this->parent->getCurrentMarker();
+            $toRepl = $toRepl["marker"];
+        }
+        // echo "Replacing '$toRepl' with '$repl'.<br/>" . PHP_EOL;
+        $number = 1;
+        // echo "BEFORE" . PHP_EOL;
+        // var_dump($this->parent->file_contents);
+        $this->parent->file_contents = str_replace($toRepl, $repl, $this->parent->file_contents, $number);
+        // echo "AFTER" . PHP_EOL;
+        // var_dump($this->parent->file_contents);
     }
     
     /**
