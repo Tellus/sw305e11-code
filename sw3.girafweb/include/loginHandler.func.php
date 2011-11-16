@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__ . "/auth.func.inc"); 
-require_once(__DIR__ . "/user.func.inc"); 
+require_once(__DIR__ . "/users.func.inc"); 
 /**
 * This class handles the login
 */
@@ -13,13 +13,14 @@ class login
 	* \param Takes a password
 	* \return ????
 	*/
-	public static function doAuthentication($username, $password )
+	public static function doAuthentication($username, $password, $doHash = true )
 	{
 		$IDstatus = false;
 		if($username != "" && $password != "")
 		{
-			$IDstatus = auth::matchPassword($username, $password);
+			$IDstatus = auth::matchPassword($username, $password, $doHash);
 		}
+		echo "in DA $IDstatus";
 		if($IDstatus==true)
 		{
 			//return
@@ -41,7 +42,7 @@ class login
 	*/
 	public static function createNewUser($username, $password, $email, $fullname = "", $userrole = -1)
 	{
-		$newUserStatus = user::registerNewUser($username, $password, $email, $fullname = "", $userrole = -1);
+		$newUserStatus = users::registerNewUser($username, $password, $email, $fullname = "", $userrole = -1);
 		if($newUserStatus==true)
 		{
 			return true;
