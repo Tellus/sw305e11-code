@@ -170,7 +170,7 @@ abstract class GirafRecord
             throw new Exception("The requested key does not exist.");
         // Finally, return the found value.
         else
-            return $this->datas[$key];
+            return $this->data[$key];
     }
     
     /**

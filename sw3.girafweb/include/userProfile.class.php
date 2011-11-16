@@ -7,35 +7,6 @@ require_once(__DIR__ . "/record.class.inc");
 */
 class userProfile
 {
-    /**
-     * The user is currently online and visible.
-     */
-    const STATUS_ONLINE = 0;
-    
-    /**
-     * The user is offline.
-     */
-    const STATUS_OFFLINE = 1;
-    
-    /**
-     * The user is away.
-     */
-    const STATUS_AWAY = 2;
-    
-    /**
-     * The user is busy.
-     */
-    const STATUS_BUSY = 3;
-    
-    /**
-     * The user is online but invisible.
-     */
-    const STATUS_HIDDEN = 4;
-	
-	const ADMIN = 1;
-	const MODERATOR = 2;
-	const BEPARENT = 3;
-	const NONE = -1;
 	
 	private $user;
 	
@@ -45,7 +16,7 @@ class userProfile
 	public function __construct($ID)
 	{
 		//get 
-		$this->user = GirafUser::getGirafUser($ID);
+		$this->user = GirafUser::getGirafUser($ID);		
 	}
 	//--------gets---------\\
 	
@@ -54,7 +25,9 @@ class userProfile
 	*/
 	public function getUsername()
 	{
-		return $user->username;
+		$temp = $this->user;
+		return $temp->username;
+		
 	}
 	
 	/**
@@ -62,7 +35,8 @@ class userProfile
 	*/
 	public function getUserMail()
 	{
-		return $user->userMail;
+		$temp = $this->user;
+		return $temp->userMail;
 	}
 	
 	/**
@@ -70,7 +44,8 @@ class userProfile
 	*/
 	public function getFullName()
 	{
-		return $user->fullname;
+		$temp = $this->user;
+		return $temp->fullname;	
 	}
 	
 	/**
@@ -79,7 +54,8 @@ class userProfile
 	*/	
 	public function getUserrole()
 	{
-		return $user->userRole;
+		$temp = $this->user;
+		return $temp->userRole;
 	}
 
 	/**
@@ -87,7 +63,8 @@ class userProfile
 	*/	
 	public function getUserOnlineStatus()
 	{
-		$result	= $user->getOnlineStatus();	
+		$temp = $this->user;
+		$result	= $temp->getOnlineStatus();	
 		//handle userstatus
 		return $result;
 	}
@@ -100,7 +77,8 @@ class userProfile
 	*/	
 	public function setUsername($value)
 	{
-		$user->__set('username', $value);
+		$temp = $this->user;
+		$temp->__set('username', $value);
 	}
 	
 	/**
@@ -109,7 +87,8 @@ class userProfile
 	*/
 	public function setUserMail($value)
 	{
-		$user->__set('userMail', $value);
+		$temp = $this->user;
+		$temp->__set('userMail', $value);
 	}
 
 	/**
@@ -118,7 +97,8 @@ class userProfile
 	*/
 	public function setFullName($value)
 	{
-		$user->__set('fullname', $value);
+		$temp = $this->user;
+		$temp->__set('fullname', $value);
 	}
 	
 	/** $value should be int to do????
@@ -127,7 +107,9 @@ class userProfile
 	*/
 	public function setUserrole($value)
 	{
-		$user->__set('userRole', $value);
+		$role = $this->identifyRole($value);
+		$temp = $this->user;
+		$temp->__set('userRole', $value);
 	}
 
 	/**
@@ -136,10 +118,11 @@ class userProfile
 	public function setUserOnlineStatus($statusvalue)
 	{
 		$bool = false;
-		$status = identifyStatus($statusvalue);
+		$status = $this->identifyStatus($statusvalue);
 		if ($status != null)
 		{
-			$bool = $user->setOnlineStatus($status);
+			$temp = $this->user;
+			$bool = $temp->setOnlineStatus($status);
 		}
 		if($status==null ||$bool==false)
 		{
@@ -152,37 +135,57 @@ class userProfile
 	//-------------others-----------------\\
 	private function identifyRole($role)
 	{
-		if ($role == ADMIN)
+		$admin = 1;
+		$moderator = 2;    
+		$beparent = 3;
+		$none= -1;
+	
+		if ($role == $admin)
 		{
+			return $admin;
 		}
-		elseif($role == MODERATOR)
+		elseif($role == $moderator)
 		{
+			return $moderator;
 		}
-		elseif($role == BEPARENT)
+		elseif($role == $beparent)
 		{
+
+			return $beparent;
 		}
 		else 
 		{
+			return none;
 		}
 	}
 	
 	private function identifyStatus($status)
 	{
-		if($status == STATUS_ONLINE)
+	    $statusOnline = 0;
+		$statusOffline = 1;
+		$statusAway = 2;
+		$statusBusy = 3;
+		$statusHidden = 4;
+		
+		if($status == $statusOnline)
 		{
-			return STATUS_ONLINE;
+			return $statusOnline;
 		}
-		elseif($status == STATUS_OFFLINE) 
+		elseif($status == $statusOffline) 
 		{
-			return STATUS_OFFLINE;
+			return $statusOffline;
 		}
-		elseif($status == STATUS_AWAY) 
+		elseif($status == $statusAway) 
 		{
-			return STATUS_AWAY;
+			return $statusAway;
 		}
-		elseif($status == STATUS_BUSY) 
+		elseif($status == $statusBusy) 
 		{
-			return STATUS_BUSY;
+			return $statusBusy;
+		}
+		elseif($status == $statusHidden) 
+		{
+			return $statusHidden;
 		}
 		else
 		{
@@ -205,7 +208,8 @@ class userProfile
 	*/
 	public function saveChanges()
 	{
-		$user->commit();
+		$temp = $this->user;
+		$temp->commit();
 	}
 	
 }
