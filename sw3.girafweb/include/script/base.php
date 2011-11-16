@@ -45,10 +45,17 @@ abstract class GirafScriptCommand
     {
         if (is_array($marker))
         {
+            var_dump($marker);
             $this->marker = $marker;
         }
         elseif (is_a($marker, "string"))
         {
+            // Handling nesting here!
+            $embedded = $this->parent->getNestedMarkers($marker);
+            if (count($embedded) > 0)
+            {
+                throw new Exception("Nesting is not yet implemented.");
+            }
             $this->marker = $this->parent->parseMarker($marker);
         }
         else throw new \Exception("Invalid marker type '$marker' passed.");

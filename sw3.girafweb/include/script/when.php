@@ -40,8 +40,6 @@ class when extends GirafScriptCommand
             // echo "EXECUTING FALSE";
             $newContent = "";
         }
-        // var_dump($oldContent, $newContent, $file);
-        // throw new \Exception();
         $this->replaceMarker($newContent, $oldContent);
         
         // Simple dodge for now. We force the parser to start over after

@@ -18,12 +18,12 @@ class GirafChild extends GirafRecord
         return null;
     }
     
-    public static function getPrimaryKey()
+    public function getPrimaryKey()
     {
         return "profileId";
     }
     
-    public static function getSourceTable()
+    public function getSourceTable()
     {
         return TABLE_CHILDREN;
     }

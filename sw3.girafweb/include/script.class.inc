@@ -85,12 +85,8 @@ class GirafScriptParser
     
     public function getNewMarkers()
     {
-        // echo "Previous markers: " . PHP_EOL;
-        // var_dump($this->markers);
         $this->markers = $this->getMarkers();
         $this->resetMarker();
-        // echo "New markers: " . PHP_EOL;
-        // var_dump($this->markers);
     }
     
     /**
@@ -176,14 +172,77 @@ class GirafScriptParser
     }
     
     /**
+     * Retrieves an array of markers embedded within a single full marker. This
+     * function recursively retrieves all embedded markers.
+     * \param $input The full marker.
+     * \param &$arr Array to place embedded markers in.
+     * \param $level The level of embedding to process. This is used by the
+     * recursive mechanism and should NOT be altered.
+     * \return A 2-dimensional array of full markers. Index 0 contains the
+     * original marker, index 1 contains the first level of embedding markers
+     * and so on. The array is flattened, so you cannot immediately tell which
+     * parent levels a given marker may have belonged to, but they are inserted
+     * in sequence, so replacing occurrences from the bottom up while following
+     * an increasing index should bring you through them all in sequence.
+     * \note It is recommended to use getEmbeddedMarkers instead. It wraps this
+     * function in a simpler interface.
+     */
+    public static function getEmbeddedMarkersRec($input, &$arr, $level = 0)
+    {
+        echo "Level $level" . PHP_EOL;
+    
+        // Secure array contents.
+        if ($level === 0 && !isset($arr)) $arr = array();
+        
+        // Ensure the requested level exists.
+        if (!array_key_exists($level, $arr)) $arr[$level] = array();
+        
+        $position = 0;
+        
+        while(false !== $subset = self::getBalancedText($input, '${', '}', $position+2, true))
+        {
+            var_dump($subset);
+            self::getEmbeddedMarkersRec($subset, $arr, $level+1);
+            $position = strpos($input, $subset, $position) + strlen($subset);
+        }
+        
+        var_dump($subset);
+        
+        if ($level > 0)
+        {
+            $input = '${' . $input . '}'; // In layman's terms, this is a "hack".
+        }
+        
+        $arr[$level][] = $input;
+        return $arr;
+    }
+    
+    /**
+     * Parses a full marker and returns all markers within.
+     * \param $input A full marker (${ to }).
+     * \return A 2-dimensional array containing level of embedding on one axis,
+     * and an array of embedded full markers on the other.
+     * \note Notice that this function puts full markers in each level, without
+     * actually running them. This is left up to an as yet unnamed function.
+     */
+    public static function getEmbeddedMarkers($input)
+    {
+        $arr = array();
+        self::getEmbeddedMarkersRec($input, $arr, 0);
+        return $arr;
+    }
+    
+    /**
      * Retrieves any markers embedded within another marker.
      * \param $input The input marker. Should contain starting and ending tags,
      * but the function will disregard them either way.
      * \return Array of nested markers, or false.
      * \note Call this function recursively to retrieve the nested markers of
      * nested markers.
+     * \todo This needs better implementation. Either it only does nesting, or
+     * it has a flawed model for deriving embedded markers.
      */
-    public static function getNestedMarkers($input)
+    public static function getNestedMarkers($input, $returnAs = 'array')
     {
         // Global file position. Used to search progressively through the file.
         $position = 0;
@@ -251,7 +310,8 @@ class GirafScriptParser
                 {
                     $new_marker = substr($input, $marker_start, $marker_end-$marker_start+1);
                     // echo "Adding finished marker '$new_marker' to list." . PHP_EOL;
-                    $markers[] = array("marker" => $new_marker, "start" => $marker_start, "end" => $marker_end);
+                    if ($returnAs == 'array') $markers[] = array("marker" => $new_marker, "start" => $marker_start, "end" => $marker_end);
+                    elseif ($returnAs == 'string') $markers[] = $new_marker;
                 }
             }
         }
@@ -295,10 +355,7 @@ class GirafScriptParser
         $hits = preg_match_all($marker_reg, $input, $matchesb);//, PREG_SET_ORDER);
         
         $matches = array_merge($matches, $matchesb[1]);
-        /*
-        var_dump($matches);
-        echo "<br/>";
-        */
+
         return $matches;
     }
     
@@ -357,8 +414,10 @@ class GirafScriptParser
     {
         // Global file position. Used to search progressively through the file.
         // Modified by the offset.
+        if ($offset > strlen($input)) return false;
+        if (strpos($input, $startMark, $offset) == false ||
+            strpos($input, $endMark, $offset) == false ) return false;
         $position = strpos($input, $startMark, $offset);
-        // var_dump($input, $startMark, $endMark, $position);
 
         // Counter to keep track of nesting level.
         $level = 0;
