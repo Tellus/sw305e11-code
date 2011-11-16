@@ -102,7 +102,7 @@ abstract class GirafRecord
      * type.
      * \return The primary key's field name as it is found in the database.
      */
-    public abstract function getPrimaryKey();
+    public abstract function auth();
     
     /**
      * Sets the class' source table information, field data and such.
@@ -158,7 +158,7 @@ abstract class GirafRecord
         // First check if the universal id value is requested. This is shorthand for this->data[$primaryKey]
         // echo $key;
         if ($key == "id")
-            return $this->data[static::getPrimaryKey()];
+            return $this->data[$this->getPrimaryKey()];
         // Second, check if the requested key is another field. Throw a antrum if not.
         elseif (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
@@ -178,7 +178,7 @@ abstract class GirafRecord
     public function __set($key, $val)
     {
         // echo "Setting $key";
-        if ($key == static::getPrimaryKey())
+        if ($key == $this->getPrimaryKey())
             throw new Exception("The primary key value is write-protected.");
         if (!array_key_exists($key, $this->data))
             throw new Exception("The requested key does not exist.");
@@ -196,7 +196,7 @@ abstract class GirafRecord
      */
     private function setId($id)  
     {
-            $this->data[static::getPrimaryKey()] = $id;
+            $this->data[$this->getPrimaryKey()] = $id;
     }
     
     /**
@@ -223,7 +223,7 @@ abstract class GirafRecord
         else
         {
             // Retrieve on hit matching the user.
-            $result = sql_helper::selectQuery("SELECT * FROM " . static::getSourceTable() . " WHERE " . static::getPrimaryKey() . "=$id");
+            $result = sql_helper::selectQuery("SELECT * FROM " . $this->getSourceTable() . " WHERE " . $this->getPrimaryKey() . "=$id");
             
             // If an error occurred or we got no hits, return false.
             if (!$result || $result->num_rows == 0) return false;
@@ -234,7 +234,7 @@ abstract class GirafRecord
             // Insert query data into the new instance.
             foreach ($row as $key=>$val)
             {
-                if($key != static::getPrimaryKey()) $newU->$key = $val;
+                if($key != $this->getPrimaryKey()) $newU->$key = $val;
                 else $newU->setId($val);
             }
         }
@@ -264,7 +264,7 @@ abstract class GirafRecord
      */
     private function commitUpdate()
     {
-        $sql = "UPDATE " . static::getSourceTable() . " SET (";
+        $sql = "UPDATE " . $this->getSourceTable() . " SET (";
         
         foreach ($this->dirty_bits as $name=>$isDirty)
         {
@@ -285,7 +285,7 @@ abstract class GirafRecord
      */
     private function commitInsert()
     {
-        $sql = "INSERT INTO " . static::getSourceTable() . " (";
+        $sql = "INSERT INTO " . $this->getSourceTable() . " (";
         
         $values = "";
         
@@ -311,7 +311,7 @@ abstract class GirafRecord
      */
     protected function getSelfCondition()
     {
-        return static::getPrimaryKey() . "=" . $this->id;
+        return $this->getPrimaryKey() . "=" . $this->id;
     }
     
     /**
@@ -326,7 +326,7 @@ abstract class GirafRecord
     public function getRecords($condition = null, $return_as = self::RETURN_PRIMARYKEY)
     {
         // Start by getting all the keys. We'll need them regardless.
-        $sql = "SELECT " . static::getPrimaryKey() . " FROM " . static::getSourceTable();
+        $sql = "SELECT " . $this->getPrimaryKey() . " FROM " . $this->getSourceTable();
         
         // If we have a specific condition, set that up.
         if (isset($condition)) $sql .= " WHERE $condition";
