@@ -21,7 +21,7 @@ class childProfile
 	
 	private $child;
 	private $childAbilities = Array();
-	private $abilityChange = false;
+
 
 	
 
@@ -59,16 +59,9 @@ class childProfile
 	/**
 	*
 	*/
-	public function getCanDragAndDrop()
+	public function getAbilitiesArray()
 	{
-		if($this->childAbilities["CAN_DRAG_AND_DROP"]==true)
-		{
-		return true;
-		}
-		else
-		{
-		return false;
-		}
+		return $this->childAbilities;
 	}
 	
 
@@ -96,6 +89,8 @@ class childProfile
 		$this->abilityChange = true;
 	}
 	
+	
+	$key=>$value
 	//--------------save-----------------\\
 
 	/**
