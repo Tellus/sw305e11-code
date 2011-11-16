@@ -171,6 +171,22 @@ class GirafScriptParser
         return null;
     }
     
+    /**
+     * Retrieves an array of markers embedded within a single full marker. This
+     * function recursively retrieves all embedded markers.
+     * \param $input The full marker.
+     * \param &$arr Array to place embedded markers in.
+     * \param $level The level of embedding to process. This is used by the
+     * recursive mechanism and should NOT be altered.
+     * \return A 2-dimensional array of full markers. Index 0 contains the
+     * original marker, index 1 contains the first level of embedding markers
+     * and so on. The array is flattened, so you cannot immediately tell which
+     * parent levels a given marker may have belonged to, but they are inserted
+     * in sequence, so replacing occurrences from the bottom up while following
+     * an increasing index should bring you through them all in sequence.
+     * \note It is recommended to use getEmbeddedMarkers instead. It wraps this
+     * function in a simpler interface.
+     */
     public static function getEmbeddedMarkersRec($input, &$arr, $level = 0)
     {
         echo "Level $level" . PHP_EOL;
@@ -211,80 +227,9 @@ class GirafScriptParser
      */
     public static function getEmbeddedMarkers($input)
     {
-        var_dump($input);
-    
-        // Level of embedding we are working on. We start at one less than zero
-        // so the while loop automatically takes the top marker without static
-        // code.
-        $level = -1;
-        
-        // So far, empty array of markers.
-        $markers = array();
-        
-        // The incomplete array contains positions from $input for the start of
-        // embedded markers. The positions are used to reconstruct a full
-        // embedded marker after its own children have been processed fully.
-        $incomplete_markers = array();
-        
-        // Set this to true when we've reached a final spot. Mostly to secure
-        // the method for unsafe input values (missing end markers).
-        $done = false;
-        
-        // Length of the input marker. Used together with $done to bail if the
-        // $input was improperly balanced.
-        $input_len = strlen($input);
-        
-        // Registers our position within the $input marker.
-        $position = 0; // Skip the first marker.
-        
-        // We continue until something marks us as done or we have passed the
-        // final character of the input string.
-        while (!$done && $position < $input_len)
-        {
-            // Find the starting position of a possible embedded point.
-            $start = strpos($input, '${', $position);
-            // Find the position of the next ending mark.
-            $end = strpos($input, "}", $position);
-            if ($start === false)
-            {
-                echo "($position) No start found" . PHP_EOL;
-                var_dump($level, $position, $input);
-            }
-            if (!$end) echo "($position) No end found!" . PHP_EOL;
-
-            // Start tag is closer than end tag. Increase nesting.
-            if ($start < $end && !(false === $start))
-            {
-                $level++;
-                // Register the position of the embed start.
-                $incomplete_markers[$level] = $start;
-                echo "($position) Increasing level to $level" . PHP_EOL;
-                $position = $start + 1;
-                echo "($position) Fragment: " . substr($input, $start, 5) . PHP_EOL;
-            }
-            else
-            {
-                $a_marker = substr($input, $incomplete_markers[$level], $end+1);
-                // End tag is closer. Reduce level.
-                $level--;
-                // Add the now-complete marker-with-embeds to the array.
-                $markers[$level][] = $a_marker;
-                echo "Added $a_marker." . PHP_EOL;
-                echo "Decreasing level to $level" . PHP_EOL;
-                $position = $end + 1;
-                echo "($position) Fragment: " . substr($input, $position-$end, 5) . PHP_EOL;
-            }
-            
-            // If we're at square one, we're done.
-            if ($level < 0)
-            {
-                // $new_marker = substr($input, $body_start, $position + strlen($endMark));
-                // If we end up at level 0 again, we're done. Fully. Badam. Return the substring.
-                $done = true;
-            }
-        }
-        
-        return $markers;
+        $arr = array();
+        self::getEmbeddedMarkersRec($input, $arr, 0);
+        return $arr;
     }
     
     /**
