@@ -95,14 +95,20 @@ abstract class GirafRecord
      * Returns the name of the table associated with this record type. Must be
      * overridden in subclasses where they define their source table.
      */
-    public abstract function getSourceTable();
+    public static function getSourceTable()
+    {
+        return null;
+    }
     
     /**
      * Returns the name of the primary key on the database table for this record
      * type.
      * \return The primary key's field name as it is found in the database.
      */
-    public abstract function getPrimaryKey();
+    public static function getPrimaryKey()
+    {
+        return "id";
+    }
     
     /**
      * Sets the class' source table information, field data and such.

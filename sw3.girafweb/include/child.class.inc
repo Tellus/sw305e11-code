@@ -13,12 +13,12 @@ class GirafChild extends GirafRecord
      * \return A GirafDevice associated with the child, or null.
      * \todo{Write the function}
      */
-    public function getDevice()
+    public static function getDevice()
     {
         return null;
     }
     
-    public function getPrimaryKey()
+    public static function getPrimaryKey()
     {
         return "profileId";
     }

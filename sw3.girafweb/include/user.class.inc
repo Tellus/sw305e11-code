@@ -35,12 +35,12 @@ class GirafUser extends GirafRecord
      */
     const STATUS_HIDDEN = 4;
     
-    public function getSourceTable()
+    public static function getSourceTable()
     {
         return TABLE_USERS;
     }
     
-    public function getPrimaryKey()
+    public static function getPrimaryKey()
     {
         return "userId";
     }

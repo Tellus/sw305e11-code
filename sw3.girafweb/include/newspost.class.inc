@@ -6,12 +6,12 @@ require_once(__DIR__ . "/group.class.inc");
 
 class GirafNewsPost extends GirafRecord
 {
-    public function getPrimaryKey()
+    public static function getPrimaryKey()
     {
         return "newsId";
     }
     
-    public function getSourceTable()
+    public static function getSourceTable()
     {
         return TABLE_NEWSPOSTS;
     }
