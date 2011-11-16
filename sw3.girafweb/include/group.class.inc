@@ -7,12 +7,12 @@ require_once(__DIR__ . "/record.class.inc");
  */
 class GirafGroup extends GirafRecord
 {
-    public static function getSourceTable()
+    public function getSourceTable()
     {
         return TABLE_GROUPS;
     }
     
-    public static function getPrimaryKey()
+    public function getPrimaryKey()
     {
         return "groupId";
     }
