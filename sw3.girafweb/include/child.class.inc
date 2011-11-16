@@ -39,7 +39,42 @@ class GirafChild extends GirafRecord
     }
 	
 	public static function getChildsAbilities($childId)
+	{
+		$result = sql_helper::selectQuery("SELECT definitionName FROM kidsProfile_abilities WHERE profileKey=$childId");
+		$allArray = GirafChild::getAllAbilities();
+        if(!$result) return null; //error
+		
+		$resultArray = Array();
+		$iter=0;		
+		while ($row = $result->fetch_assoc())
+		{
+			$resultArray[$iter] = $row["definitionName"];
+			$iter++;
+		}
+		
+		foreach($allArray as $key=>$value)
+		{
+			$isInArray = array_search($key, $resultArray);
+			if(!($isInArray==false))
+			{
+				$value = true;
+			}
+		}
+		return $resultArray;
+	}
+	public static function getAllAbilities()
+	{
+		$result = sql_helper::selectQuery("SELECT * FROM  abilityDefinitions");
 	
+        if(!$result) return null; //error
+		
+		$resultArray = Array();    
+		while ($row = $result->fetch_assoc())
+		{
+			$resultArray[$row["definitionName"]] = false;
+		}
+		return $resultArray;
+	}
 
 }
 
