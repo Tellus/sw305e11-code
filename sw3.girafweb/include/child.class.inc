@@ -38,9 +38,9 @@ class GirafChild extends GirafRecord
         return parent::getInstance($childId);
     }
 	
-public static function getChildsAbilities($childId)
+	public static function getChildsAbilities($childId)
 	{
-		$result = sql_helper::selectQuery("SELECT definitionName FROM kidsProfile_abilities WHERE profileKey=$childId");
+		$result = sql_helper::selectQuery("SELECT definitionName FROM ". TABLE_KIDSPROFILE_ABILITIES ." WHERE profileKey=$childId");
 		$allArray = GirafChild::getAllAbilities();
         if(!$result) return null; //error
 		
@@ -66,7 +66,7 @@ public static function getChildsAbilities($childId)
 	}
 	public static function getAllAbilities()
 	{
-		$result = sql_helper::selectQuery("SELECT * FROM  abilityDefinitions");
+		$result = sql_helper::selectQuery("SELECT * FROM ". TABLE_ABILITY_DEFINITIONS);
 	
         if(!$result) return null; //error
 		
@@ -78,6 +78,38 @@ public static function getChildsAbilities($childId)
 		}
 
 		return $resultArray;
+	}
+	public static function commitAbilityChange($ID, $oldAbilities, $newAbilities)
+	{
+		$aDQuery = sql_helper::selectQuery("SELECT * FROM ". TABLE_ABILITY_DEFINITIONS);
+		
+		$abilityDefinition = Array();    
+		while ($row = $aDQuery->fetch_assoc())
+		{
+			$abilityDefinition[$row["definitionId"]] = $row["definitionName"];
+		}
+	foreach($abilityDefinition as $key=>$value)
+	{
+		echo "$key=>$value</br>";
+	}
+		
+		foreach($newAbilities as $key=>$value)
+		{
+			if(!($oldAbilities[$key] == $newAbilities[$key]))
+			{
+
+				$definitionKey = array_search($key, $abilityDefinition);
+			echo "$definitionKey</br>";
+				if($newAbilities[$key]==true)
+				{
+					sql_helper::insertQuery("INSERT INTO " . TABLE_PROFILE_ABILITIES . " (profileKey, definitionKey) VALUES ('$ID', '$definitionKey')");
+				}
+				else
+				{
+					sql_helper::updateQuery("DELETE FROM " . TABLE_PROFILE_ABILITIES . " WHERE profileKey = '$ID' AND definitionKey = '$definitionKey')");
+				}
+			}
+		}
 	}
 
 }

@@ -1,109 +1,219 @@
 <?php
+
+require_once(__DIR__ . "/user.class.inc");
 require_once(__DIR__ . "/record.class.inc");
-require_once(__DIR__ . "/child.class.inc"); 
-
 /**
-* This class handles requist from the interface about the Child 
+* This class handles requist from the interface about the User 
 */
-class childProfile
+class userProfile
 {
-	const CAN_DRAG_AND_DROP = "canDragAndDrop";
-	const CAN_HEAR = "canHear";
-	const CAN_ANALOG_TIME = "canAnalogTime";	
-	const CAN_DIGITAL_TIME = "canDigitalTime";
-	const CAN_READ = "canRead";
-	const REQURE_LARGE-_BUTTONS = "requiresLargeButtons";
-	const CAN_SPEAK = "canSpeak";
-	const CAN_NUMBERS = "canNumbers";
-	const CAN_USE_KEYBOARD = "canUseKeyboard";
-	const HAS_BAD_VISION = "hasBadVision";
-	const REQURE_SIMPLE_VE = "requireSimpleVisualEffects";
 	
-	private $child;
-	private $childAbilities = Array();
-
-
+	private $user;
 	
-
 	/**
-	* find the child from ID
-	* \param dette skal være et gyldigt childId 
-	*/	
+	* \param Takes the userID to identify the user
+	*/
 	public function __construct($ID)
 	{
-		$this->child = GirafChild::getGirafChild($ID);
-		$this->childAbilities = GirafChild::getChildsAbilities($ID);
+		//get 
+		$this->user = GirafUser::getGirafUser($ID);		
 	}
-	
-	
-	
-	//---------------get----------------\\ 
+	//--------gets---------\\
 	
 	/**
-	* get the childs name
-	* \return Returns the childs name
+	* \return Returns the users username
 	*/
-	public function getChildName()
+	public function getUsername()
 	{
-		return $child->profileName;
+		$temp = $this->user;
+		return $temp->username;
+		
 	}
 	
 	/**
-	* \return Returns the childs age
+	* \return Returns the users mail
 	*/
-	public function getChildAge()
+	public function getUserMail()
 	{
-		return $child->profileBirthday;
+		$temp = $this->user;
+		return $temp->userMail;
 	}
 	
 	/**
-	*
+	* \return Returns the users fullname
 	*/
-	public function getAbilitiesArray()
+	public function getFullName()
 	{
-		return $this->childAbilities;
-	}
-	
-
-	//---------------set-----------------\\
-	
-	/**
-	* \param Takes the name of the child 
-	*/
-	public function setChildName($value)
-	{
-		$child->__set('profileName', $value);
+		$temp = $this->user;
+		return $temp->fullname;	
 	}
 	
 	/**
-	* \param Takes the birthday of the child 
+	* this is an int what to do?
+	* \return Returns the users role
 	*/	
-	public function setChildAge()
+	public function getUserrole()
 	{
-		$child->__set('profileBirthday', $value);
+		$temp = $this->user;
+		return $temp->userRole;
 	}
-	
-	public function setCanDragAndDrop($newValue)
-	{
-		$this->childAbilities["CAN_DRAG_AND_DROP"] = $newValue;
-		$this->abilityChange = true;
-	}
-	
-	
-	$key=>$value
-	//--------------save-----------------\\
 
+	/**
+	* \return Returns the current Online status
+	*/	
+	public function getUserOnlineStatus()
+	{
+		$temp = $this->user;
+		$result	= $temp->getOnlineStatus();	
+		//handle userstatus
+		return $result;
+	}
+	
+	// ---------set--------\\
+
+	/**
+	* Change the users username
+	* \param Takes the users Username 
+	*/	
+	public function setUsername($value)
+	{
+		$temp = $this->user;
+		$temp->__set('username', $value);
+	}
+	
+	/**
+	* Change the users e-mail
+	* \param Takes the e-mail 
+	*/
+	public function setUserMail($value)
+	{
+		$temp = $this->user;
+		$temp->__set('userMail', $value);
+	}
+
+	/**
+	* Change the users fullname
+	* \param Takes the fullname 
+	*/
+	public function setFullName($value)
+	{
+		$temp = $this->user;
+		$temp->__set('fullname', $value);
+	}
+	
+	/** $value should be int to do????
+	* Change the users role
+	* \param Takes the userole  
+	*/
+	public function setUserrole($value)
+	{
+		$role = $this->identifyRole($value);
+		$temp = $this->user;
+		$temp->__set('userRole', $value);
+	}
+
+	/**
+	* Changes the Online status of the user
+	*/
+	public function setUserOnlineStatus($statusvalue)
+	{
+		$bool = false;
+		$status = $this->identifyStatus($statusvalue);
+		if ($status != null)
+		{
+			$temp = $this->user;
+			$bool = $temp->setOnlineStatus($status);
+		}
+		if($status==null ||$bool==false)
+		{
+			//error handling
+		}
+		//evt return ny status
+	}
+	
+	
+	//-------------others-----------------\\
+	private function identifyRole($role)
+	{
+		$admin = 1;
+		$moderator = 2;    
+		$beparent = 3;
+		$none= -1;
+	
+		if ($role == $admin)
+		{
+			return $admin;
+		}
+		elseif($role == $moderator)
+		{
+			return $moderator;
+		}
+		elseif($role == $beparent)
+		{
+
+			return $beparent;
+		}
+		else 
+		{
+			return none;
+		}
+	}
+	
+	private function identifyStatus($status)
+	{
+	    $statusOnline = 0;
+		$statusOffline = 1;
+		$statusAway = 2;
+		$statusBusy = 3;
+		$statusHidden = 4;
+		
+		if($status == $statusOnline)
+		{
+			return $statusOnline;
+		}
+		elseif($status == $statusOffline) 
+		{
+			return $statusOffline;
+		}
+		elseif($status == $statusAway) 
+		{
+			return $statusAway;
+		}
+		elseif($status == $statusBusy) 
+		{
+			return $statusBusy;
+		}
+		elseif($status == $statusHidden) 
+		{
+			return $statusHidden;
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	//to handle
+	public function identifyUserGroup()
+	{
+		$groupArray = $user->getUserGroups();
+	}
+	
+	//to handle addToGroup($gId) from user class
+
+	
+	//----------save------------\\
 	/**
 	* 
 	*/
 	public function saveChanges()
 	{
-		$child->commit();
+		$temp = $this->user;
+		$temp->commit();
 	}
-	//--------------others----------------\\
-
-	
 	
 }
+
+
 
 ?>
