@@ -21,12 +21,12 @@ class vdec extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invoke()
-    {
-        // echo "VDEC invoked " . $this->marker . PHP_EOL;
-        // We need to have the class initialised.
+    public function invokeNoReplace()
+    {/*
+        echo "VDEC invoked " . $this->marker . PHP_EOL;
+        var_dump($this->marker);*/
         $this->parent->setVar($this->varName, $this->varValue);
-        $this->replaceMarker(""); // Remove the marker.
+        return ""; // Remove the marker.
     }
     
     public function getParameters()

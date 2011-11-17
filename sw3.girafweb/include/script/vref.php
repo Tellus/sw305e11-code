@@ -31,7 +31,7 @@ class vref extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invoke()
+    public function invokeNoReplace()
     {
         // echo "vref invoked" . PHP_EOL;
         // We need to have the class initialised.
@@ -78,8 +78,8 @@ class vref extends GirafScriptCommand
             $text = $this->parent->getVar($this->varName);
         }
         
-        if ($text == null) $this->replaceMarker("NULL");
-        else $this->replaceMarker($text);
+        if ($text == null) return "NULL";
+        else return $text;
     }
     
     public function getParameters()

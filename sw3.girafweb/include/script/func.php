@@ -4,8 +4,30 @@ namespace Giraf\Script;
 
 require_once("base.php");
 
+class UnknownClassException extends \GirafScriptException
+{
+    function __construct($class)
+    {
+        parent::__construct("The class '$class' is undefined or unknown.");
+    }
+}
+
+class UnknownFuncException extends \GirafScriptException
+{
+    function __construct($func, $class)
+    {
+        parent::__construct("The function '$func' was not found in the class '$class'.");
+    }
+}
+
 /**
- * 
+ * The FUNC marker command runs static class methods and saves the return value
+ * in the parser's environment variables with a special value. Using FUNC by
+ * itself in a template should not make sense. Instead, use it to produce arrays
+ * for LOOP or values for VREF and VDEC.
+ * In practicality, this is done in two different steps by FUNC. FUNC will
+ * register the return value with setVar() with a random variable name. That
+ * name will be returned within a VREF marker by func.
  */
 class func extends GirafScriptCommand
 {
@@ -20,29 +42,34 @@ class func extends GirafScriptCommand
      * \param A marker string or array as defined in GirafScriptCommand.
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
-     */
-    public function invoke()
+     */    
+    public function invokeNoReplace()
     {
         // echo "FUNC invoked" . PHP_EOL;
         // We need to have the class initialised.
         if (class_exists($this->cmdClass))
         {
-            echo "Requested class does not exist." . PHP_EOL;
-            $method = $input[2]; // We need to have this method available on the class.
             if (method_exists($this->cmdClass, $this->method))
             {
                 // We need to return the modified body. Since the body *is* the
                 // marker, we simply return the result of the function call.
-                return call_user_func_array(array($this->cmdClass, $this->method), $this->parameters);
+                $tmpname = uniqid();
+                $retval = call_user_func_array(array($this->cmdClass, $this->method), $this->parameters);
+                
+                $this->parent->setVar($tmpname, $retval);
+                
+                // var_dump($tmpname, $retval);
+                
+                return $tmpname;
             }
             else
             {
-                $this->replaceMarker("The method '" . $this->method . "' does not exist in the class.");
+                throw new UnknownFuncException($this->method, $this->cmdClass);
             }
         }
         else
         {
-            $this->replaceMarker("Requested class '" . $this->cmdClass . "' does not exist.");
+            throw new UnknownClassException($this->cmdClass);
         }
     }
     

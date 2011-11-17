@@ -4,10 +4,18 @@ namespace Giraf\Script;
 
 require_once("base.php");
 
+class BadInputTypeException extends \GirafScriptException
+{
+    function __construct($input)
+    {
+        parent::__construct("The type '" . gettype($input) . "' is not a valid array input.");
+    }
+}
+
 /**
  * 
  */
-class sloop extends GirafScriptCommand
+class loop extends GirafScriptCommand
 {
     public $iter;
     public $iterName;
@@ -21,60 +29,61 @@ class sloop extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invoke()
+    public function invokeNoReplace()
     {
-        $iter = $this->iter;
-        $name = $this->iterName;
-        if ($this->iter == null)
+        if (!is_array($this->iter)) throw new BadInputTypeException($this->iter);
+        
+        // Parent stuff. Shorthands.
+        $parent = $this->parent;
+        $file = $parent>file_contents;
+        $curMarker = $this>full_marker;
+        
+        // Retrieved the marker area we're supposed to replace. Balancing is
+        // not exactly an issue, but it's a great quick function for getting
+        // this delimited text.
+        $body = $this->getBalancedText($file, $curMarker, '${ENDLOOP}', 0, true);
+        
+        // Parse $body by normal parsing rules.
+        
+        // Special rules apply to variables within loops to make it easier for
+        // designers to iterate. In particular, a special variable is made
+        // available, akin to the last parameter in a PHP foreach loop. This
+        // variable must be updated after each loop to reflect the next entry in
+        // the list. The most effective way to do this is to have the LOOP
+        // class (this class) run and replace the markers by itself and then
+        // return the final output.
+        
+        // Loop over the list.
+        foreach ($this->iter as $loop)
         {
-            $this->replaceMarker("The array '$name' is not defined.");
-            return;
-        }
-        
-        // Remember the index so we can properly reverse every time we re-loop.
-        $startIndex = $this->parent->getMarkerIndex();
-        
-        // The prefab is the base template for the contents between the two loop
-        // markers.
-        $prefab = $this->parent->file_contents;
-        $curMark = $this->parent->getCurrentMarker();
-        $prefab = substr($prefab, $curMark["start"], strpos($prefab, '${ENDLOOP}') - strlen('${ENDLOOP}'));
-        
-        var_dump($prefab);
-        throw new \Exception();
-        
-        while ('${ENDLOOP}' != $marker = $this->parent->getNextMarker())
-        {
-        
-        }
-    
-        // echo "FUNC invoked" . PHP_EOL;
-        // We need to have the class initialised.
-        if (class_exists($this->cmdClass))
-        {
-            echo "Requested class does not exist." . PHP_EOL;
-            $method = $input[2]; // We need to have this method available on the class.
-            if (method_exists($this->cmdClass, $this->method))
-            {
-                // We need to return the modified body. Since the body *is* the
-                // marker, we simply return the result of the function call.
-                return call_user_func_array(array($this->cmdClass, $this->method), $this->parameters);
-            }
-            else
-            {
-                $this->replaceMarker("The method '" . $this->method . "' does not exist in the class.");
-            }
-        }
-        else
-        {
-            $this->replaceMarker("Requested class '" . $this->cmdClass . "' does not exist.");
+            // Set the single loop instance into the declared var name for it.
+            // Once we run markers in here, they can reference it without issue.
+            $parent->setVar($this->iterName, $loop);
+            // Body will be recursively replaced.
+            $parent->parseTemplate($body);
         }
     }
     
     public function getParameters()
     {
-        // We just need one parameter. An array.
-        $this->iter = $this->parent->getVar($this->marker[1]);
+        // The first loop parameter will *always* be considered a variable.
+        $iter = $this->marker[1];
+
+        while (!is_array($iter))
+        {
+            // Recursively follow the variable references until we find a proper
+            // array.
+            $prev_iter = $iter;
+            $iter = $this->parent->getVar($iter);
+            if ($iter === $prev_iter || $iter === null)
+            {
+                $iter = null;
+                break;
+            }
+        }
+        
+        var_dump($iter);
+
         $this->iterName = $this->marker[1];
     }
 }

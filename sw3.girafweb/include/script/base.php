@@ -2,6 +2,8 @@
 
 namespace Giraf\Script;
 
+require_once(__DIR__ . "/../errors.class.inc");
+
 /**
  * Base class for all girafscript.php commands. This is to satisfy the state
  * design pattern, and because I likes it!
@@ -17,6 +19,11 @@ abstract class GirafScriptCommand
      * The passed input marker. Among other things.
      */
     public $marker;
+    
+    /**
+     * The full marker as it appeared in the template file.
+     */
+    public $full_marker;
 
     /**
      * Array of the parameters in the marker. Depending on script, this is
@@ -33,7 +40,20 @@ abstract class GirafScriptCommand
      * tags.
      * \return The full body, modified as needed by the script.
      */
-    public abstract function invoke();
+    public final function invoke()
+    {
+        "Invoking: ";
+        $this->replaceMarker($this->invokeNoReplace());
+    }
+    
+    /**
+     * Similar to invoke, but always returns the value it intended to replace
+     * as the return value.
+     * \return The string that was intended to replace the marker area. This
+     * string should be usable by GirafScriptParser to replace file contents
+     * without modification.
+     */
+    public abstract function invokeNoReplace();
     
     /**
      * Sets the current marker in use for the script instance.
@@ -45,20 +65,14 @@ abstract class GirafScriptCommand
     {
         if (is_array($marker))
         {
-            var_dump($marker);
-            $this->marker = $marker;
+            throw new \Exception("\$marker must be passed as a full string now.");
         }
-        elseif (is_a($marker, "string"))
+        elseif (is_string($marker))
         {
-            // Handling nesting here!
-            $embedded = $this->parent->getNestedMarkers($marker);
-            if (count($embedded) > 0)
-            {
-                throw new Exception("Nesting is not yet implemented.");
-            }
             $this->marker = $this->parent->parseMarker($marker);
+            $this->full_marker = $marker;
         }
-        else throw new \Exception("Invalid marker type '$marker' passed.");
+        else throw new \Exception("Invalid marker type '" . get_class($marker) . "' passed.");
         
         // Draw out the parameters.
         $this->getParameters();
@@ -76,7 +90,7 @@ abstract class GirafScriptCommand
     {
         if (!isset($toRepl))
         {
-            $toRepl = $this->parent->getCurrentMarker();
+            // $toRepl = $this->parent->getCurrentMarker();
             $toRepl = $toRepl["marker"];
         }
         // echo "Replacing '$toRepl' with '$repl'.<br/>" . PHP_EOL;

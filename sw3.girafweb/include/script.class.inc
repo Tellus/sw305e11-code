@@ -4,6 +4,7 @@
 require_once(__DIR__ . "/config.php");
 require_once(__DIR__ . "/sql_helper.inc");
 require_once(__DIR__ . "/settings.func.inc");
+require_once(__DIR__ . "/util.func.inc");
 
 /**
  * The GirafScriptParser is responsible for properly parsing girafscript.web
@@ -17,6 +18,13 @@ require_once(__DIR__ . "/settings.func.inc");
  */
 class GirafScriptParser
 {
+    /**
+     * String of characters considered reserved for the purposes of GirafScript.
+     * Each of the characters in the string will be escaped during serialization
+     * and likened procedures.
+     */
+    public const RESERVED_CHARS = ';:}{=!<>';
+
     /**
      * Path to the template file being parsed.
      */
@@ -55,7 +63,7 @@ class GirafScriptParser
      * Array of variables used within a single template parse. Currently used by
      * VREF and VDEC, but could have uses elsewhere.
      */
-    protected $templateVars;
+    public $templateVars;
     
     /**
      * Constructs a new parser, prepared to run through a particluar page of
@@ -72,6 +80,30 @@ class GirafScriptParser
         if (!file_exists("$root_dir/$theme/$page.tpl")) return false;
 
         $this->loadFile("$root_dir/$theme/$page.tpl");
+    }
+    
+    /**
+     * Returns the class' reserved symbols as a requested type.
+     * \param $as The type of return value desired. Current valid values are
+     * "array" and "string".
+     * \trhwos Exception If the passed type request is invalid, a generic
+     * Exception is thrown.
+     */
+    public static function getReservedSymbols($as = "array")
+    {
+        // '$|;:}{'
+        if (strtolower($as) === "array")
+        {
+            return str_spli(self::RESERVED_CHARS);
+        }
+        elseif (strtolower($as) === "string")
+        {
+            return self::RESERVED_CHARS;
+        }
+        else
+        {
+            throw new Exception("Bad type requested.");
+        }
     }
     
     public function loadFile($file)
@@ -172,6 +204,139 @@ class GirafScriptParser
     }
     
     /**
+     * Gets a template var and deserializes it if the markers for such a state
+     * exists. Functions can call this function to always get PHP objects back
+     * from the vars.
+     * \sa GirafScriptParser:getDeserializedVar()
+     * \sa GirafScriptParser:getSerializedVar()
+     * \sa GirafScriptParser:setSerializedVar()
+     * \sa GirafScriptParser:setDeserializedVar()
+     */
+    public function getDeserializedVar($key)
+    {
+        if (!array_has_key($key)) return null;
+        
+        $retval = $this->templateVars[$key];
+        
+        $startcheck = strpos("__", $retval);
+        if (self::isSerializedVar($retval)))
+        {
+            $retval = unserialize(substr($retval), 2, strlen($retval) - 4);
+            return $retval;
+        }
+        else
+        {
+            return $retval;
+        }
+    }
+    
+    /**
+     * Retrieves a variable from the template environment variables and
+     * serializes it if it isn't already.
+     * \param $key Name of the variable you want to retrieve.
+     * \return Variable from the env vars, ensured to be serialized. Null is
+     * returned if the key has no value.
+     */
+    public function setSerializedVar($key, $val)
+    {
+        if (self::isSerializedVar($val)) $this->setVar($key, $val);
+        else $this->setVar($key, "__" . serialize($val) . "__");
+    }
+    
+    /**
+     * Sets a value in the template environment, and serializes it if it is not
+     * already.
+     * \param $key Name of the variable you want to set.
+     * \param $val Value you want to store.
+     * \return Always returns null.
+     */
+    public function setDeserializedVar($key, $val)
+    {
+        if (self::isSerializedVar($val)) $this->setVar($key, unserialize($val));
+        else $this->setVar($key, $val);
+    }
+    
+    /**
+     * Sets a value in the template environment, and desserializes it if it is
+     * in a serialized state.
+     * \param $key Name of the variable you want to set.
+     * \param $val Value you want to store.
+     * \return Always returns null.
+     */
+    public function getSerializedVar($key)
+    {
+        $retval = $this->getVar($key);
+        
+        if (self::isSerializedVar($retval)) return $retval;
+        else return unserialize($retval);
+    }
+    
+    /**
+     * Checks whether the passed var is likely to be a GirafScript-serialised
+     * object and returns accordingly.
+     * \param $val The value to be checked.
+     * \return True if the value seems to be serialized by GirafScript, false
+     * otherwise.
+     */
+    public static function isSerializedVar($val)
+    {
+        return (strrpos($val, "__", 2) !== false && strrpos($val, "__", -2) !== false) ? true : false;
+    }
+    
+    /**
+     * A GirafScript-specific wrapper for PHP's serialize construct. It performs
+     * escaping of the input text.
+     * \param $val The object to serialize.
+     * \return A serialized version of the input.
+     */
+    public static function serialize($val)
+    {
+        $val
+    }
+    
+    /**
+     * Escapes a string to the GirafScript standard.
+     * \param $val String to escape.
+     * \return Escaped string.
+     * \todo Implement support for escaped escape chars (\).
+     * \sa GirafScriptParser::unescapeString()
+     */
+    public static function escapeString($val)
+    {
+        $toRepl = self::getReservedSymbols();
+        
+        $with = array();
+        
+        foreach($toRepl as $char)
+        {
+            $with[] = "\\$char";
+        }
+
+        return str_replace($toRepl, $with, $val);
+    }
+    
+    /**
+     * Unescapes a (previously) escaped GirafScript string.
+     * \param $val String to unescape.
+     * \return Unescaped string.
+     * \todo Implement support for escaped escape chars (\).
+     * \sa GirafScriptParser::escapeString()
+     */
+    public static function unescapeString($val)
+    {
+        $with = self::getReservedSymbols();
+        
+        $toRepl = array();
+        
+        foreach($with as $char)
+        {
+            $toRepl[] = "\\$char";
+        }
+        
+        return str_replace($toRepl, $with, $val);
+    }
+    
+    /**
      * Retrieves an array of markers embedded within a single full marker. This
      * function recursively retrieves all embedded markers.
      * \param $input The full marker.
@@ -189,7 +354,7 @@ class GirafScriptParser
      */
     public static function getEmbeddedMarkersRec($input, &$arr, $level = 0)
     {
-        echo "Level $level" . PHP_EOL;
+        // echo "Level $level" . PHP_EOL;
     
         // Secure array contents.
         if ($level === 0 && !isset($arr)) $arr = array();
@@ -201,12 +366,12 @@ class GirafScriptParser
         
         while(false !== $subset = self::getBalancedText($input, '${', '}', $position+2, true))
         {
-            var_dump($subset);
+            // var_dump($subset);
             self::getEmbeddedMarkersRec($subset, $arr, $level+1);
             $position = strpos($input, $subset, $position) + strlen($subset);
         }
         
-        var_dump($subset);
+        // var_dump($subset);
         
         if ($level > 0)
         {
@@ -215,6 +380,59 @@ class GirafScriptParser
         
         $arr[$level][] = $input;
         return $arr;
+    }
+    
+    /**
+     * Flattens an array from getEmbeddedMarkers resulting in a one-dimensional
+     * array that describes the proper order of execution for the full,
+     * original marker.
+     * \param $embedArray The array from getEmbeddedMarkers to process.
+     * \param $sort_order How you want the data returned. MARKER_ORDER_SET will
+     * create an array where lower-level markers are grouped right before their
+     * parent, while MARKER_ORDER_LEVEL will simply flatten the array, backwards
+     * to front.
+     * \return A one-dimensional array formatted as specified by $sort_order.
+     */
+    public static function getMarkerExecutionOrder($embedArray, $sort_order)
+    {
+        if ($sort_order == MARKER_ORDER_LEVEL)
+        {
+            $new_array = array();
+            
+            // A simple bottom-up approach is to reverese the array and traverse
+            // it.
+            $embedArray = array_reverse($embedArray);
+            
+            foreach($embedArray as $levelArray)
+            {
+                $levelArray = array_reverse($embedArray);
+                foreach ($levelArray as $marker)
+                {
+                    $new_array[] = $marker;
+                }
+            }
+            
+            return $new_array;
+        }
+        elseif ($sort_order == MARKER_ORDER_SET)
+        {
+            // How to: Reverse recursive handling of the levels.
+            // Where x<y, while handling level x, you constantly look through
+            
+            /**
+             * WHEN RUNNING THE MARKERS FROM THE ARRAY, DO SO IN THIS WAY:
+             * FOR EACH LOWER LEVEL YOU PROCESS, REPLACE EVERY INSTANCE OF THE
+             * REPLACED MARKER THROUGHOUT THE HIGHER LEVELS UNTIL YOU REACH THE
+             * TOP. THIS WAY YOU WILL NOT LOSE SEARCH CAPABILITIES DUE TO 
+             * PROCESSED VERSUS UNPROCESSED MARKERS.
+             * SO WHEN PROCESSING LEVEL 3, CHANGE ALL MARKERS IN BOTH LEVEL 2
+             * AND 1 WHEN PROCESSING A SINGLE MARKER. QED.
+             */
+        }
+        else
+        {
+            throw new Exception("Invalid sort order passed.");
+        }
     }
     
     /**
@@ -348,7 +566,10 @@ class GirafScriptParser
         // This basic regex pattern retrieves all regular characters between
         // irregular characters. More simply: alphanumerics, not curly braces.
         // $marker_reg = '/(.+)(?:[:,]{0,1})/';
-        $marker_reg = '/([A-Za-z0-9=!<>]+)/';
+        // $marker_reg = '/([A-Za-z0-9=!<>]+)/';
+        // This newest regex will match any alphanumeric character, and any of
+        // the listed special characters if they are escaped.
+        $marker_reg = '/((\w|\\[;:}{=!<>])+)/';
         
         $matches = array();
         $matches[0] = $cmd;
@@ -360,17 +581,129 @@ class GirafScriptParser
     }
     
     /**
-     * Determines necessary script being requested, ensures it is defined, calls
-     * it and returns the script's return value. This should be called by
-     * the parser for each marker block that needs parsing.
-     * \param $marker A marker array prepared by parseMarker().
+     * Retrieves and invokes the script handler for each marker found in the
+     * input, in correct order.
+     * 
      * \sa GirafScriptParser::parseMarker()
      */
     public function runMarker($marker)
     {
-        // Calls the class method with all the parmeters in sequence.
-        $hndl = $this->getScriptHandler($marker[0]);
-        call_user_func_array(array($newU, "invoke"), $marker);
+        // Quick secure.
+        if (is_array($marker)) $marker = $marker["marker"];
+
+        if (substr($marker, 0, 2) != '${' ||  substr($marker, strlen($marker)-1, 1) != '}')
+            throw new Exception("Invalid marker passed.");
+        
+        // Get all embedded markers.
+        $marks = self::getEmbeddedMarkers($marker);
+        
+        // Atomic?
+        if(count($marks) == 1)
+        {
+            // Just run it if atomic.
+            $marker_parsed = $this->parseMarker($marker);
+            $handler = $this->getScriptHandler($marker_parsed[0]);
+            if ($handler === false) return false;
+            else
+            {
+                // var_dump($marker);
+                // echo "<br/>";
+                $handler->setMarker($marker);
+                try
+                {
+                    $toReturn = $handler->invokeNoReplace();
+                    return $toReturn;
+                }
+                catch (GirafScriptException $e)
+                {
+                    // return "ERROR!";
+                    return $e;
+                }
+            }
+        }
+        else
+        {
+            // Run embedded markers.
+            // 
+            return $this->runEmbeddedMarkers($marks);
+        }
+    }
+    
+    /**
+     * Sibling function to runMarker, this function handles the embedded
+     * scenario. The added function overhead is to make the code more readable.
+     * \return Array with two indices. 0: the original entire marker, 1: the
+     * new content for that marker.
+     */
+    public function runEmbeddedMarkers($marks)
+    {
+        // Now, start from the bottom of the array and work through each marker
+        // and level in sequence, each time replacing one occurrence in every
+        // higher level.
+        
+        $marks = array_reverse($marks); // Simplest way of starting at the bottom.
+        
+        // echo "Running entire mark group:<br/>";
+        // var_dump($marks);
+
+        foreach ($marks as $index=>&$level)
+        {
+            foreach ($level as &$marker)
+            {
+                // echo "Running embedded marker $marker<br/>" . PHP_EOL;
+                $marker_parsed = $this->parseMarker($marker);
+                $handler = $this->getScriptHandler($marker_parsed[0]);
+                if ($handler === false)
+                {
+                    throw new Exception("Error handling for missing markers is also missing!");
+                    self::recursiveReplace($marks, $marker, "BAD", 1);
+                }
+                else
+                {
+                    try
+                    {
+                        $parsed_marker = $this->parseMarker($marker);
+                        $handler->setMarker($marker);
+                        $result = $handler->invokeNoReplace();
+                        // echo "Replacing $marker with $result throughout.";
+                        self::recursiveReplace($marks, $marker, $result, 1);
+                    }
+                    catch (GirafScriptException $e)
+                    {
+                        // echo "Replacing $marker with 'ERROR!' throughout.";
+                        self::recursiveReplace($marks, $marker, "ERROR!", 1);
+                        break 2;
+                    }
+                }
+            }
+        }
+        
+        $marks = array_reverse($marks);
+        
+        return $marks[0][0];
+    }
+    
+    /**
+     * Replaces a specific string throughout an array up to a specific number
+     * of times within each sub-array.
+     * \param $haystack The 2-dimensional array (array of array of strings) that
+     * contains the strings we want replaced.
+     * \param $find The string to seek out.
+     * \param $replace The replacement for the string sought out.
+     * \param $count Optional, the number of times to replace on each array index.
+     * \return The modified $haystack
+     */
+    public static function recursiveReplace(&$haystack, $find, $replace, $count = 1)
+    {
+        // For each sub-array...
+        foreach ($haystack as &$single)
+        {   // For each string in that sub-array...
+            foreach ($single as &$string)
+            {   // Up to 
+                if (strpos($string, $find) !== false)
+                    $string = str_replace($find, $replace, $string, $count);
+            }
+        }
     }
     
     /**
@@ -380,6 +713,14 @@ class GirafScriptParser
      */
     public function getScriptHandler($cmd)
     {
+        if (is_array($cmd))
+        {
+            // var_dump($this->parseMarker($cmd));
+            die();
+            $cmd = $this->parseMarker($cmd);
+            $cmd = $cmd["marker"];
+        }
+        
         // echo "Retrieving $cmd." . PHP_EOL;
         // By convention, all script classes are lower-case. To try and
         // segregate them from the rest of the code, we keep them in their own
@@ -545,50 +886,30 @@ class GirafScriptParser
     
     /**
      * Fully parses an input template and returns the newly generated content.
+     * \param Optionally the string to parse. If omitted, file_contents is used.
      * \return The modified file in its entirety, ripe for printage.
      */
-    public function parseTemplate($file = null)
+    public function parseTemplate(&$file = null)
     {
-        $pos = 0;
+        if (!isset($file)) $file = $this->file_contents;
+    
+        $markers = $this->getMarkers($file);
         
-        // While we have markers to process.
-        $this->currentMarker = -1;
-        while($marker = $this->getNextMarker())
+        foreach ($markers as $marker)
         {
-            // echo '(' . $this->currentMarker . '): ' . $marker["marker"] . "<br/>" . PHP_EOL;
-        
-            // echo "Handling " . $marker["marker"];
-            // Find the next marker.
-            // $pos = strpos($file, $marker, $pos + strlen($marker));
-            $pos = $marker["start"];
-            // Get an array version of the marker.
-            $markerArray = $this->parseMarker($marker["marker"]);
-            // Find a proper script handler instance (or create a new one).
-            $handler = $this->getScriptHandler($markerArray[0]);
+            $newText = $this->runMarker($marker);
 
-            $body_length = "";
-            
-            if ($handler != false)
-            {
-                // Give the instance a marker.
-                $handler->setMarker($markerArray);
-                
-                // echo "Calling $markerArray[0]";
-                // Invoke it. It has a parent reference and can work it as necessary.
-                $handler->invoke();   
-            }
-            elseif ($handler == false)
-            {
-                $debug_mark = str_replace('$', '', $marker["marker"]);
-                $errText = "<span class='giraferror'>The marker command '" . $debug_mark . "' is unknown</span>";
-                // echo "Replacing '" . $marker["marker"] . "' with '$errText'";
-                $this->file_contents = str_replace($marker["marker"], $errText, $this->file_contents);
-                continue;
-            }
+            // $this->file_contents = util::str_replace_once($marker["marker"], $newText, $this->file_contents);
+            $file = util::str_replace_once($marker["marker"], $newText, $file);
         }
         
         // At this point, $this->file_contents is hopefully fully replaced.
-        return $this->file_contents;
+        return $file;
     }
 } 
+
+// CONSTANTS!
+define("MARKER_ORDER_SET", 0);
+define("MARKER_ORDER_LEVEL", 1);
+
 ?>
