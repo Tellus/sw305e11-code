@@ -7,7 +7,7 @@ require_once(__DIR__ . "/record.class.inc");
 */
 class userProfile
 {
-	
+	private $id
 	private $user;
 	
 	/**
@@ -16,9 +16,15 @@ class userProfile
 	public function __construct($ID)
 	{
 		//get 
+		$this->id = $ID;
 		$this->user = GirafUser::getGirafUser($ID);		
 	}
 	//--------gets---------\\
+	
+	public function getUserId()
+		{
+			return $this->id;
+		}
 	
 	/**
 	* \return Returns the users username
