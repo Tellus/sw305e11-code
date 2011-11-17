@@ -103,6 +103,16 @@ class sql_helper
     {
         return self::_baseQuery($sql);
     }
+	
+	/**
+     * Performs an deletion query on the database.
+     * \param sql the <b>complete</b> query (including the DELETE). Will be escaped.
+     * \return The result of the query.
+     */
+    public static function deleteQuery($sql)
+    {
+        return self::_baseQuery($sql);
+    }
     
     /**
      * Proxy call to real_escape_string for the internal connection object.

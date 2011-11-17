@@ -1,219 +1,114 @@
 <?php
-
-require_once(__DIR__ . "/user.class.inc");
 require_once(__DIR__ . "/record.class.inc");
+require_once(__DIR__ . "/child.class.inc"); 
+
 /**
-* This class handles requist from the interface about the User 
+* This class handles requist from the interface about the Child 
 */
-class userProfile
+class childProfile
 {
+
+	private $id;
+	private $child;
+	private $oldChildAbilities;
+	private $childAbilities = Array();
+
+
+
 	
-	private $user;
-	
+
 	/**
-	* \param Takes the userID to identify the user
-	*/
+	* find the child from ID
+	* \param dette skal være et gyldigt childId 
+	*/	
 	public function __construct($ID)
 	{
-		//get 
-		$this->user = GirafUser::getGirafUser($ID);		
+		$this->id = $ID;
+		$this->child = GirafChild::getGirafChild($ID);
+		$this->childAbilities = GirafChild::getChildsAbilities($ID);
 	}
-	//--------gets---------\\
 	
-	/**
-	* \return Returns the users username
-	*/
-	public function getUsername()
+	
+	
+	//---------------get----------------\\ 
+	public function getId()
 	{
-		$temp = $this->user;
-		return $temp->username;
-		
+		return $this->id;
 	}
 	
 	/**
-	* \return Returns the users mail
+	* get the childs name
+	* \return Returns the childs name
 	*/
-	public function getUserMail()
+	public function getChildName()
 	{
-		$temp = $this->user;
-		return $temp->userMail;
+		$temp = $this->child;
+		return $temp->profileName;
 	}
 	
 	/**
-	* \return Returns the users fullname
+	* \return Returns the childs age
 	*/
-	public function getFullName()
+	public function getChildAge()
 	{
-		$temp = $this->user;
-		return $temp->fullname;	
+		$temp = $this->child;
+		return $temp->profileBirthday;
 	}
 	
 	/**
-	* this is an int what to do?
-	* \return Returns the users role
+	*
+	*/
+	public function getAbilitiesArray()
+	{
+		return $this->childAbilities;
+	}
+	
+
+	//---------------set-----------------\\
+	
+	/**
+	* \param Takes the name of the child 
+	*/
+	public function setChildName($value)
+	{
+		$temp = $this->child;
+		$temp->__set('profileName', $value);
+	}
+	
+	/**
+	* \param Takes the birthday of the child 
 	*/	
-	public function getUserrole()
+	public function setChildAge($value)
 	{
-		$temp = $this->user;
-		return $temp->userRole;
+		$temp = $this->child;
+		$temp->__set('profileBirthday', $value);
 	}
+	
+	public function setAbilities($newValue)
+	{
+		$this->oldChildAbilities = Array();
+		$this->oldChildAbilities = $this->childAbilities;
+		$this->childAbilities=$newValue;
+	}
+	
+	//--------------save-----------------\\
 
-	/**
-	* \return Returns the current Online status
-	*/	
-	public function getUserOnlineStatus()
-	{
-		$temp = $this->user;
-		$result	= $temp->getOnlineStatus();	
-		//handle userstatus
-		return $result;
-	}
-	
-	// ---------set--------\\
-
-	/**
-	* Change the users username
-	* \param Takes the users Username 
-	*/	
-	public function setUsername($value)
-	{
-		$temp = $this->user;
-		$temp->__set('username', $value);
-	}
-	
-	/**
-	* Change the users e-mail
-	* \param Takes the e-mail 
-	*/
-	public function setUserMail($value)
-	{
-		$temp = $this->user;
-		$temp->__set('userMail', $value);
-	}
-
-	/**
-	* Change the users fullname
-	* \param Takes the fullname 
-	*/
-	public function setFullName($value)
-	{
-		$temp = $this->user;
-		$temp->__set('fullname', $value);
-	}
-	
-	/** $value should be int to do????
-	* Change the users role
-	* \param Takes the userole  
-	*/
-	public function setUserrole($value)
-	{
-		$role = $this->identifyRole($value);
-		$temp = $this->user;
-		$temp->__set('userRole', $value);
-	}
-
-	/**
-	* Changes the Online status of the user
-	*/
-	public function setUserOnlineStatus($statusvalue)
-	{
-		$bool = false;
-		$status = $this->identifyStatus($statusvalue);
-		if ($status != null)
-		{
-			$temp = $this->user;
-			$bool = $temp->setOnlineStatus($status);
-		}
-		if($status==null ||$bool==false)
-		{
-			//error handling
-		}
-		//evt return ny status
-	}
-	
-	
-	//-------------others-----------------\\
-	private function identifyRole($role)
-	{
-		$admin = 1;
-		$moderator = 2;    
-		$beparent = 3;
-		$none= -1;
-	
-		if ($role == $admin)
-		{
-			return $admin;
-		}
-		elseif($role == $moderator)
-		{
-			return $moderator;
-		}
-		elseif($role == $beparent)
-		{
-
-			return $beparent;
-		}
-		else 
-		{
-			return none;
-		}
-	}
-	
-	private function identifyStatus($status)
-	{
-	    $statusOnline = 0;
-		$statusOffline = 1;
-		$statusAway = 2;
-		$statusBusy = 3;
-		$statusHidden = 4;
-		
-		if($status == $statusOnline)
-		{
-			return $statusOnline;
-		}
-		elseif($status == $statusOffline) 
-		{
-			return $statusOffline;
-		}
-		elseif($status == $statusAway) 
-		{
-			return $statusAway;
-		}
-		elseif($status == $statusBusy) 
-		{
-			return $statusBusy;
-		}
-		elseif($status == $statusHidden) 
-		{
-			return $statusHidden;
-		}
-		else
-		{
-			return null;
-		}
-	}
-	
-	//to handle
-	public function identifyUserGroup()
-	{
-		$groupArray = $user->getUserGroups();
-	}
-	
-	//to handle addToGroup($gId) from user class
-
-	
-	//----------save------------\\
 	/**
 	* 
 	*/
 	public function saveChanges()
 	{
-		$temp = $this->user;
-		$temp->commit();
+		if($this->oldChildAbilities != "")
+		{   
+			$child->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
+		}
+		
+		$child->commit();
 	}
+	//--------------others----------------\\
+
+	
 	
 }
-
-
 
 ?>

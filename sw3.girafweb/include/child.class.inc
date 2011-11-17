@@ -88,25 +88,21 @@ class GirafChild extends GirafRecord
 		{
 			$abilityDefinition[$row["definitionId"]] = $row["definitionName"];
 		}
-	foreach($abilityDefinition as $key=>$value)
-	{
-		echo "$key=>$value</br>";
-	}
-		
+
 		foreach($newAbilities as $key=>$value)
 		{
 			if(!($oldAbilities[$key] == $newAbilities[$key]))
 			{
 
 				$definitionKey = array_search($key, $abilityDefinition);
-			echo "$definitionKey</br>";
 				if($newAbilities[$key]==true)
 				{
 					sql_helper::insertQuery("INSERT INTO " . TABLE_PROFILE_ABILITIES . " (profileKey, definitionKey) VALUES ('$ID', '$definitionKey')");
 				}
 				else
 				{
-					sql_helper::updateQuery("DELETE FROM " . TABLE_PROFILE_ABILITIES . " WHERE profileKey = '$ID' AND definitionKey = '$definitionKey')");
+					sql_helper::deleteQuery("DELETE FROM " . TABLE_PROFILE_ABILITIES . " WHERE profileKey = " . $ID ." AND definitionKey = " .$definitionKey . "");
+					
 				}
 			}
 		}
