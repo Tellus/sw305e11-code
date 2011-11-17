@@ -23,7 +23,7 @@ class GirafChild extends GirafRecord
         return "profileId";
     }
     
-    public function getSourceTable()
+    public static function getSourceTable()
     {
         return TABLE_CHILDREN;
     }
