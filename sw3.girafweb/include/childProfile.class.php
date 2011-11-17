@@ -18,7 +18,7 @@ class childProfile
 	
 
 	/**
-	* find the child from ID
+	* Find the child from ID
 	* \param dette skal være et gyldigt childId 
 	*/	
 	public function __construct($ID)
@@ -31,13 +31,17 @@ class childProfile
 	
 	
 	//---------------get----------------\\ 
+	/**
+	* Returning the child's idkey
+	* \return the child's idkey 
+	*/
 	public function getId()
 	{
 		return $this->id;
 	}
 	
 	/**
-	* get the childs name
+	* Returning the child's  name
 	* \return Returns the childs name
 	*/
 	public function getChildName()
@@ -47,16 +51,18 @@ class childProfile
 	}
 	
 	/**
+	* Returning the child birthday
 	* \return Returns the childs age
 	*/
-	public function getChildAge()
+	public function getChildBirthday()
 	{
 		$temp = $this->child;
 		return $temp->profileBirthday;
 	}
 	
 	/**
-	*
+	* Returning an array for abilities where the index key is the ability and the value is a bool
+	* \return an array with booleans indicating the child's abilities
 	*/
 	public function getAbilitiesArray()
 	{
@@ -67,6 +73,7 @@ class childProfile
 	//---------------set-----------------\\
 	
 	/**
+	* Change the child's name 
 	* \param Takes the name of the child 
 	*/
 	public function setChildName($value)
@@ -76,14 +83,19 @@ class childProfile
 	}
 	
 	/**
+	* Change the child's birthday 
 	* \param Takes the birthday of the child 
 	*/	
-	public function setChildAge($value)
+	public function setChildBirthday($value)
 	{
 		$temp = $this->child;
 		$temp->__set('profileBirthday', $value);
 	}
 	
+	/**
+	* Change the child's abilities which is in a array
+	* \param Takes an array where index key is the ability and the value is a bool
+	*/
 	public function setAbilities($newValue)
 	{
 		$this->oldChildAbilities = Array();
@@ -94,7 +106,7 @@ class childProfile
 	//--------------save-----------------\\
 
 	/**
-	* 
+	* Save all the changes that have been made
 	*/
 	public function saveChanges()
 	{

@@ -38,7 +38,12 @@ class GirafChild extends GirafRecord
         return parent::getInstance($childId);
     }
 	
-	public static function getChildsAbilities($childId)
+	/**
+	* Getting an array of abilities
+	* \param The child's id
+	* \return An array of bool where the index is the ability 
+	*/
+	public function getChildsAbilities($childId)
 	{
 		$result = sql_helper::selectQuery("SELECT definitionName FROM ". TABLE_KIDSPROFILE_ABILITIES ." WHERE profileKey=$childId");
 		$allArray = GirafChild::getAllAbilities();
@@ -64,6 +69,10 @@ class GirafChild extends GirafRecord
 
 		return $allArray;
 	}
+	/**
+	* Gets an array with abilities
+	* \return All abilities in an array where the ability is the index and the value is at default false; 
+	*/
 	public static function getAllAbilities()
 	{
 		$result = sql_helper::selectQuery("SELECT * FROM ". TABLE_ABILITY_DEFINITIONS);
@@ -79,9 +88,17 @@ class GirafChild extends GirafRecord
 
 		return $resultArray;
 	}
+	
+	/**
+	* Saves the changes for the child's abilities
+	* \param ID: the child's id
+	* \param oldAbilities: the array before changes was made
+	* \param newAbilities: the array after changes was made 
+	*/
 	public static function commitAbilityChange($ID, $oldAbilities, $newAbilities)
 	{
 		$aDQuery = sql_helper::selectQuery("SELECT * FROM ". TABLE_ABILITY_DEFINITIONS);
+		if(!$aDQuery) return null; //error
 		
 		$abilityDefinition = Array();    
 		while ($row = $aDQuery->fetch_assoc())
@@ -97,13 +114,15 @@ class GirafChild extends GirafRecord
 				$definitionKey = array_search($key, $abilityDefinition);
 				if($newAbilities[$key]==true)
 				{
-					sql_helper::insertQuery("INSERT INTO " . TABLE_PROFILE_ABILITIES . " (profileKey, definitionKey) VALUES ('$ID', '$definitionKey')");
+					$result = sql_helper::insertQuery("INSERT INTO " . TABLE_PROFILE_ABILITIES . " (profileKey, definitionKey) VALUES ('$ID', '$definitionKey')");
 				}
 				else
 				{
-					sql_helper::deleteQuery("DELETE FROM " . TABLE_PROFILE_ABILITIES . " WHERE profileKey = " . $ID ." AND definitionKey = " .$definitionKey . "");
+					$result = sql_helper::deleteQuery("DELETE FROM " . TABLE_PROFILE_ABILITIES . " WHERE profileKey = " . $ID ." AND definitionKey = " .$definitionKey . "");
 					
 				}
+				if(!$result) return null; //error
+				return true;
 			}
 		}
 	}
