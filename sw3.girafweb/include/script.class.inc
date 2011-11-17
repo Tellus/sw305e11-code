@@ -23,7 +23,7 @@ class GirafScriptParser
      * Each of the characters in the string will be escaped during serialization
      * and likened procedures.
      */
-    public const RESERVED_CHARS = ';:}{=!<>';
+    const RESERVED_CHARS = ';:}{=!<>';
 
     /**
      * Path to the template file being parsed.
@@ -219,7 +219,7 @@ class GirafScriptParser
         $retval = $this->templateVars[$key];
         
         $startcheck = strpos("__", $retval);
-        if (self::isSerializedVar($retval)))
+        if (self::isSerializedVar($retval))
         {
             $retval = unserialize(substr($retval), 2, strlen($retval) - 4);
             return $retval;
@@ -289,9 +289,9 @@ class GirafScriptParser
      * \param $val The object to serialize.
      * \return A serialized version of the input.
      */
-    public static function serialize($val)
+    public static function girafSerialize($val)
     {
-        $val
+        throw new Exception("Internal serialize not yet implemented.");
     }
     
     /**
