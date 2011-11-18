@@ -11,7 +11,7 @@ class login
 	* Authenticate the username and password 
 	* \param Takes a username
 	* \param Takes a password
-	* \return ????
+	* \return True if Authentication is approvied, else returns false
 	*/
 	public static function doAuthentication($username, $password, $doHash = true )
 	{
@@ -28,7 +28,8 @@ class login
 		}
 		else
 		{
-			//error => goto nybruger/glemt password
+			//error
+			return false;
 		}
 	}
 	
@@ -39,6 +40,7 @@ class login
 	* \param Takes the new users e-mail
 	* \param Takes the new users fullname
 	* \param Takes the new users userrole	
+	* \return True if succesfull, and false otherwise 
 	*/
 	public static function createNewUser($username, $password, $email, $fullname = "", $userrole = -1)
 	{
@@ -49,7 +51,7 @@ class login
 		}
 		else
 		{
-		//error
+			return false;
 		}
 	}
 	
