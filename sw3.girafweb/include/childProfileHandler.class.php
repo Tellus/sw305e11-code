@@ -25,7 +25,8 @@ class childProfile
 	{
 		$this->id = $ID;
 		$this->child = GirafChild::getGirafChild($ID);
-		$this->childAbilities = GirafChild::getChildsAbilities($ID);
+		$temp = $this->child;
+		$this->childAbilities = $temp->getChildsAbilities($ID);
 	}
 	
 	

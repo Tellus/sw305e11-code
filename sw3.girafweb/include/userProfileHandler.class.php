@@ -7,7 +7,7 @@ require_once(__DIR__ . "/record.class.inc");
 */
 class userProfile
 {
-	private $id
+	private $id;
 	private $user;
 	
 	/**
@@ -203,11 +203,16 @@ class userProfile
 	//to handle
 	public function identifyUserGroup()
 	{
-		$groupArray = $user->getUserGroups();
+		$temp = $this->user;
+		return $temp->getUserGroups();
 	}
 	
 	//to handle addToGroup($gId) from user class
-
+	public function addUserToGroup($gId)
+	{
+		$temp = $this->user;
+		$temp->addToGroup($gId);
+	}
 	
 	//----------save------------\\
 	/**
