@@ -45,7 +45,7 @@ class func extends GirafScriptCommand
      * loop to retrieve proper object data instead of toString pieces.
      * \sa GirafScriptCommand::invoke()
      */    
-    public function invokeNoReplace()
+    public function invokeNoReplace(&$unused)
     {
         // echo "FUNC invoked" . PHP_EOL;
         // We need to have the class initialised.

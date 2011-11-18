@@ -12,7 +12,8 @@ require_once(__DIR__ . "/include/script.class.inc");
 if (!isset($_GET["page"])) die("No page was requested.");
 
 $parser = new GirafScriptParser($_GET["page"]);
+// $parser = new GirafScriptParser("test");
 
-echo $parser->parseTemplate();
+echo $parser->parseTemplate(null, true);
 
 ?>

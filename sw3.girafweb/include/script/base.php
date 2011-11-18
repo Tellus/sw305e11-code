@@ -49,11 +49,15 @@ abstract class GirafScriptCommand
     /**
      * Similar to invoke, but always returns the value it intended to replace
      * as the return value.
+     * \param &$changes Optionally pass an array that should be filled
+     * with any extra changes to the original template in the form of
+     * tuples (arrays with two elements). The first index contains the
+     * search string, the second its replacement.
      * \return The string that was intended to replace the marker area. This
      * string should be usable by GirafScriptParser to replace file contents
      * without modification.
      */
-    public abstract function invokeNoReplace();
+    public abstract function invokeNoReplace(&$changes);
     
     /**
      * Sets the current marker in use for the script instance.
