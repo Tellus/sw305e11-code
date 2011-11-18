@@ -3,8 +3,7 @@
 <link rel="stylesheet" type="text/css" href="themes/default/css/girafbase.css" />
 </head>
 <body>
-    ${VREF|POST:username}
-    ${WHEN|${VREF|POST:username!==null}}
+    ${WHEN|("${VREF|POST:username}"!=null && 1 == "1") || "Myass" == DICKPUMP}
     <div class="centerbox">
     <form method="POST" action="index.php?page=login">
     <table>

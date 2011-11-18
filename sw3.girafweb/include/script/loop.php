@@ -126,12 +126,13 @@ class loop extends GirafScriptCommand
 			// String
 			// This should never loop forever. getVar will return null
 			// when the passed value does not reference anything.
-			while ($iter !== null)
+			$prev_key = $p->getVar($iter, true);
+			/*while ($iter !== null)
 			{
 				$prev_key = $iter;
 				$iter = $p->getVar($iter);
 				// echo "Key: $iter<br/>";
-			}
+			}*/
 			
 			// When $iter is finally null, $prev_key vill contain the
 			// final valid value.

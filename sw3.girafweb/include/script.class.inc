@@ -83,6 +83,7 @@ class GirafScriptParser
     
         if (!file_exists("$root_dir/$theme")) die("Requested theme '$theme' is not installed.");
         if (!file_exists("$root_dir/$theme/$page.tpl")) return false;
+        $this->templateVars = array();
 
         $this->loadFile("$root_dir/$theme/$page.tpl");
     }
@@ -186,14 +187,28 @@ class GirafScriptParser
     
     /**
      * Gets the value associated with a key, or null if the key did not exist.
+     * \param $key The key of the value to retrieve.
+     * \param $recursive Optional. If true, the function will recursively
+     * retrieve values and use them as keys until no longer possible.
+     * \return The value associated with the key, or null.
      */
-    public function getVar($key)
+    public function getVar($key, $recursive = false)
     {
         if ((!is_numeric($key) && !is_string($key)) ||
 			!array_key_exists($key, $this->templateVars))
             return null;
         else
-			return $this->templateVars[$key];
+			if ($recursive)
+			{
+				while ($key !== null)
+				{
+					echo "$key<br/>" . PHP_EOL;
+					$prev_key = $key;
+					$key = $this->getVar($key, false);
+				}
+				return $this->templateVars[$prev_key];
+			}
+			else return $this->templateVars[$key];
             
     }
     
@@ -780,8 +795,8 @@ class GirafScriptParser
         // Modified by the offset.
         // echo "<hr/>Balanced text for $input requested<hr/>";
         if ($offset > strlen($input)) return false;
-        if (strpos($input, $startMark, $offset) == false ||
-            strpos($input, $endMark, $offset) == false ) return false;
+        if (strpos($input, $startMark, $offset) === false ||
+            strpos($input, $endMark, $offset) === false ) return false;
         $position = strpos($input, $startMark, $offset);
 
         // Counter to keep track of nesting level.
@@ -807,7 +822,7 @@ class GirafScriptParser
             // if (!$end) echo "No end found" . PHP_EOL;
 
             // Start tag is closer than end tag. Increase nesting.
-            if ($start != false && $start < $end)
+            if ($start !== false && $start < $end)
             {
                 $level++;
                 // echo "($position) Increasing level to $level" . PHP_EOL;
@@ -960,6 +975,7 @@ class GirafScriptParser
 			}
 
             // $this->file_contents = util::str_replace_once($marker["marker"], $newText, $this->file_contents);
+            
             $file = util::str_replace_once($marker["marker"], $newText, $file);
         }
         
