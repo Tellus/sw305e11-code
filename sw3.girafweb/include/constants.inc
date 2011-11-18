@@ -15,7 +15,7 @@ define("TABLE_CHILD_GROUP", "childGroupKey");
 define("TABLE_IMAGE_RESOURCES", "imageResources");
 define("TABLE_USER_GROUP_KEYS", "userGroupKeys");
 define("TABLE_NEWSPOSTS", "newsPosts");
-define("TABLE_RELATIONS", "devAppRelaions");
+define("TABLE_RELATIONS", "devAppKeys");
 define("TABLE_PROFILE_ABILITIES", "profileAbilities"); 
 define("TABLE_KIDSPROFILE_ABILITIES", "kidsProfile_abilities");
 
