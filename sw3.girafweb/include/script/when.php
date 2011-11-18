@@ -22,7 +22,7 @@ class when extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invokeNoReplace()
+    public function invokeNoReplace(&$unused)
     {
 		$this->whenText = $this->parent->getBalancedText($this->parent->file_contents, '${WHEN|', '${ENDWHEN}', 0, false);
 		// Remove the first condition. It's unparsed.

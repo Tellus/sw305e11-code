@@ -4,25 +4,23 @@
 </head>
 <body>
 <div>Function call test.</div>
-<div>${FUNC|CLASS:METHOD}</div>
-<div>${VREF|GET:message}</div>
+${FUNC|CLASS:METHOD}
+${VREF|GET:message}
 <div>Variable declaration.</div>
-<div>${VDEC|NAME:VALUE}</div>
+${VDEC|NAME:VALUE}
 <div>Advanced Variable declaration.</div>
 <div>Variable reference:<span>${VREF|NAME}</span></div>
-<div>${VDEC|NAME:${FUNC|CLASS:METHOD}}</div>
+${VDEC|REFERENCED_NAME:${VREF|NAME}}
 <div>Loop test.</div>
-<div>${VDEC|numbers:${FUNC|util:docount,5}}</div>
-<div>${LOOP|numbers:item}</div>
-<div>${VREF|item}</div>
-<div>${ENDLOOP}</div>
+${VDEC|numbers:${FUNC|util:getArrayOfIntegers,1,5,1}}
 <div>Loop with variable reference.</div>
-<div>${LOOP|${VREF|NAME}}</div>
-<div>Woooo!
-<div>${ENDLOOP}</div>
+${VDEC|list:${VREF|numbers}}
+${LOOP|list}
+<div>Woooo!</div>
+${ENDLOOP}
 <div>Conditional</div>
-<div>${WHEN|false==false}</div>
-<div>This is visible if true</div>
-<div>${ENDWHEN}</div>
+${WHEN|false==false}
+	<div>This is visible if true</div>
+${ENDWHEN}
 </body>
 </html>

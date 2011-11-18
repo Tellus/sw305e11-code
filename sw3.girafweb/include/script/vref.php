@@ -31,7 +31,7 @@ class vref extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invokeNoReplace()
+    public function invokeNoReplace(&$unused)
     {
         // echo "vref invoked" . PHP_EOL;
         // We need to have the class initialised.
