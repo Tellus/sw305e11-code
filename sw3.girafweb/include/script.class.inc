@@ -774,8 +774,8 @@ class GirafScriptParser
         // Global file position. Used to search progressively through the file.
         // Modified by the offset.
         if ($offset > strlen($input)) return false;
-        if (strpos($input, $startMark, $offset) == false ||
-            strpos($input, $endMark, $offset) == false ) return false;
+        if (strpos($input, $startMark, $offset) === false ||
+            strpos($input, $endMark, $offset) === false ) return false;
         $position = strpos($input, $startMark, $offset);
 
         // Counter to keep track of nesting level.
@@ -918,6 +918,7 @@ class GirafScriptParser
             $newText = $this->runMarker($marker);
 
             // $this->file_contents = util::str_replace_once($marker["marker"], $newText, $this->file_contents);
+            
             $file = util::str_replace_once($marker["marker"], $newText, $file);
         }
         

@@ -10,9 +10,9 @@ require_once("base.php");
 class when extends GirafScriptCommand
 {
     public $condition;
-    public $lvalue;
-    public $rvalue;
-
+    public $whenText;
+	public $sub;
+	
     /**
      * Calls the func marker command that will, in turn, attempt to call the
      * true backend function and return its value.
@@ -24,7 +24,30 @@ class when extends GirafScriptCommand
      */
     public function invokeNoReplace()
     {
-        return 'WHEN is not yet implemented.';
+		$this->whenText = $this->parent->getBalancedText($this->parent->file_contents, '${WHEN|', '${ENDWHEN}', 0, false);
+		// Remove the first condition. It's unparsed.
+		$length = strlen($this->parent->getBalancedText($this->whenText, '${', '}'));
+		$this->sub = substr($this->whenText, $length);
+		
+		var_dump($length); 
+		var_dump($this->sub); ?> <br /> <?php
+		
+		//var_dump($this->whenText);
+		//var_dump($this->full_marker);
+		
+		$evalCond = "return " . $this->condition . ";";
+		
+		if (eval($evalCond))
+		{
+			// The condition holds.
+		}
+		else
+		{
+			// The condition does not hold.
+		}
+		
+		
+        return "";
     }
     
     public function getParameters()
