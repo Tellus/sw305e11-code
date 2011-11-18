@@ -18,7 +18,7 @@ define("TABLE_NEWSPOSTS", "newsPosts");
 define("TABLE_RELATIONS", "devAppKeys");
 define("TABLE_PROFILE_ABILITIES", "profileAbilities"); 
 define("TABLE_KIDSPROFILE_ABILITIES", "kidsProfile_abilities");
-
+define("TABLE_APPS" , "applications");
 
 /** SETTINGS CONSTANTS. **/
 define("SETTING_LOCAL_IMAGE_PATH", "local_image_path");
