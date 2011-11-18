@@ -3,8 +3,8 @@
 require_once(__DIR__ . "/record.class.inc"); //parent class
 require_once(__DIR__ . "/constants.inc"); // table constants
 
-/* 
-* Class used for applications
+/**
+* Class used for handeling application data
 */
 class GirafApplications extends GirafRecord
 {
@@ -28,11 +28,11 @@ class GirafApplications extends GirafRecord
 		return parent::getRecord($cond, $return_as);
 	}
 	
-	/*
+	/**
 	* Function used for getting applications related to a specific device.
 	* \param $deviceId The id of the device you wish to locate applications at.
 	* \return Returns an array of applicationsid's which is installed at the input device.
-	**/
+	*/
 	public static function getAppsOnDevice($deviceId)
 	{
 		$result = sql_helper::selectQuery("SELECT applicationKey FORM" . TABLE_RELATIONS . "WHERE deviceKey=" . $deviceId);

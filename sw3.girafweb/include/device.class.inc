@@ -1,8 +1,11 @@
 <?php
 
-require_once(__DIR__ . "/record.class.inc");
-require_once(__DIR__ . "/constants.inc");
+require_once(__DIR__ . "/record.class.inc"); // Parent class
+require_once(__DIR__ . "/constants.inc"); // Table constants 
 
+/** 
+ * Class used to handle data of devices
+ */
 class GirafDevices extends GirafRecord
 {
 	public static function getSourceTable()
@@ -25,11 +28,11 @@ class GirafDevices extends GirafRecord
 		return parent::getRecord($cond, $return_as);
 	}
 	
-	/*
+	/**
 	* Function used for finding the devices a specific applications is installed at
 	* \param $appId The id of the specific application
 	* \return Returns an array of deviceid's at which the input application is installed
-	**/
+	*/
 	
 	public static function getDevInstalledApps($appId)
 	{
