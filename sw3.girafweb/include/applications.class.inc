@@ -23,16 +23,15 @@ class GirafApplications extends GirafRecord
 		return parent::getInstance($aId)
 	}
 	
-	public static function getApplications()$cond = null, $return_as = self::RETURN_PRIMARYKEY)
+	public static function getApplications($cond = null, $return_as = self::RETURN_PRIMARYKEY)
 	{
 		return parent::getRecord($cond, $return_as);
 	}
 	
-	// public static function 
 	/*
 	* Function used for getting applications related to a specific device.
 	* \param $deviceId The id of the device you wish to locate applications at.
-	* \return Returns an array of ids of the application on the inputted the device.
+	* \return Returns an array of applicationsid's which is installed at the input device.
 	**/
 	public static function getAppsOnDevice($deviceId)
 	{
