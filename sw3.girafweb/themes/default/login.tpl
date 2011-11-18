@@ -4,6 +4,7 @@
 </head>
 <body>
     ${VREF|POST:username}
+    ${WHEN|${VREF|POST:username!==null}}
     <div class="centerbox">
     <form method="POST" action="index.php?page=login">
     <table>
@@ -21,6 +22,8 @@
     </table>
     </form>
     </div>
+    ${ELSE}
+		<div>I'm not really sure what's going on.</div>
     ${ENDWHEN}
 </body>
 </html>

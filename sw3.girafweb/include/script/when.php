@@ -22,7 +22,7 @@ class when extends GirafScriptCommand
      * \return Whatever the hell the called function feels like returning.
      * \sa GirafScriptCommand::invoke()
      */
-    public function invokeNoReplace()
+    public function invokeNoReplace(&$unused)
     {
         return 'WHEN is not yet implemented.';
     }

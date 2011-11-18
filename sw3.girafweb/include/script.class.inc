@@ -36,6 +36,11 @@ class GirafScriptParser
     public $file_contents;
     
     /**
+     * Array of tuples containing search/replace changes for the file.
+     */
+    protected $queuedChanges = array();
+    
+    /**
      * The current theme for the parser. Matches the directory which is used to
      * read template files.
      */
@@ -184,14 +189,12 @@ class GirafScriptParser
      */
     public function getVar($key)
     {
-        if (array_key_exists($key, $this->templateVars))
-        {
-            return $this->templateVars[$key];
-        }
-        else
-        {
+        if ((!is_numeric($key) && !is_string($key)) ||
+			!array_key_exists($key, $this->templateVars))
             return null;
-        }
+        else
+			return $this->templateVars[$key];
+            
     }
     
     /**
@@ -214,20 +217,12 @@ class GirafScriptParser
      */
     public function getDeserializedVar($key)
     {
-        if (!array_has_key($key)) return null;
+        if (!array_key_exists($key, $this->templateVars)) return null;
         
         $retval = $this->templateVars[$key];
         
-        $startcheck = strpos("__", $retval);
-        if (self::isSerializedVar($retval))
-        {
-            $retval = unserialize(substr($retval), 2, strlen($retval) - 4);
-            return $retval;
-        }
-        else
-        {
-            return $retval;
-        }
+        if (self::isSerializedVar($retval)) return unserialize(substr($retval), 2, strlen($retval) - 4);
+        else return $retval;
     }
     
     /**
@@ -280,18 +275,46 @@ class GirafScriptParser
      */
     public static function isSerializedVar($val)
     {
-        return (strrpos($val, "__", 2) !== false && strrpos($val, "__", -2) !== false) ? true : false;
+		if (!is_string($val)) return false;
+        else return (strrpos($val, "__", 2) !== false && strrpos($val, "__", -2) !== false) ? true : false;
     }
+    
+    public static function girafDeserialize($val)
+    {
+		// When *deserializing*, perform the following actions, in order:
+		// - check for, then remove, underscores.
+		// - unescape using RESERVED_CHARS.
+		// - PHP unserialize.
+		if (!self::isSerializedVar($val))
+			throw new Exception("Very bad serialized var passed.");
+			
+		$val = substr($val, 2, strlen($val) - 4); // Should be good.
+		$val = self::unescapeString($val);
+		$val = unserialize($val);
+		
+		return $val;
+	}
     
     /**
      * A GirafScript-specific wrapper for PHP's serialize construct. It performs
      * escaping of the input text.
      * \param $val The object to serialize.
      * \return A serialized version of the input.
+     * \note While you can serialize the same value several times, it
+     * makes no sense to do so, and will in the end only garble the
+     * input, requiring equal amount of deserialization.
      */
     public static function girafSerialize($val)
     {
-        throw new Exception("Internal serialize not yet implemented.");
+		// When *serializing*, perform the following actions, in order:
+		// - PHP serialize.
+		// - escape with RESERVED_CHARS
+		// - prepend and append underscores.
+		$val = serialize($val);
+		$val = self::escapeString($val);
+		$val = "__$val__";
+		
+		return $val;
     }
     
     /**
@@ -569,7 +592,7 @@ class GirafScriptParser
         // $marker_reg = '/([A-Za-z0-9=!<>]+)/';
         // This newest regex will match any alphanumeric character, and any of
         // the listed special characters if they are escaped.
-        $marker_reg = '/((\w|\\[;:}{=!<>])+)/';
+        $marker_reg = '/((\w|\\[' . self::RESERVED_CHARS . '])+)/';
         
         $matches = array();
         $matches[0] = $cmd;
@@ -586,7 +609,7 @@ class GirafScriptParser
      * 
      * \sa GirafScriptParser::parseMarker()
      */
-    public function runMarker($marker)
+    public function runMarker($marker, &$changes)
     {
         // Quick secure.
         if (is_array($marker)) $marker = $marker["marker"];
@@ -595,7 +618,7 @@ class GirafScriptParser
             throw new Exception("Invalid marker passed.");
         
         // Get all embedded markers.
-        $marks = self::getEmbeddedMarkers($marker);
+        $marks = self::getEmbeddedMarkers($marker, $changes);
         
         // Atomic?
         if(count($marks) == 1)
@@ -611,7 +634,7 @@ class GirafScriptParser
                 $handler->setMarker($marker);
                 try
                 {
-                    $toReturn = $handler->invokeNoReplace();
+                    $toReturn = $handler->invokeNoReplace($changes);
                     return $toReturn;
                 }
                 catch (GirafScriptException $e)
@@ -625,7 +648,7 @@ class GirafScriptParser
         {
             // Run embedded markers.
             // 
-            return $this->runEmbeddedMarkers($marks);
+            return $this->runEmbeddedMarkers($marks, $changes);
         }
     }
     
@@ -635,7 +658,7 @@ class GirafScriptParser
      * \return Array with two indices. 0: the original entire marker, 1: the
      * new content for that marker.
      */
-    public function runEmbeddedMarkers($marks)
+    public function runEmbeddedMarkers($marks, &$changes)
     {
         // Now, start from the bottom of the array and work through each marker
         // and level in sequence, each time replacing one occurrence in every
@@ -664,7 +687,7 @@ class GirafScriptParser
                     {
                         $parsed_marker = $this->parseMarker($marker);
                         $handler->setMarker($marker);
-                        $result = $handler->invokeNoReplace();
+                        $result = $handler->invokeNoReplace($changes);
                         // echo "Replacing $marker with $result throughout.";
                         self::recursiveReplace($marks, $marker, $result, 1);
                     }
@@ -755,6 +778,7 @@ class GirafScriptParser
     {
         // Global file position. Used to search progressively through the file.
         // Modified by the offset.
+        // echo "<hr/>Balanced text for $input requested<hr/>";
         if ($offset > strlen($input)) return false;
         if (strpos($input, $startMark, $offset) == false ||
             strpos($input, $endMark, $offset) == false ) return false;
@@ -885,31 +909,63 @@ class GirafScriptParser
     }
     
     /**
+     * Queues up a change in the template being parsed. parseTemplate
+     * will process this if working on the primary file.
+     */
+    public function queueReplace($search, $replace)
+    {
+		$this->queuedChanges[] = array($search, $replace);
+	}
+    
+    /**
+     * Performs the changes queued in the internal changes queue.
+     */
+    protected function runReplacementQueue()
+    {
+		$file = $this->file_contents;
+		foreach($this->queuedChanges as $change)
+		{
+			$file = util::str_replace_once($change[0], $change[1], $this->file_contents);
+		}
+		
+		$this->queuedChanges = array(); // Empty it.
+		
+		return $file;
+	}
+    
+    /**
      * Fully parses an input template and returns the newly generated content.
      * \param Optionally the string to parse. If omitted, file_contents is used.
      * \return The modified file in its entirety, ripe for printage.
      */
-    public function parseTemplate(&$file = null)
+    public function parseTemplate($file = null, $unused = false)
     {
         if (!isset($file)) $file = $this->file_contents;
     
-        $markers = $this->getMarkers($file);
+        $markers = $this->getNestedMarkers($file);
         
         foreach ($markers as $marker)
         {
-            $newText = $this->runMarker($marker);
+			$changeList = array();
+            $newText = $this->runMarker($marker, $changeList);
+            
+            if (count($changeList) > 0)
+            {
+				// echo "Extra changes passed...<br/>";
+				foreach($changeList as $change)
+				{
+					// echo "Change...<br/>";
+					$file = util::str_replace_once($change[0], $change[1], $file);
+				}
+			}
 
             // $this->file_contents = util::str_replace_once($marker["marker"], $newText, $this->file_contents);
             $file = util::str_replace_once($marker["marker"], $newText, $file);
         }
         
-        // At this point, $this->file_contents is hopefully fully replaced.
+        // At this point, $file is hopefully fully replaced.
         return $file;
     }
-} 
-
-// CONSTANTS!
-define("MARKER_ORDER_SET", 0);
-define("MARKER_ORDER_LEVEL", 1);
+}
 
 ?>
