@@ -7,7 +7,7 @@ require_once(__DIR__ . "/record.class.inc");
 */
 class userProfile
 {
-	
+	private $id
 	private $user;
 	
 	/**
@@ -16,12 +16,20 @@ class userProfile
 	public function __construct($ID)
 	{
 		//get 
+		$this->id = $ID;
 		$this->user = GirafUser::getGirafUser($ID);		
 	}
 	//--------gets---------\\
+	/**
+	*\return the user's ID
+	*/
+	public function getUserId()
+		{
+			return $this->id;
+		}
 	
 	/**
-	* \return Returns the users username
+	* \return Returns the user's username
 	*/
 	public function getUsername()
 	{
@@ -31,7 +39,7 @@ class userProfile
 	}
 	
 	/**
-	* \return Returns the users mail
+	* \return Returns the user's mail
 	*/
 	public function getUserMail()
 	{
@@ -40,7 +48,7 @@ class userProfile
 	}
 	
 	/**
-	* \return Returns the users fullname
+	* \return Returns the user's fullname
 	*/
 	public function getFullName()
 	{
@@ -49,7 +57,6 @@ class userProfile
 	}
 	
 	/**
-	* this is an int what to do?
 	* \return Returns the users role
 	*/	
 	public function getUserrole()

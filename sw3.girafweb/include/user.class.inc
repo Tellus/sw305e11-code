@@ -115,11 +115,11 @@ class GirafUser extends GirafRecord
         // First, make sure the group exists. We do this indirectly by creating
         // a GirafGroup instance or getting the id based on name.
         if (is_numeric($gId))
-            $g = GirafGroup::getGroup($gId);
+            $g = GirafGroup::getGirafGroup($gId);
         else
         {
             $gk = sql_helper::simpleQuery("SELECT " . GirafGroup::getPrimaryKey() . " FROM " . TABLE_GROUPS . " WHERE groupName='$gId'");
-            $g = GirafGroup::getGroup($gId);
+            $g = GirafGroup::getGirafGroup($gId);
         }
         
         if ($g == null || $g == false) throw new Exception("Bad group id.");
@@ -128,7 +128,7 @@ class GirafUser extends GirafRecord
         
         $result = sql_helper::insertQuery($sql);
         
-        if (!result) throw new Exception(sql_helper::getErrMsg());
+        if (!$result) throw new Exception(sql_helper::getErrMsg());
     }
     
     public function removeFromGroup($gId)
