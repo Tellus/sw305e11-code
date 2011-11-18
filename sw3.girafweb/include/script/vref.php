@@ -92,7 +92,7 @@ class vref extends GirafScriptCommand
 			}
         }
         
-        if ($text == null) return "NULL";
+        if ($text == null) return "null";
         else return $text;
     }
     

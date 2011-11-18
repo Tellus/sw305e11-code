@@ -9,10 +9,10 @@ require_once(__DIR__ . "/include/script.class.inc");
  * the controllers should be invoked by index.php.
  */ 
 
-if (!isset($_GET["page"])) die("No page was requested.");
+// if (!isset($_GET["page"])) die("No page was requested.");
 
-$parser = new GirafScriptParser($_GET["page"]);
-// $parser = new GirafScriptParser("test");
+// $parser = new GirafScriptParser($_GET["page"]);
+$parser = new GirafScriptParser("login");
 
 echo $parser->parseTemplate(null, true);
 
