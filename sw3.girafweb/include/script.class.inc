@@ -184,14 +184,12 @@ class GirafScriptParser
      */
     public function getVar($key)
     {
-        if (array_key_exists($key, $this->templateVars))
-        {
-            return $this->templateVars[$key];
-        }
-        else
-        {
+        if ((!is_numeric($key) && !is_string($key)) ||
+			!array_key_exists($key, $this->templateVars))
             return null;
-        }
+        else
+			return $this->templateVars[$key];
+            
     }
     
     /**
@@ -214,20 +212,12 @@ class GirafScriptParser
      */
     public function getDeserializedVar($key)
     {
-        if (!array_has_key($key)) return null;
+        if (!array_key_exists($key, $this->templateVars)) return null;
         
         $retval = $this->templateVars[$key];
         
-        $startcheck = strpos("__", $retval);
-        if (self::isSerializedVar($retval))
-        {
-            $retval = unserialize(substr($retval), 2, strlen($retval) - 4);
-            return $retval;
-        }
-        else
-        {
-            return $retval;
-        }
+        if (self::isSerializedVar($retval)) return unserialize(substr($retval), 2, strlen($retval) - 4);
+        else return $retval;
     }
     
     /**
@@ -280,18 +270,46 @@ class GirafScriptParser
      */
     public static function isSerializedVar($val)
     {
-        return (strrpos($val, "__", 2) !== false && strrpos($val, "__", -2) !== false) ? true : false;
+		if (!is_string($val)) return false;
+        else return (strrpos($val, "__", 2) !== false && strrpos($val, "__", -2) !== false) ? true : false;
     }
+    
+    public static function girafDeserialize($val)
+    {
+		// When *deserializing*, perform the following actions, in order:
+		// - check for, then remove, underscores.
+		// - unescape using RESERVED_CHARS.
+		// - PHP unserialize.
+		if (!self::isSerializedVar($val))
+			throw new Exception("Very bad serialized var passed.");
+			
+		$val = substr($val, 2, strlen($val) - 4); // Should be good.
+		$val = self::unescapeString($val);
+		$val = unserialize($val);
+		
+		return $val;
+	}
     
     /**
      * A GirafScript-specific wrapper for PHP's serialize construct. It performs
      * escaping of the input text.
      * \param $val The object to serialize.
      * \return A serialized version of the input.
+     * \note While you can serialize the same value several times, it
+     * makes no sense to do so, and will in the end only garble the
+     * input, requiring equal amount of deserialization.
      */
     public static function girafSerialize($val)
     {
-        throw new Exception("Internal serialize not yet implemented.");
+		// When *serializing*, perform the following actions, in order:
+		// - PHP serialize.
+		// - escape with RESERVED_CHARS
+		// - prepend and append underscores.
+		$val = serialize($val);
+		$val = self::escapeString($val);
+		$val = "__$val__";
+		
+		return $val;
     }
     
     /**
@@ -569,7 +587,7 @@ class GirafScriptParser
         // $marker_reg = '/([A-Za-z0-9=!<>]+)/';
         // This newest regex will match any alphanumeric character, and any of
         // the listed special characters if they are escaped.
-        $marker_reg = '/((\w|\\[;:}{=!<>])+)/';
+        $marker_reg = '/((\w|\\[' . self::RESERVED_CHARS . '])+)/';
         
         $matches = array();
         $matches[0] = $cmd;
@@ -906,10 +924,6 @@ class GirafScriptParser
         // At this point, $this->file_contents is hopefully fully replaced.
         return $file;
     }
-} 
-
-// CONSTANTS!
-define("MARKER_ORDER_SET", 0);
-define("MARKER_ORDER_LEVEL", 1);
+}
 
 ?>

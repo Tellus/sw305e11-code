@@ -75,7 +75,21 @@ class vref extends GirafScriptCommand
         else
         {
             // If it's no form of collection, just get the var value.
-            $text = $this->parent->getVar($this->varName);
+            // $text = $this->parent->getVar($this->varName);
+            $data = $this->parent->getVar($name);
+            if(is_array($data))
+            {
+				$text = $this->parent->getSerializedVar($name);
+			}
+			elseif(is_string($data))
+			{
+				$text = $data;
+			}
+			else
+			{
+				// We need better random object handling, but this is fine.
+				$text = $data;
+			}
         }
         
         if ($text == null) return "NULL";

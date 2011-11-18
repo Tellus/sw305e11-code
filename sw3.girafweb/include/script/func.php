@@ -40,7 +40,9 @@ class func extends GirafScriptCommand
      * \note Recall that commands are atomic. They will not themselves handle
      * embedded markers. That must be handled by the parser itself.
      * \param A marker string or array as defined in GirafScriptCommand.
-     * \return Whatever the hell the called function feels like returning.
+     * \return Func will store the returned data in a randomly generated
+     * key and instead return the key name. This allows markers such as
+     * loop to retrieve proper object data instead of toString pieces.
      * \sa GirafScriptCommand::invoke()
      */    
     public function invokeNoReplace()
