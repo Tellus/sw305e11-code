@@ -76,7 +76,7 @@ class users
 	*/
 	public static function getUserId($username)
 	{
-		$result = sql_helper::selectQuery("SELECT userId FROM" . TABLE_USERS . "WHERE username=" . $username);
+		$result = sql_helper::selectQuery("SELECT userId FROM" . TABLE_USERS . "WHERE username='$username'");
 		
 		if (!$result) return false;
 		
