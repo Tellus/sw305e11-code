@@ -23,7 +23,7 @@ class GirafScriptParser
      * Each of the characters in the string will be escaped during serialization
      * and likened procedures.
      */
-    const RESERVED_CHARS = ';:}{=!<>';
+    const RESERVED_CHARS = ';:}{=!<>,';
 
     /**
      * Path to the template file being parsed.
@@ -607,13 +607,18 @@ class GirafScriptParser
         // $marker_reg = '/([A-Za-z0-9=!<>]+)/';
         // This newest regex will match any alphanumeric character, and any of
         // the listed special characters if they are escaped.
-        $marker_reg = '/((\w|\\[' . self::RESERVED_CHARS . '])+)/';
+        // $marker_reg = '/((\w|\\[' . self::RESERVED_CHARS . '])+)/';
+        $marker_reg = '/(([^' . self::RESERVED_CHARS . ']|\\[' . self::RESERVED_CHARS . '])+)/';
         
         $matches = array();
         $matches[0] = $cmd;
         $hits = preg_match_all($marker_reg, $input, $matchesb);//, PREG_SET_ORDER);
         
         $matches = array_merge($matches, $matchesb[1]);
+
+/*
+		var_dump($matches);
+		die();*/
 
         return $matches;
     }

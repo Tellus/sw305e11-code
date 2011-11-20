@@ -7,6 +7,35 @@
  */
 class GirafSession
 {
+	private $session_data;
+	
+	public function __get($key)
+	{
+		if (!array_key_exists($key, $_SESSION)) return null;
+		else return $_SESSION[$key];
+	}
+	
+	public function __set($key, $val)
+	{
+		$_SESSION[$key] = $val;
+	}
+	
+	/**
+	 * Creates a new GirafSession instance.
+	 * \param $sid Optionally the ID to give the retrieved session.
+	 * */
+	function __construct($sid = null)
+	{
+		if (session_id() != "")
+		{
+			session_id($sid);
+		}
+		else
+		{
+			session_start();
+		}
+	}
+	
     public static function get($name)
     {
         return $_SESSION[$name];
@@ -25,11 +54,16 @@ class GirafSession
     /**
      * Retrieves a session's data. If no session exists, a new session
      * is created.
-     * \return A new GirafSession instance.
+     * \return The session id (SID). Always.
+     * \note The method is mostly a way of circumventing PHP's E_NOTICE
+     * message when session_start is called several times over.
      */
     public static function getSession($id = -1)
     {
-        session_start();
+		$gs = new GirafSession();
+		
+		if (session_id() == "")	session_start();
+		return session_id();
     }
     
     /**
