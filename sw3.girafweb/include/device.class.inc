@@ -28,31 +28,31 @@ class GirafDevices extends GirafRecord
 		return parent::getRecord($cond, $return_as);
 	}
 	
-	/**
-	* Function used for finding the devices a specific applications is installed at
-	* \param $appId The id of the specific application
-	* \return Returns an array of deviceid's at which the input application is installed
+		/**
+	* Function used for getting applications related to a specific device.
+	* \param $deviceId The id of the device you wish to locate applications at.
+	* \return Returns an array of applicationsid's which is installed at the input device.
 	*/
-	
-	public static function getDevInstalledApps($appId)
+	public static function getAppsOnDevice($deviceId)
 	{
-		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_RELATIONS . "WHERE applicationKey=" . appId);
+		$result = sql_helper::selectQuery("SELECT applicationKey FORM" . TABLE_RELATIONS . "WHERE deviceKey=" . $deviceId);
 		
-		if(!$result) return false;
+		if(!result) return false;
 		
-		$devIds = Array();
-		
+		$appsIds = Array();
 		$iter = 0;
-		
-		while($row = $result->fetch_assoc())
+	
+		while ($row = $result->fetch_assoc())
 		{
-			$devIds[iter] = $row["deviceKey"];
+			$appsIds[iter] = $row["applicationsKey"];
 			
 			$iter++;
 		}
 		
-		return $devIds;
+		return $appsIds;
 	}
+	
+	
 }
 
 ?>

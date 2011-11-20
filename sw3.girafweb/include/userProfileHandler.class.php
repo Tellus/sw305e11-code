@@ -2,6 +2,7 @@
 
 require_once(__DIR__ . "/user.class.inc");
 require_once(__DIR__ . "/record.class.inc");
+require_once(__DIR__ . "/childDevice.func.inc");
 /**
 * This class handles requist from the interface about the User 
 */
@@ -213,6 +214,39 @@ class userProfile
 	{
 		$temp = $this->user;
 		$temp->addToGroup($gId);
+	}
+	
+	public function addNewChildToUser($profileName, $profileBirthday, $abilities)
+	{
+		$childkey = ChildAndDevice::createChild($profileName, $profileBirthday, $abilities);
+		if(!$childkey)
+		{
+			return "Error: This child were not registeret";
+		}
+		$connected = self::addChildToUser($childkey);
+		
+		return $connected;
+	}
+	
+	public function addExistingChildToUser($profileName, $profileBirthday)
+	{
+		$childkey = ChildAndDevice::getChildId($profileName, $profileBirthday);
+		if(!$childkey)
+		{
+			return "Error: Bad id";
+		}
+		$connected = self::addChildToUser($childkey);
+		return $connected;
+	}
+	
+	private function addChildToUser($childkey)
+	{
+		$connected = ChildAndDevice::connectChildAndUser($childkey, $this->id);
+		if(!$connected)
+		{
+			return'Error: connection failed';
+		}
+		return true;
 	}
 	
 	//----------save------------\\

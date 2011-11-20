@@ -110,7 +110,6 @@ class GirafChild extends GirafRecord
 		{
 			if(!($oldAbilities[$key] == $newAbilities[$key]))
 			{
-
 				$definitionKey = array_search($key, $abilityDefinition);
 				if($newAbilities[$key]==true)
 				{
@@ -122,9 +121,9 @@ class GirafChild extends GirafRecord
 					
 				}
 				if(!$result) return null; //error
-				return true;
 			}
 		}
+		return true;
 	}
 
 }
