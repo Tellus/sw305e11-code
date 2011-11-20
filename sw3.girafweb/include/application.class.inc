@@ -20,7 +20,7 @@ class GirafApplications extends GirafRecord
 	
 	public static function getApplication($aId)
 	{
-		return parent::getInstance($aId)
+		return parent::getInstance($aId);
 	}
 	
 	public static function getApplications($cond = null, $return_as = self::RETURN_PRIMARYKEY)
