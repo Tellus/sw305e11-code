@@ -20,8 +20,7 @@ class ChildAndDevice
 		$childkey = self::getChildId($profileName, $profileBirthday);
 		$allAbilities = GirafChild::getAllAbilities();
 		GirafChild::commitAbilityChange($childkey, $allAbilities, $abilities);
-		return $childkey;
-		
+		return $childkey;	
 	}
 	
 	/**
@@ -53,7 +52,7 @@ class ChildAndDevice
 			return false;
 		}
 
-		return result;
+		return $result;
 	}
 	
 	/**
@@ -101,6 +100,11 @@ class ChildAndDevice
 	}
  
  //connect child with user(childKey, userKey)
+	/**
+	* \param the child's id
+	* \param the user's id
+	* \return true if succesful
+	*/
 	public static function connectChildAndUser($childId, $userId)
 	{
 		$sql = "INSERT INTO " . TABLE_CHILD_USER . " (childKey, userKey) VALUES ('$childId','$userId')";
