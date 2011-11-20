@@ -9,6 +9,7 @@ class userProfile
 {
 	private $id;
 	private $user;
+
 	
 	/**
 	* \param Takes the userID to identify the user
