@@ -252,8 +252,9 @@ abstract class GirafRecord
      */
     public function commit()
     {
-        if ($this->data[$this->primaryKey] > 0) commitUpdate();
-        else commitInsert();
+	// $this->primaryKey
+        if ($this->data[$this->getPrimaryKey()] > 0) GirafRecord::commitUpdate();
+		else GirafRecord::commitInsert();	
     }
     
     /**
@@ -261,19 +262,19 @@ abstract class GirafRecord
      */
     private function commitUpdate()
     {
-        $sql = "UPDATE " . static::getSourceTable() . " SET (";
+			
+        $sql = "UPDATE " . static::getSourceTable() . " SET ";
         
         foreach ($this->dirty_bits as $name=>$isDirty)
         {
             if($isDirty)
             {
-                $sql .= "$name='" . $this->data[$name] . "',";
+                $sql .= "$name= '" . $this->data[$name] ."', ";
             }
         }
-        $sql = substr($sql, 0, strlen($sql) - 1); // Remove final colon.
+        $sql = substr($sql, 0, strlen($sql) - 2); // Remove final colon.
         
-        $sql .= ") WHERE " . $this->getSelfCondition();
-    
+        $sql .= " WHERE " . $this->getSelfCondition();
         sql_helper::updateQuery($sql);
     }
     
@@ -282,7 +283,7 @@ abstract class GirafRecord
      */
     private function commitInsert()
     {
-        $sql = "INSERT INTO " . static::getSourceTable() . " (";
+        $sql = "INSERT INTO " . static::getSourceTable() . " ";
         
         $values = "";
         
@@ -297,7 +298,7 @@ abstract class GirafRecord
         $value = trim($value, ","); // Trim final comma.
         
         
-        $sql .= ") VALUES ($values)";
+        $sql .= " VALUES ($values)";
     
         sql_helper::insertQuery($sql);
     }

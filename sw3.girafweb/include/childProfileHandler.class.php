@@ -111,12 +111,14 @@ class childProfile
 	*/
 	public function saveChanges()
 	{
+		$temp = $this->child;
 		if($this->oldChildAbilities != "")
 		{   
-			$child->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
+			$temp->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
 		}
+	
 		
-		$child->commit();
+		$temp->commit();
 	}
 	//--------------others----------------\\
 

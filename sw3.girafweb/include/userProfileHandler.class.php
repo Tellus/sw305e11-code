@@ -255,6 +255,7 @@ class userProfile
 	*/
 	public function saveChanges()
 	{
+	    echo "in save";
 		$temp = $this->user;
 		$temp->commit();
 	}
