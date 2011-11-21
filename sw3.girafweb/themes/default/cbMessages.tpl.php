@@ -64,8 +64,11 @@
 		<?php
 	}
 	?>
-	</div>
-	
+	</div>	
 </div>
 <div id="contactbooklowerbar">
+</div>
+
+<div id="readMessageDialog" title="%subject%">
+<div id="messageDialogContents">This will write out some neat contactbook information!</div>
 </div>

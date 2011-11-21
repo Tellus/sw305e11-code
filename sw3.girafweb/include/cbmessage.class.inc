@@ -39,7 +39,7 @@ class ContactbookMessage extends GirafRecord
      * */
     public function getReplies()
     {
-		return self::getMessages("msgParentKey=" . $this->id, self::RETURN_RECORD);
+		return self::getMessages("msgParentKey=" . $this->id, null, self::RETURN_RECORD);
 	}
 	
 	/**

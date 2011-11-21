@@ -56,9 +56,6 @@ foreach($kids as $child)
 	$kidsApps[$child->id] = $childApps;
 }
 
-// Debug.
-
-
 ?>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -71,36 +68,25 @@ foreach($kids as $child)
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
   
 	<script>$(document).ready(function(){
-		$("#childGroupSelect").change(function(){
-			// alert("You clicked" + $("#childGroupSelect").val());
-			$(".child-select").hide();
-			$(".group-" + $("#childGroupSelect").val()).show();
-		});
-		
 		$(".app-select").hide();
 		
-		// $(".child-picker").button().click(function(){
-		$("#childlist").buttonset();
-		$(".child-picker").click(function(){
-			// alert("I should show you apps for this child now!");
+		$(".child-picker").button().click(function(){
 			var callerId = event.target.id;
 			var childId = callerId.substring(callerId.length-1);
-			var name = "#app-picker-" + childId;
-			// alert(name);
+			var name = ".app-for-child-" + childId;
 			
 			// Pretty, but glitchy.
 			// $(".app-select").slideUp('fast', function(){$(".for-child-" + childId).slideDown('fast');});
 			
 			// Functional, but poppy.
-			// alert($(name).html());
 			$(".app-select").hide();
 			$(name).show();;
 		});
 		
 		$(".app-picker").button().click(function(){
-			// alert("Now we should display the app module.");
-			// Simple hard-coding for now.
-			// window
+			var callerId = event.target.id;
+			var childId = callerId.substring(callerId.lastIndexOf("-") + 1);
+			// alert(childId);
 			$.get("themes/default/cbMessages.tpl.php", { child : 1}, printModule);
 		});
 		
@@ -110,6 +96,10 @@ foreach($kids as $child)
 			$("#window").html(contents);
 			
 			// Re-initialize some jquery stuff.
+			// We need a really neat way of adding a new script element
+			// to the document when loading modules. We need something
+			// simple to easily add javascript to a loaded module. Easy
+			// in principle.
 			$("#accordion").accordion({
 				collapsible: true,
 				//active: false
@@ -121,7 +111,29 @@ foreach($kids as $child)
 			});
 			
 			$(".readmoreButton").button().click(function(){
-				alert("Getting more for more.");
+				// alert("Getting more for more.");
+				// $("#readMessageDialog").dialog("open");
+				// Load data.
+				$.get("themes/default/cbMessage.tpl.php", { message : 1 }, function(contents, ign, ignToo)
+				{
+					$("#messageDialogContents").html(contents);
+					$("#readMessageDialog").dialog("open");
+					// alert("Changing " + $("#readMessageDialog").attr("title") + " to " + $("#messageSubject").html());
+					$("#readMessageDialog").dialog('option', 'title', $("#messageSubject").html());
+				});
+			});
+			
+			$( "#readMessageDialog").dialog({
+				autoOpen: false,
+				modal: true,
+				height: 480,
+				width: 640,
+				buttons: {
+							Ok: function()
+							{
+									$ (this).dialog("close");
+							}
+						}
 			});
 		}
 	});</script>
@@ -144,50 +156,17 @@ foreach($kids as $child)
 		</div>
 		<div id="menu">
 			<div id="childlist">
-				<form>
 				<?php
-					// Find all children that this user has access to. That
-					// encompasses finding all groups that this user is a
-					// member of and then children for each group. I'd
-					// rather we have a dropdown list of groups the user has
-					// access to, bit of a filter, y'know.
-					/*
-					$groups = $currentUserData->getUserGroups();
-					
-					echo "<form>";
-					echo "<select id=\"childGroupSelect\"";
-					
-					foreach ($groups as $group)
-					{
-						
-						$data = GirafGroup::getGirafGroup($group);
-						// var_dump($group, $data);
-						echo "<option value=\"$group\">" . $data->groupName . "</option>";
-					}
-					*/
-					// Get *all* apps for a single child.
-					
-					// As I said, we're bruteforcing because of time
-					// Constraints.
-					
 					foreach($kids as $child)
 					{
 						$id = "\"childPicker-" . $child->id . "\"";
 				?>
-					<div class="child-select group-0">
-						<input type="radio" name="children" class="menu-image child-image ui-widget-content child-picker" id=<?php echo $id; ?> />
-							<label for=<?php echo $id; ?>>
-								<?php echo $child->getFirstName(); ?>
-							</label>
+					<div class="child-select">
+						<a class="child-picker menu-image" href="#" id=<?php echo $id; ?> ><?php echo $child->getFirstName(); ?></a>
 					</div>
 				<?php
 					}
 				?>
-				</form>
-				<!-- Skal indeholde en liste af børn, som er tilknyttet den aktuelle bruger.
-				For forældrene skal der kun være adgang til personens eget/egne barn/børn, hvor pædagoger skal have 
-				adgang til alle børn i den pågældende børnehave
-				-->
 			</div>
 			<div id="applist">
 				<?php
@@ -199,28 +178,19 @@ foreach($kids as $child)
 				{
 					foreach ($apps as $app)
 					{
-						// var_dump($app);
-						// echo "id=\"app-picker-$kidId\"";
 					?>
-					<div id="app-picker-<?php echo $kidId; ?>" class="app-select menu-image">
-						<a href="#" id="app-<?php echo $kidId . "-" . $app->id; ?>"/><?php echo $app->applicationName; ?></a>
+					<div class="app-select app-for-child-<?php echo $kidId; ?>">
+						<a class="app-picker menu-image" id="app-<?php echo $kidId . "-" . $app->id; ?>"/><?php echo $app->applicationName; ?></a>
 					</div>
 					<?php
 					}
 				}
 				
 				?>
-				<!-- Skal indeholde:
-						En liste af applikationer installeret på tabletten
-						Et Settingsapplikation, som indeholder personlige oplysninger såsom handicap
-						En markedsapplikation, som giver mulighed for at hente nye applikationer til tabletten
-				-->
 			</div>
 		</div>
 		
 		<div id="window">
-			<!-- Hovedvindue, som skal vise indhold og indstillinger for samtlige applikationer, samt Settings og GIRAFMarket
-			-->
 			<?php
 				// We should fill this place with the template of the chosen module.
 			?>
@@ -229,7 +199,7 @@ foreach($kids as $child)
 		<div id="lowerbar">
 			Support: 98 12 34 56 / help@mail.com
 		</div>	
-	</div>	
+	</div>
 </body>
 </html>
 
