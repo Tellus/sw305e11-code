@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . "/application.class.inc"); 
+require_once(__DIR__ . "/childDevice.func.inc");
 
 class applicationHandler
 {
@@ -81,6 +82,11 @@ class applicationHandler
 	{
 		$application = GirafApplication::getDevicesWithInstalledApp($this->id);
 		return $application;
+	}
+	public function connectAppToDevice($deviceKey)
+	{
+		$result = ChildAndDevice::connectAppDevice($this->id, $deviceKey);
+		return $result;
 	}
 
 } 

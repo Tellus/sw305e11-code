@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . "/device.class.inc");
+require_once(__DIR__ . "/childDevice.func.inc");
 class DeviceHandler
 {
 	private $id;
@@ -33,7 +34,11 @@ class DeviceHandler
 		$AppsOnDevice = GirafDevice::getAppsOnDevice($this->id);
 		return $AppsOnDevice;
 	}
-	
+	public function connectAppToDevice($applicationKey)
+	{
+		$result = ChildAndDevice::connectAppDevice($applicationKey, $this->id);
+		return $result;
+	}
 } 
 
 ?>
