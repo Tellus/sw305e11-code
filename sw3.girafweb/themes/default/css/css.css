@@ -84,8 +84,8 @@ a:active {	text-decoration:none;
 			
 }
 
-#childlist {	// background-color: #99eeaa;
-			width: 50%;
+#childlist {	background-color: #99eeaa;
+			width: 48%;
 			height: 100%;
 			float: left;
 			border-top-left-radius: 10px;
@@ -98,10 +98,10 @@ a:active {	text-decoration:none;
 			opacity: 0.5;
 }*/
 
-#applist {	// background-color: #Fea99F;
-			width: 50%;
+#applist {	background-color: #Fea99F;
+			width: 48%;
 			height: 100%;
-			float: left;
+			float: right;
 
 }
 /*#applist:hover {
@@ -153,8 +153,8 @@ a:active {	text-decoration:none;
 }
 
 #newpostinput { 
-			width: 400px;
-			height: 200px;
+			width: 500px;
+			height: 120px;
 			float: left;
 
 }
@@ -267,8 +267,6 @@ a:active {	text-decoration:none;
 {
 	width: 90%;
 	height: 64px;
-	vertical-align: middle;
 	margin: 5px;
-	padding: 5px;
-	float: left;
+	padding: 10px;
 }

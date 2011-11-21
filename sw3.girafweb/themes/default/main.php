@@ -77,8 +77,24 @@ foreach($kids as $child)
 			$(".group-" + $("#childGroupSelect").val()).show();
 		});
 		
-		$(".child-picker").button().click(function(){
-			alert("I should show you apps for this child now!");
+		$(".app-select").hide();
+		
+		// $(".child-picker").button().click(function(){
+		$("#childlist").buttonset();
+		$(".child-picker").click(function(){
+			// alert("I should show you apps for this child now!");
+			var callerId = event.target.id;
+			var childId = callerId.substring(callerId.length-1);
+			var name = "#app-picker-" + childId;
+			// alert(name);
+			
+			// Pretty, but glitchy.
+			// $(".app-select").slideUp('fast', function(){$(".for-child-" + childId).slideDown('fast');});
+			
+			// Functional, but poppy.
+			// alert($(name).html());
+			$(".app-select").hide();
+			$(name).show();;
 		});
 		
 		$(".app-picker").button().click(function(){
@@ -128,6 +144,7 @@ foreach($kids as $child)
 		</div>
 		<div id="menu">
 			<div id="childlist">
+				<form>
 				<?php
 					// Find all children that this user has access to. That
 					// encompasses finding all groups that this user is a
@@ -155,14 +172,18 @@ foreach($kids as $child)
 					
 					foreach($kids as $child)
 					{
+						$id = "\"childPicker-" . $child->id . "\"";
 				?>
 					<div class="child-select group-0">
-						<a href="#" class="menu-image child-image child-picker" id="childPicker-<?php echo $child->id; ?>"><?php echo $child->getFirstName(); ?></a>
+						<input type="radio" name="children" class="menu-image child-image ui-widget-content child-picker" id=<?php echo $id; ?> />
+							<label for=<?php echo $id; ?>>
+								<?php echo $child->getFirstName(); ?>
+							</label>
 					</div>
 				<?php
 					}
 				?>
-				
+				</form>
 				<!-- Skal indeholde en liste af børn, som er tilknyttet den aktuelle bruger.
 				For forældrene skal der kun være adgang til personens eget/egne barn/børn, hvor pædagoger skal have 
 				adgang til alle børn i den pågældende børnehave
@@ -179,9 +200,10 @@ foreach($kids as $child)
 					foreach ($apps as $app)
 					{
 						// var_dump($app);
+						// echo "id=\"app-picker-$kidId\"";
 					?>
-					<div class="app-select app-image">
-						<a href="#" class="menu-image app-picker" id="app-<?php echo $kidId . "-" . $app->id; ?>"/><?php echo $app->applicationName; ?></a>
+					<div id="app-picker-<?php echo $kidId; ?>" class="app-select menu-image">
+						<a href="#" id="app-<?php echo $kidId . "-" . $app->id; ?>"/><?php echo $app->applicationName; ?></a>
 					</div>
 					<?php
 					}

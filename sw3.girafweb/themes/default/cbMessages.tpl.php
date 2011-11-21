@@ -5,7 +5,7 @@
 <div id="contactbook">
 			
 	<div id="newpost">
-		<h3><a href="#">New post</a></h3>
+		<h3><a href="#">Nyt indlæg</a></h3>
 		<div>
 			<table>
 				<tr>
