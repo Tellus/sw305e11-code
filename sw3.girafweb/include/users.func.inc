@@ -76,11 +76,15 @@ class users
 	*/
 	public static function getUserId($username)
 	{
-		$result = sql_helper::selectQuery("SELECT userId FROM" . TABLE_USERS . "WHERE username='$username'");
+		$result = sql_helper::selectQuery("SELECT " . GirafUser::getPrimaryKey() . " FROM " . GirafUser::getSourceTable() . " WHERE username='$username'");
 		
 		if (!$result) return false;
 		
-		return result;
+		// We need to actually return the id of the result, not the resultset... sigh.
+		
+		$row = $result->fetch_assoc();
+		
+		return $row[GirafUser::getPrimaryKey()];
 	
 	}
 }

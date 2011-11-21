@@ -1,21 +1,27 @@
 <!-- File for single message contents. -->
 <?php
 
+require_once("theme.conf");
+
 // Should be handled by index.php, but just for debugging...
 require_once($_SERVER["DOCUMENT_ROOT"] . "/dev/include/session.class.inc");
 require_once($_SERVER["DOCUMENT_ROOT"] . "/dev/include/user.class.inc");
 require_once($_SERVER["DOCUMENT_ROOT"] . "/dev/include/cbmessage.class.inc");
+
 
 // Prep data
 
 // We only need one thing for the display itself, but we should have
 // current user information stored in-session.
 
-$userId = GirafSession::getCurrentUser();
+// $userId = GirafSession::getCurrentUser();
+if (!isset($s)) $s = GirafSession::getSession();
+
+$userId = $s->getCurrentUser();
 
 if ($userId == null || $userId == false)
 {
-	$userId = 1;
+	die("Page cannot be used without loggin in.");
 }
 
 $userData = GirafUser::getGirafUser($userId);
@@ -34,6 +40,10 @@ $messageData = ContactbookMessage::getMessage($msgId);
 
 // Get OP data.
 $poster = GirafUser::getGirafUser($messageData->msgUserKey);
+
+// Get current user.
+if (!isset($s)) $s = GirafSession::getSession();
+$userId = $s->getCurrentUser();
 
 // Get replies.
 $replies = $messageData->getReplies();
@@ -63,19 +73,22 @@ $replies = $messageData->getReplies();
 	
 	?>
 	<div>
-		<form>
+		<form id="messageReplyForm" action="index.php?page=cbAddMessage" method="POST">
+		<input type="hidden" name="subject" value=<?php echo "\"SV: " . $messageData->msgSubject . '"'; ?> />
+		<input type="hidden" name="parent" value=<?php echo '"' . $messageData->id . '"'; ?> />
+		<input type="hidden" name="child" value=<?php echo '"' . $messageData->msgChildKey . '"'; ?> />
+		<input type="hidden" name="user" value=<?php echo '"' . $userId . '"'; ?> />
 			<table>
-				<table>
-					<tr>
-						<td>Svar fra: </td><td><input type="text" id="username" disabled="true" value="<?php echo $userData->fullname; ?>"/></td>
-					</tr>
-					<tr>
-						<td>Besked: </td>
-					</tr>
-					<tr>
-						<td colspan="2"><textarea id="newMessageBody"></textarea></td>
-					</tr>
-				</table>
+				<tr>
+					<td>Svar fra: </td><td><input type="text" disabled="true" name="userDisplay" value=<?php echo '"' . $poster->fullname . '"' ?> /></td>
+				</tr>
+				<tr>
+					<td>Besked: </td>
+				</tr>
+				<tr>
+					<td colspan="2"><textarea name="body" id="newMessageBody"></textarea></td>
+				</tr>
+				<tr><td><input type="submit" value="Send" /></td></tr>
 			</table>
 		</form>
 	</div>
