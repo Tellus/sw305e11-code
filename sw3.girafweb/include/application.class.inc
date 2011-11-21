@@ -32,22 +32,20 @@ class GirafApplication extends GirafRecord
 	* Function used for finding the devices a specific applications is installed at
 	* \param $appId The id of the specific application
 	* \return Returns an array of deviceid's at which the input application is installed
-	*/
-	
+	*/	
 	public static function getDevicesWithInstalledApp($appId)
 	{
-		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_DEVICE_APPS . "WHERE applicationKey=" . appId);
-		
+	
+		$result = sql_helper::selectQuery("SELECT deviceKey FROM " . TABLE_DEVICE_APPS . " WHERE applicationKey= '$appId'");
+	
 		if(!$result) return false;
-		
-		$devIds = Array();
-		
+		echo"hej";
+		$devIds = Array();		
 		$iter = 0;
 		
 		while($row = $result->fetch_assoc())
 		{
-			$devIds[iter] = $row["deviceKey"];
-			
+			$devIds[$iter] = $row["deviceKey"];
 			$iter++;
 		}
 		

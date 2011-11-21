@@ -119,7 +119,18 @@ class ChildAndDevice
 	}
 	
  
-//connect app device(applicationKey, deviceKey)
+	public static function connectAppDevice($applicationKey, $deviceKey)
+	{
+		$sql = "INSERT INTO " . TABLE_DEVICE_APPS ." (applicationKey, deviceKey) VALUES ('$applicationKey','$deviceKey')";
+				$result = sql_helper::insertQuery($sql);
+			
+		if (!$result)
+		{
+			return false;
+		}
+
+		return $result;
+	}
  }
  
  ?>
