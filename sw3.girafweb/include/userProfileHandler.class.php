@@ -87,7 +87,7 @@ class userProfile
 	// ---------set--------\\
 
 	/**
-	* Change the users username
+	* Change the users username, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the users Username 
 	*/	
 	public function setUsername($value)
@@ -97,7 +97,7 @@ class userProfile
 	}
 	
 	/**
-	* Change the users e-mail
+	* Change the users e-mail, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the e-mail 
 	*/
 	public function setUserMail($value)
@@ -107,7 +107,7 @@ class userProfile
 	}
 
 	/**
-	* Change the users fullname
+	* Change the users fullname, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the fullname 
 	*/
 	public function setFullName($value)
@@ -116,8 +116,8 @@ class userProfile
 		$temp->__set('fullname', $value);
 	}
 	
-	/** $value should be int to do????
-	* Change the users role
+	/** 
+	* Change the users role, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the userole  
 	*/
 	public function setUserrole($value)
@@ -219,7 +219,8 @@ class userProfile
 	}
 	
 	/**
-	*
+	* Retrieves a list of the groups that this user is a member of.
+    * \return Array of groupIds on succes and false otherwise
 	*/
 	public function identifyUserGroup()
 	{
@@ -227,9 +228,11 @@ class userProfile
 		return $temp->getUserGroups();
 	}
 	
-	/**
-	*
-	*/
+    /**
+     * Adds the current user to a group.
+     * \param ID of the group that the user is to be added to.
+     * \return True on success, false otherwise.
+     */
 	public function addUserToGroup($gId)
 	{
 		$temp = $this->user;
