@@ -23,12 +23,6 @@ abstract class GirafRecord
      * Used when needing a recordset returned as full records.
      */
     const RETURN_RECORD = 1;
-
-    /**
-     * Name of the primary key in the underlying table. Used for calls to
-     * createInstance().
-     */
-    protected $primaryKey;
    
     /**
      * Contains the actual data from the database.
@@ -146,8 +140,6 @@ abstract class GirafRecord
             $field = $row["Field"];
             $this->data[$field] = "";
             $this->dirty_bits[$field] = false;
-            
-            // if($row["Key"] == "PRI") $this->$primaryKey = $row["Field"];
         }
         
         return;
@@ -161,7 +153,6 @@ abstract class GirafRecord
      */
     public function __get($key)
     {
-        // First check if the universal id value is requested. This is shorthand for this->data[$primaryKey]
         // echo $key;
         if ($key == "id")
             return $this->data[static::getPrimaryKey()];
@@ -337,7 +328,8 @@ abstract class GirafRecord
         // If we have a specific condition, set that up.
         if (isset($condition)) $sql .= " WHERE $condition";
         
-        // echo $sql;
+        // var_dump($sql);
+        // die();
         
         // Execute the query.
         $keys = sql_helper::selectQuery($sql);

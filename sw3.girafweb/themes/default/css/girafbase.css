@@ -1,9 +1,23 @@
-.centerbox
+.center-box
 {
+    width:300px;
+    margin: auto;
+    padding: 10px;
     vertical-align: middle;
 }
 
+.center-box-header
+{
+    margin: -10px -10px 10px -10px;
+}
+
 .giraferror
+{
+    color: red;
+    background-color: #BBBBBB;
+}
+
+.giraf-user-error
 {
     color: red;
     background-color: #BBBBBB;

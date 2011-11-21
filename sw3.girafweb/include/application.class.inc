@@ -6,7 +6,7 @@ require_once(__DIR__ . "/constants.inc"); // table constants
 /**
 * Class used for handeling application data
 */
-class GirafApplications extends GirafRecord
+class GirafApplication extends GirafRecord
 {
 	public static function getSourceTable()
 	{
@@ -36,7 +36,7 @@ class GirafApplications extends GirafRecord
 	
 	public static function getDevicesWithInstalledApp($appId)
 	{
-		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_RELATIONS . "WHERE applicationKey=" . appId);
+		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_DEVICE_APPS . "WHERE applicationKey=" . appId);
 		
 		if(!$result) return false;
 		

@@ -48,6 +48,40 @@ abstract class util
         }
         return $out;
     }
+    
+    private static $safeSyntaxMsg;
+    
+    /**
+     * A Giraf implementation of the deprecated php_check_syntax
+     * function. Will use the CLI version of PHP to check a file for
+     * syntax errors.
+     * \param $file Full path to the file in question.
+     * \param $run If true, the file will also be executed within the
+     * CGI context (that is, included).
+     * \return True if the file is OK, false otherwise.
+     */
+    public static function checkFileSyntax($file, $run = false)
+    {
+		// We cheat a little. PHP doesn't find any syntax errors in the
+		// file "." (current dir). We use that output to determine
+		// safeness of other files.
+		if (!isset(self::$safeSyntaxMsg))
+		{
+			self::$safeSyntaxMsg = `php -l .`;
+			self::$safeSyntaxMsg = substr(self::$safeSyntaxMsg, 0, strlen(self::$safeSyntaxMsg)-2);
+		}
+		$output = `php -l $file`;
+		
+		if (strpos($output, self::$safeSyntaxMsg) !== false)
+		{
+			if ($run) include_once($file);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 ?>

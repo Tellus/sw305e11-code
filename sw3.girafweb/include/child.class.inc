@@ -39,6 +39,27 @@ class GirafChild extends GirafRecord
     }
 	
 	/**
+	 * Proxy for GirafRecord::getRecords. Retrieves an array of
+	 * children.
+	 * \param $cond Optional restrictive condition.
+	 * \param $returnAs Desired return type.
+	 * \return Array of children, either primary keys (ints) or objects.
+	 * */
+	public static function getGirafChildren($cond = null, $returnAs = self::RETURN_PRIMARYKEY)
+	{
+		return parent::getRecords($cond, $returnAs);
+	}
+	
+	public function getFirstName()
+	{
+		$name = $this->profileName;
+		
+		$name = substr($name, 0, strpos($name, " "));
+		
+		return $name;
+	}
+	
+	/**
 	* Getting an array of abilities
 	* \param The child's id
 	* \return An array of bool where the index is the ability 

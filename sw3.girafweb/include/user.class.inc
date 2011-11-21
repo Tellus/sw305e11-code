@@ -86,7 +86,7 @@ class GirafUser extends GirafRecord
      */
     public function getUserGroups()
     {
-        $sql = "SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey={$this->id}";
+        $sql = "SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey=" . $this->id;
         // echo $sql;
         $keys = sql_helper::selectQuery($sql);
         
@@ -94,10 +94,9 @@ class GirafUser extends GirafRecord
         if(!$keys) die(sql_helper::getErrMsg());
         
         $ret = array();
-        $iter = 0;
         while($row = $keys->fetch_row())
         {
-            $ret[$iter++] = $row[0];
+            $ret[] = $row[0];
         }
         
         return $ret;
@@ -131,10 +130,27 @@ class GirafUser extends GirafRecord
         if (!$result) throw new Exception(sql_helper::getErrMsg());
     }
     
+    /**
+     * Removes a child from a group.
+     * \todo Implement.
+     * */
     public function removeFromGroup($gId)
     {
     
     }
+    
+    /**
+     * Retrieves array of applications installed on the child's devices.
+     * \param $dev Optional. Set a single device to pull apps for.
+     * \param $returnAs Define return type, array of app objects or
+     * array of primary keys.
+     * */
+    public function getApps($dev = null, $returnAs = self::RETURN_PRIMARYKEY)
+    {
+		
+	}
+    
+    
 }
 
 ?>

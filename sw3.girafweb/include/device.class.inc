@@ -1,12 +1,13 @@
 <?php
 
 require_once(__DIR__ . "/record.class.inc"); // Parent class
+require_once(__DIR__ . "/application.class.inc"); // App class. Referenced.
 require_once(__DIR__ . "/constants.inc"); // Table constants 
 
 /** 
  * Class used to handle data of devices
  */
-class GirafDevices extends GirafRecord
+class GirafDevice extends GirafRecord
 {
 	public static function getSourceTable()
 	{
@@ -25,7 +26,7 @@ class GirafDevices extends GirafRecord
 	
 	public static function getDevices($cond = null, $return_as = self::RETURN_PRIMARYKEY)
 	{
-		return parent::getRecord($cond, $return_as);
+		return parent::getRecords($cond, $return_as);
 	}
 	
 		/**
@@ -35,18 +36,23 @@ class GirafDevices extends GirafRecord
 	*/
 	public static function getAppsOnDevice($deviceId)
 	{
-		$result = sql_helper::selectQuery("SELECT applicationKey FORM" . TABLE_RELATIONS . "WHERE deviceKey=" . $deviceId);
+		$sql = "SELECT applicationKey FROM " . TABLE_DEVICE_APPS . " WHERE deviceKey=" . $deviceId;
 		
-		if(!result) return false;
+		// var_dump($sql);
+		
+		$result = sql_helper::selectQuery($sql);
+		
+		if(!$result)
+		{
+			var_dump($result, sql_helper::getErrMsg());
+			return false;
+		}
 		
 		$appsIds = Array();
-		$iter = 0;
 	
 		while ($row = $result->fetch_assoc())
 		{
-			$appsIds[iter] = $row["applicationsKey"];
-			
-			$iter++;
+			$appsIds[] = $row["applicationKey"];
 		}
 		
 		return $appsIds;
