@@ -58,7 +58,7 @@ class login
 	/**
 	* handles when the user forget their password
 	*/
-	public static function forgottenPassword($username)
+	public static function forgottenPassword($email)
 	{
 		//todo
 	}

@@ -91,7 +91,7 @@ class GirafChild extends GirafRecord
 		return $allArray;
 	}
 	/**
-	* Gets an array with abilities
+	* Gets an array with abilities where the ability is the index and the value is at default false
 	* \return All abilities in an array where the ability is the index and the value is at default false; 
 	*/
 	public static function getAllAbilities()
@@ -115,11 +115,12 @@ class GirafChild extends GirafRecord
 	* \param ID: the child's id
 	* \param oldAbilities: the array before changes was made
 	* \param newAbilities: the array after changes was made 
+	* \return if successful the return value is true and false otherwise
 	*/
 	public static function commitAbilityChange($ID, $oldAbilities, $newAbilities)
 	{
 		$aDQuery = sql_helper::selectQuery("SELECT * FROM ". TABLE_ABILITY_DEFINITIONS);
-		if(!$aDQuery) return null; //error
+		if(!$aDQuery) return false; //error
 		
 		$abilityDefinition = Array();    
 		while ($row = $aDQuery->fetch_assoc())

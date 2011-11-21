@@ -9,10 +9,11 @@ require_once(__DIR__ . "/child.class.inc");
 class ChildAndDevice
 {
 	/**
+	* Create a new child
 	* \param The child's name
 	* \param The child's birthday as YYYY-MM-DD
 	* \param An array of the child's abilities
-	* \returns The new childs ID
+	* \returns The new child's ID upon succes
 	*/
 	public static function createChild($profileName, $profileBirthday, $abilities)
 	{
@@ -24,6 +25,7 @@ class ChildAndDevice
 	}
 	
 	/**
+	* Get a child's id from the database, identified from the child's name and birthday
 	* \param The child's name
 	* \param The child's birthday
 	* \returns The child's id if succesful
@@ -39,6 +41,7 @@ class ChildAndDevice
 	}
 
 	/**
+	* This function is called by ChildAndDevice::createChild to save the child in the database
 	* create a new child and returns the child's id
 	* \return True if succesful
 	*/
@@ -56,9 +59,10 @@ class ChildAndDevice
 	}
 	
 	/**
-	* \param the child's id 
-	* \param the device identity
-	* \return the device id on success
+	* Creates a new device in the system
+	* \param The child's id 
+	* \param The device identity
+	* \return The device id on success
 	*/
 	public static function createDevice($childID, $deviceIdent)
 	{
@@ -67,6 +71,7 @@ class ChildAndDevice
 	}
  
 	/**
+	* This function is used by ChildAndDevice::createDevice to create a new device in the database
 	* \param the child's id 
 	* \param the device identity
 	* \return true on succes otherwise false
@@ -85,9 +90,10 @@ class ChildAndDevice
 	}
 	
 	/**
-	* \param the child's id 
-	* \param the device identity
-	* \return the device id on success
+	* Finds a device id from the child's id and device identity 
+	* \param The child's id 
+	* \param The device identity
+	* \return The device id on success and false otherwise
 	*/
 	public static function deviceId($childID, $deviceIdent)
 	{
@@ -99,8 +105,9 @@ class ChildAndDevice
 		return null;
 	}
  
- //connect child with user(childKey, userKey)
+
 	/**
+	* Try to connect an user and a child 
 	* \param the child's id
 	* \param the user's id
 	* \return true if succesful
@@ -114,11 +121,15 @@ class ChildAndDevice
 		{
 			return false;
 		}
-
 		return $result;
 	}
 	
- 
+	/**
+	* Try to connect an app and device
+	* \param the app's id
+	* \param the device's id
+	* \return true if succesful and false otherwise
+	*/
 	public static function connectAppDevice($applicationKey, $deviceKey)
 	{
 		$sql = "INSERT INTO " . TABLE_DEVICE_APPS ." (applicationKey, deviceKey) VALUES ('$applicationKey','$deviceKey')";

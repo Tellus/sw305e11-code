@@ -39,7 +39,6 @@ class GirafApplication extends GirafRecord
 		$result = sql_helper::selectQuery("SELECT deviceKey FROM " . TABLE_DEVICE_APPS . " WHERE applicationKey= '$appId'");
 	
 		if(!$result) return false;
-		echo"hej";
 		$devIds = Array();		
 		$iter = 0;
 		

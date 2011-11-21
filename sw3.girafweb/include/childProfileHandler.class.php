@@ -19,7 +19,7 @@ class childProfile
 
 	/**
 	* Find the child from ID
-	* \param dette skal være et gyldigt childId 
+	* \param This has to be an valid child ID 
 	*/	
 	public function __construct($ID)
 	{
@@ -33,16 +33,16 @@ class childProfile
 	
 	//---------------get----------------\\ 
 	/**
-	* Returning the child's idkey
-	* \return the child's idkey 
+	* Get the child's id
+	* \return The child's idkey 
 	*/
 	public function getId()
 	{
 		return $this->id;
 	}
 	
-	/**
-	* Returning the child's  name
+	/** 
+	* Get the child's  name
 	* \return Returns the childs name
 	*/
 	public function getChildName()
@@ -62,7 +62,7 @@ class childProfile
 	}
 	
 	/**
-	* Returning an array for abilities where the index key is the ability and the value is a bool
+	* Get the array for child's abilities where the index key is the ability and the value is a bool
 	* \return an array with booleans indicating the child's abilities
 	*/
 	public function getAbilitiesArray()
@@ -74,7 +74,7 @@ class childProfile
 	//---------------set-----------------\\
 	
 	/**
-	* Change the child's name 
+	* Change the child's name, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the name of the child 
 	*/
 	public function setChildName($value)
@@ -84,7 +84,7 @@ class childProfile
 	}
 	
 	/**
-	* Change the child's birthday 
+	* Change the child's birthday, but remember to commit otherwise these changes woundn't be saved in the database 
 	* \param Takes the birthday of the child 
 	*/	
 	public function setChildBirthday($value)
@@ -94,7 +94,7 @@ class childProfile
 	}
 	
 	/**
-	* Change the child's abilities which is in a array
+	* Change the child's abilities which is in a array, but remember to commit otherwise these changes woundn't be saved in the database
 	* \param Takes an array where index key is the ability and the value is a bool
 	*/
 	public function setAbilities($newValue)
@@ -107,23 +107,22 @@ class childProfile
 	//--------------save-----------------\\
 
 	/**
-	* Save all the changes that have been made
+	* Save all the changes in the database that have been made by the user
+	* \return Returns true if succesful and false otherwise 
 	*/
 	public function saveChanges()
 	{
 		$temp = $this->child;
 		if($this->oldChildAbilities != "")
 		{   
-			$temp->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
+			$resultAbilities = $temp->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
+			if(!$resultAbilities) return false
 		}
-	
-		
-		$temp->commit();
+		$result=$temp->commit();
+		if(!$result) return false;
+		return $result;
 	}
-	//--------------others----------------\\
 
-	
-	
 }
 
 ?>

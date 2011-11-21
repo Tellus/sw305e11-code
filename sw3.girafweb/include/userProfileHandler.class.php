@@ -4,7 +4,7 @@ require_once(__DIR__ . "/user.class.inc");
 require_once(__DIR__ . "/record.class.inc");
 require_once(__DIR__ . "/childDevice.func.inc");
 /**
-* This class handles requist from the interface about the User 
+* This class handles users info and functions
 */
 class userProfile
 {
@@ -23,7 +23,8 @@ class userProfile
 	}
 	//--------gets---------\\
 	/**
-	*\return the user's ID
+	* Get the user id
+	*\return The user's ID
 	*/
 	public function getUserId()
 		{
@@ -31,6 +32,7 @@ class userProfile
 		}
 	
 	/**
+	* Get the username
 	* \return Returns the user's username
 	*/
 	public function getUsername()
@@ -41,6 +43,7 @@ class userProfile
 	}
 	
 	/**
+	* Get the users mail
 	* \return Returns the user's mail
 	*/
 	public function getUserMail()
@@ -50,6 +53,7 @@ class userProfile
 	}
 	
 	/**
+	* Get the users fullname
 	* \return Returns the user's fullname
 	*/
 	public function getFullName()
@@ -59,6 +63,7 @@ class userProfile
 	}
 	
 	/**
+	* Get the user's role 
 	* \return Returns the users role
 	*/	
 	public function getUserrole()
@@ -68,6 +73,7 @@ class userProfile
 	}
 
 	/**
+	* Get the users current online status
 	* \return Returns the current Online status
 	*/	
 	public function getUserOnlineStatus()
@@ -135,13 +141,18 @@ class userProfile
 		}
 		if($status==null ||$bool==false)
 		{
-			//error handling
+			return false;
 		}
-		//evt return ny status
+		return self::getUserOnlineStatus();
 	}
 	
 	
 	//-------------others-----------------\\
+	/**
+	* Is used to find users role, but not necessary, more to future work
+	* \param A user role which is an integer
+	* \return An valid integer corrosponding to a valid role
+	*/
 	private function identifyRole($role)
 	{
 		$admin = 1;
@@ -168,6 +179,11 @@ class userProfile
 		}
 	}
 	
+	/**
+	* Is used to find the right online status, but not necessary, more to future work
+	* \param An online status which is an integer
+	* \return An valid integer corrosponding to a valid online status
+	*/	
 	private function identifyStatus($status)
 	{
 	    $statusOnline = 0;
@@ -202,20 +218,31 @@ class userProfile
 		}
 	}
 	
-	//to handle
+	/**
+	*
+	*/
 	public function identifyUserGroup()
 	{
 		$temp = $this->user;
 		return $temp->getUserGroups();
 	}
 	
-	//to handle addToGroup($gId) from user class
+	/**
+	*
+	*/
 	public function addUserToGroup($gId)
 	{
 		$temp = $this->user;
 		$temp->addToGroup($gId);
 	}
 	
+	/**
+	* Creates a child and connect it to the user
+	* \param The child's name
+	* \param The child's birthday as YYYY-MM-DD
+	* \param An array of the child's abilities
+	* \return True on succes and false otherwise;
+	*/	
 	public function addNewChildToUser($profileName, $profileBirthday, $abilities)
 	{
 		$childkey = ChildAndDevice::createChild($profileName, $profileBirthday, $abilities);
@@ -224,21 +251,32 @@ class userProfile
 			return "Error: This child were not registeret";
 		}
 		$connected = self::addChildToUser($childkey);
-		
+		if(!$connected) return false;
 		return $connected;
 	}
-	
+
+	/**
+	* Find an existing child and connect it to the user
+	* \param The child's name
+	* \param The child's birthday as YYYY-MM-DD
+	* \return True on succes and false otherwise;
+	*/	
 	public function addExistingChildToUser($profileName, $profileBirthday)
 	{
 		$childkey = ChildAndDevice::getChildId($profileName, $profileBirthday);
 		if(!$childkey)
 		{
-			return "Error: Bad id";
+			return false;
 		}
 		$connected = self::addChildToUser($childkey);
+		if(!$connected) return false;
 		return $connected;
 	}
-	
+	/**
+	* this is used by userProfile::addExistingChildToUser() and userProfile::addNewChildToUser()
+	*\param a child id
+	*\return True upon succes and false otherwise
+	*/
 	private function addChildToUser($childkey)
 	{
 		$connected = ChildAndDevice::connectChildAndUser($childkey, $this->id);
@@ -251,13 +289,15 @@ class userProfile
 	
 	//----------save------------\\
 	/**
-	* 
+	* Save all the changes in the database that have been made by the user
+	* \return Returns true if succesful and false otherwise 
 	*/
 	public function saveChanges()
 	{
-	    echo "in save";
 		$temp = $this->user;
-		$temp->commit();
+		$result=$temp->commit();
+		if(!$result) return false;
+		return $result;
 	}
 	
 }
