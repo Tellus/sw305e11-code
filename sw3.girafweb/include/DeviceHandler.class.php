@@ -10,7 +10,23 @@ class DeviceHandler
 		$this->device = GirafDevices::getDevice($ID);
 		$this->id = $ID; 
 	}
+
+	public function getDeviceId()
+	{
+		return $this->id;
+	}
 	
+	public function getOwnerId()
+	{
+		$temp = $this->device;
+		return $temp->ownerId;
+	}
+	
+	public function getDeviceIdent()
+	{
+		$temp = $this->device;
+		return $temp->deviceIdent;
+	}
 	
 } 
 
