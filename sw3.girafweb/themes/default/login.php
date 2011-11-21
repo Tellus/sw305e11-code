@@ -23,7 +23,7 @@ if(isset($_POST["action"]))
 			if($result == true)
 			{
 				$isLoggedIn = true;
-				header("Location: index.php?page=home");
+				header("Location: index.php?page=main");
 			}
 
 			break;

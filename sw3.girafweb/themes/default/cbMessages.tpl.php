@@ -21,20 +21,24 @@ $userData = GirafUser::getGirafUser($userId);
 	<div id="newpost">
 		<h3><a href="#">Nyt indlæg</a></h3>
 		<div>
+			<form name="newMessageForm" action="index.php?page=cbAddMessage" method="POST">
+			<input type="hidden" name="child" value=<?php echo '"' . $_GET["child"] . '"'; ?> id="newMessageChildId" />
 			<table>
 				<tr>
 					<td>Oprettet af: </td><!-- Automantisk indsættes brugernavn-->
-					<td><input type="text" value=<?php echo '"' . $userData->username . '"'; ?> readonly="readonly"/></td>
+					<td><input type="text" name="user" value=<?php echo '"' . $userData->username . '"'; ?> readonly="readonly"/></td>
 				</tr>
 				<tr>
 					<td>Overskrift: </td><!-- Overskrift, som skal være synlig fra oversigten-->
-					<td><input type="text" /></td>
+					<td><input name="subject" type="text" /></td>
 				</tr>
+				<tr>
+					<td colspan="2"><textarea class="newpostinput" name="body">:D</textarea></td>
+				</tr>
+			<tr><td><input type="file" id="uploadimage"></td></tr>
+			<tr><td><input type="submit" value="Send" /></td></tr>
 			</table>
-			<textarea id="newpostinput">:D</textarea>
-				<!-- Lille text editor
-				-->
-			<input type="file" id="uploadimage"> <!-- Uploader et eller flere billeder til en post -->
+			</form>
 		</div>
 	</div>
 	<!-- Here follows the complete accordian of contactbook messages. -->
@@ -67,7 +71,7 @@ $userData = GirafUser::getGirafUser($userId);
 			<h3><a href="#"><?php echo $msg->msgTimestamp; ?> <?php echo $msg->msgSubject; ?><span id="new">New</span></a></h3>
 			<div>
 				<?php echo $msg->msgBody; ?>
-				<input id=<?php echo '"' . $msg->id . '"'; ?> class="readmoreButton" type="button" value="Læs mere"/>
+				<input id=<?php echo '"message-' . $msg->id . '"'; ?> class="readmoreButton" type="button" value="Læs mere"/>
 			</div>
 			<?php
 		}

@@ -1,5 +1,6 @@
 <?php
 
+require_once(__DIR__ . "/sql_helper.inc");
 require_once(__DIR__ . "/record.class.inc");
 require_once(__DIR__ . "/constants.inc");
 
@@ -54,6 +55,42 @@ class ContactbookMessage extends GirafRecord
 	public static function getMessages($cond = "", $order = self::ORDER_DESCENDING, $returnAs = self::RETURN_PRIMARYKEY)
 	{
 		return parent::getRecords($cond, $returnAs);
+	}
+	
+	/**
+	 * (Very) shorthand for creating new messages. Really just a proxy
+	 * for an insertion statement.
+	 * \param $userId Id of the poster.
+	 * \param $childId Id of the child this is for.
+	 * \param $subject Message subject.
+	 * \param $body Message body.
+	 * \param $parent Optional, the message ID that this message is a reply to.
+	 * \return Id of the new message on success, false on failure.
+	 * */
+	public static function createNewMessage($uId, $cId, $subject, $body, $parent = null)
+	{
+		if (isset($parent))
+		{
+			$sql = "INSERT INTO " . self::getSourceTable() .
+					" (msgParentKey, msgChildKey, msgUserKey, msgSubject, msgBodY) VALUES " .
+					" ('$parent', '$cId', '$uId', '$subject', '$body')";
+		}
+		else
+		{
+			$sql = "INSERT INTO " . self::getSourceTable() .
+					" (msgParentKey, msgChildKey, msgUserKey, msgSubject, msgBodY) VALUES " .
+					" (NULL, '$cId', '$uId', '$subject', '$body')";
+		}
+				
+		var_dump($sql);
+				
+		$res = sql_helper::insertQuery($sql);
+		
+		if (!$res) die(sql_helper::getErrMsg());
+		
+		// Else, we assume good.
+		// SELECT * FROM `cbMessages` WHERE msgUserKey=1 ORDER BY messageId DESC LIMIT 1
+		return sql_helper::simpleQuery("SELECT " . self::getPrimaryKey() . " FROM " . self::getSourceTable() . " WHERE msgUserKey=$uId ORDER BY messageId DESC LIMIT 1");
 	}
 }
 

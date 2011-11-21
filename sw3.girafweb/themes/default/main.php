@@ -89,6 +89,7 @@ foreach($kids as $child)
 			var callerId = event.target.id;
 			var appId = getAppIdFromAppButton(callerId);
 			var kidId = getChildIdFromAppButton(callerId);
+			
 			// alert(appId + " and " + kidId);
 			$.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
 		});
@@ -127,7 +128,9 @@ foreach($kids as $child)
 				// alert("Getting more for more.");
 				// $("#readMessageDialog").dialog("open");
 				// Load data.
-				$.get("themes/default/cbMessage.tpl.php", { message : 1 }, function(contents, ign, ignToo)
+				var msgId = event.target.id;
+				msgId = msgId.substring(msgId.indexOf("-")+1);
+				$.get("themes/default/cbMessage.tpl.php", { message : msgId }, function(contents, ign, ignToo)
 				{
 					$("#messageDialogContents").html(contents);
 					$("#readMessageDialog").dialog("open");
