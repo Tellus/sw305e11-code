@@ -77,6 +77,11 @@ class applicationHandler
 		$abilities['$canUseKeyboard'] = $temp->canUseKeyboard;	
 		return $abilities;
 	}	
+	public function getDevicesWithInstalledApp()
+	{
+		$application = GirafApplication::getDevicesWithInstalledApp($this->id);
+		return $application;
+	}
 
 } 
 ?>

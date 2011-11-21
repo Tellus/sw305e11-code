@@ -28,6 +28,12 @@ class DeviceHandler
 		return $temp->deviceIdent;
 	}
 	
+	public function getAllAppsOnDevice()
+	{
+		$AppsOnDevice = GirafDevice::getAppsOnDevice($this->id);
+		return $AppsOnDevice;
+	}
+	
 } 
 
 ?>
