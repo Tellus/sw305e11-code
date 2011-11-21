@@ -6,16 +6,18 @@
 // Initializing code.
 // $page_path = dirname($_SERVER["PHP_SELF"]);
 require_once("theme.conf");
+// require_once("../../include/session.class.inc");
 
 $p = dirname($_SERVER["SCRIPT_NAME"]) . "/" . THEME_PATH;
 
 // Since it's a feature used numerous times throughout this script,
 // let's just get the current user.
 
-$currentUser = users::getCurrentUser();
-$currentUser = 1;
+// $currentUser = users::getCurrentUser();
+$s = GirafSession::getSession();
+// $currentUser = 1;
 
-$currentUserData = GirafUser::getGirafUser($currentUser);
+$currentUserData = GirafUser::getGirafUser($s->getCurrentUser());
 
 // Alright, time constraint.
 // We're gonna bruteforce the fuck out of this thing.
@@ -85,10 +87,21 @@ foreach($kids as $child)
 		
 		$(".app-picker").button().click(function(){
 			var callerId = event.target.id;
-			var childId = callerId.substring(callerId.lastIndexOf("-") + 1);
-			// alert(childId);
-			$.get("themes/default/cbMessages.tpl.php", { child : 1}, printModule);
+			var appId = getAppIdFromAppButton(callerId);
+			var kidId = getChildIdFromAppButton(callerId);
+			// alert(appId + " and " + kidId);
+			$.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
 		});
+		
+		function getChildIdFromAppButton(fullId)
+		{
+			return fullId.substring(fullId.indexOf("-")+1, fullId.lastIndexOf("-"));
+		}
+		
+		function getAppIdFromAppButton(fullId)
+		{
+			return fullId.substring(fullId.lastIndexOf("-") + 1);
+		}
 		
 		function printModule(contents, ignore, ignoreToo)
 		{

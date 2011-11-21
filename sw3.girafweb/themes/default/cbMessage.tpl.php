@@ -11,11 +11,14 @@ require_once($_SERVER["DOCUMENT_ROOT"] . "/dev/include/cbmessage.class.inc");
 // We only need one thing for the display itself, but we should have
 // current user information stored in-session.
 
-$userId = GirafSession::getCurrentUser();
+// $userId = GirafSession::getCurrentUser();
+if (!isset($s)) $s = GirafSession::getSession();
+
+$userId = $s->getCurrentUser();
 
 if ($userId == null || $userId == false)
 {
-	$userId = 1;
+	die("Page cannot be used without loggin in.");
 }
 
 $userData = GirafUser::getGirafUser($userId);
