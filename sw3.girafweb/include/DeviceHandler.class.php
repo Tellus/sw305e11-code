@@ -7,7 +7,7 @@ class DeviceHandler
 	
 	public function __construct($ID)
 	{
-		$this->device = GirafDevices::getDevice($ID);
+		$this->device = GirafDevice::getDevice($ID);
 		$this->id = $ID; 
 	}
 

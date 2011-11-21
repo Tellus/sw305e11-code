@@ -36,7 +36,7 @@ class GirafApplication extends GirafRecord
 	
 	public static function getDevicesWithInstalledApp($appId)
 	{
-		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_DEVICE_APPS . "WHERE applicationKey=" . appId);
+		$result = sql_helper::selectQuery("SELECT deviceKey FROM" . TABLE_DEVICE_APPS . "WHERE applicationKey=". $appId);
 		
 		if(!$result) return false;
 		

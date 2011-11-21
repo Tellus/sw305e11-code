@@ -1,14 +1,14 @@
 <?php
-require_once(__DIR__ . "/applications.class.inc"); 
+require_once(__DIR__ . "/application.class.inc"); 
 
 class applicationHandler
 {
-	private id;
-	private application;
+	private $id;
+	private $application;
 	
 	public function __construct($ID)
 	{
-		$this->application = GirafApplications::getDevicesWithInstalledApp($ID);
+		$this->application = GirafApplication::getApplication($ID);
 		$this->id = $ID;
 	}
 	
@@ -64,7 +64,7 @@ class applicationHandler
 		$abilities = Array();
 		$temp = $this->application;
 		
-		$abilities['$CanDragAndDrop'] = $temp->CanDragAndDrop;
+		$abilities['$CanDragAndDrop'] = $temp->canDragAndDrop;
 		$abilities['$canHear'] = $temp->canHear;
 		$abilities['$requiresSimpleVisualEffects'] = $temp->requiresSimpleVisualEffects;
 		$abilities['$canAnalogTime'] = $temp->canAnalogTime;
