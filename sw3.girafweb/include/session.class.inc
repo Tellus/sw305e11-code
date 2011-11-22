@@ -143,7 +143,7 @@ class GirafSession
 			$user = users::getUserId($user);
 		}
 		
-		var_dump($user, $password);
+		// var_dump($user, $password);
 		
 		// Finally, check the password.
 		if (auth::matchPassword($user, $password, $hash))

@@ -21,7 +21,7 @@ $userData = GirafUser::getGirafUser($userId);
 	<div id="newpost">
 		<h3><a href="#">Nyt indlæg</a></h3>
 		<div>
-			<form name="newMessageForm" action="index.php?page=cbAddMessage" method="POST">
+			<form name="newMessageForm" action="index.php?page=cbAddMessage" method="post" enctype="multipart/form-data">
 			<input type="hidden" name="child" value=<?php echo '"' . $_GET["child"] . '"'; ?> id="newMessageChildId" />
 			<table>
 				<tr>
@@ -35,8 +35,8 @@ $userData = GirafUser::getGirafUser($userId);
 				<tr>
 					<td colspan="2"><textarea class="newpostinput" name="body">:D</textarea></td>
 				</tr>
-			<tr><td><input type="file" id="uploadimage"></td></tr>
-			<tr><td><input type="submit" value="Send" /></td></tr>
+			<tr><td><input class="imageUpload" type="file" name="uploadImage0" id="uploadimage0" /></td></tr>
+			<tr><td><input type="submit" name="submit" value="Send" /></td></tr>
 			</table>
 			</form>
 		</div>

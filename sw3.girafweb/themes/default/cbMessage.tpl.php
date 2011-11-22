@@ -51,10 +51,27 @@ $replies = $messageData->getReplies();
 ?>
 <div id="messageSubject" style="visibility:hidden;"><?php echo $messageData->msgSubject; ?></div>
 <div>
-	<h3><?php echo $poster->fullname; ?> | <?php echo $messageData->msgTimestamp ?></h3>
-	<div>
-		<?php echo $messageData->msgBody; ?>
-	</div>
+	<h3><?php echo $poster->username; ?> | <?php echo $messageData->msgTimestamp ?></h3>
+	<hr/>
+	<table>
+	<tr>
+		<td style="vertical-align: top;"><?php echo $messageData->msgBody; ?></td>
+		<td>
+		<?php
+		
+		// For each image, show it!
+		
+		$imgs = $messageData->getImages();
+		
+		foreach ($imgs as $image)
+		{
+			echo "<image class=\"cb-image\" src=\"content/img/" . basename($image) . "\"/><br/>";
+		}
+		
+		?>
+		</td>
+	</tr>
+	</table>
 	<hr/>
 	<?php
 	
@@ -62,11 +79,33 @@ $replies = $messageData->getReplies();
 	
 	foreach($replies as $reply)
 	{
+		// Get the op.
+		$user = GirafUser::getGirafUser($reply->msgUserKey); 
+		
 		?>
 		<div>
-			<h3><?php echo $reply->msgSubject; ?></h3>
-			<div><?php echo $reply->msgBody; ?></div>
-		</div>
+			<!-- h3><?php echo $reply->msgSubject; ?></h3 -->
+			<h3><?php echo $user->username . " | " . $reply->msgTimestamp; ?></h3>
+			<hr/>
+			<table>
+			<tr>
+		<td style="vertical-align: top;"><?php echo $reply->msgBody; ?></td>
+		<td>
+		<?php
+		
+		// For each image, show it!
+		
+		$imgs = $reply->getImages();
+		
+		foreach ($imgs as $image)
+		{
+			echo "<image class=\"cb-image\" src=\"content/img/" . basename($image) . "\"/><br/>";
+		}
+		
+		?>
+		</td>
+	</tr>
+	</table>
 		<hr/>
 		<?php
 	}
@@ -80,7 +119,7 @@ $replies = $messageData->getReplies();
 		<input type="hidden" name="user" value=<?php echo '"' . $userId . '"'; ?> />
 			<table>
 				<tr>
-					<td>Svar fra: </td><td><input type="text" disabled="true" name="userDisplay" value=<?php echo '"' . $poster->fullname . '"' ?> /></td>
+					<td>Svar fra: </td><td><input type="text" disabled="true" name="userDisplay" value=<?php echo '"' . $userData->username . '"' ?> /></td>
 				</tr>
 				<tr>
 					<td>Besked: </td>

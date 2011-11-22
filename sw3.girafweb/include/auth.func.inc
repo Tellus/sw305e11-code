@@ -80,8 +80,6 @@ class auth
             
         $matches = ($pass == $row["password"]);
             
-        // echo $pass . "<br/> versus <br/>" . $row["password"] . "<br/>Match : " . $matches;
-            
         return $pass == $row["password"] ? true : false;
     }
 }

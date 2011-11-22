@@ -2,7 +2,7 @@
 
 require_once(__DIR__ . "/record.class.inc");
 require_once(__DIR__ . "/util.func.inc");
-require_once(__DIR__ . "/constants.php");
+require_once(__DIR__ . "/constants.inc");
 
 /**
  * The GirafImage class is a complex enhancement of the GirafRecord class.
@@ -54,22 +54,15 @@ class GirafImage extends GirafRecord
      */
     public $imagePath;
 
-    /**
-     * Base constructor. Sets a few nice default values, but otherwise is empty.
-     */
-    public __construct()
-    {
-        $imagePath = setImagePath();
-    }
-    
-    /**
-     * Creates a new GirafImage and loads the image from the given uri.
-     * \param $fileUri URI to the image.
-     */
-    public __construct($fileUri)
-    {
-    
-    }
+	public static function getSourceTable()
+	{
+		return TABLE_IMAGE_URIS;
+	}
+	
+	public static function getPrimaryKey()
+	{
+		return "imgId";
+	}
     
     /**
      * Creates a new GirafImage based on data uploaded through the POST
@@ -168,6 +161,29 @@ class GirafImage extends GirafRecord
     {
     
     }
+    
+    /**
+     * HACKS! HAX! Hacked shorthand for the prototype. Creates a new
+     * image in the database with path, reference to a message and some
+     * text for it.
+     * \param $path Path to the file. Absolute or relative to the
+     * location of index.php
+     * \param $msgId Id of the message that the image belongs to.
+     * \param $text Text for the image.
+     * \return Id of the image or null.
+     * */
+    public static function createMessageImage($path, $msgId, $text)
+    {
+		// Resource.
+		sql_helper::insertQuery("INSERT INTO " . self::getSourceTable() . " (imgUri) VALUES ('$path')");
+		
+		$imgId = sql_helper::simpleQuery("SELECT " . self::getPrimaryKey() . " FROM " . self::getSourceTable() . " WHERE imgUri='$path'");
+		
+		// Link.
+		sql_helper::insertQuery("INSERT INTO cbMsgImages (msgKey, imgKey, imgText) VALUES ($msgId, $imgId, '$text')");
+		
+		return $imgId;
+	}
 }
 
 ?>

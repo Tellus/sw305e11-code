@@ -270,3 +270,13 @@ a:active {	text-decoration:none;
 	margin: 5px;
 	padding: 10px;
 }
+
+/* Stuff for contactbook images. */
+
+.cb-image
+{
+	width:200px;
+	height: auto;
+	padding:1px;
+	border:1px solid #021a40;
+}

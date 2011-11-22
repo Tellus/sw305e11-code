@@ -12,7 +12,9 @@ require_once(GIRAF_INCLUDE . "script.class.inc");
 // Load utility functions. And classes. Given some web discussions,
 // it is discouraged to consider this bad code until we actually see
 // detrimental performance.
-
+// Update: this procedure has actually prolonged page load with a few
+// seconds on a no-load server. Still, for now, let's not worry about
+// it until we have more users.
 $files = scandir(GIRAF_INCLUDE);
 foreach ($files as $file)
 {
@@ -35,9 +37,12 @@ foreach ($files as $file)
 // Get a session, make sure the user is logged in.
 $s = GirafSession::getSession();
 
-$isLoggedIn = $s->userId>0;
+$userId = $s->getCurrentUser();
 
-if (!isset($_GET["page"]) || ($_GET["page"] != "login" && $isLoggedIn))
+$isLoggedIn = $userId != null;
+
+// if (!isset($_GET["page"]) || ($_GET["page"] != "login" && $isLoggedIn))
+if (!$isLoggedIn && $_GET["page"] != "login")
 {
 	// This is not good. Return the user to the login page with an
 	// expiration error.
@@ -45,6 +50,10 @@ if (!isset($_GET["page"]) || ($_GET["page"] != "login" && $isLoggedIn))
 	
 	// Redirect. Will create an infinite loop if we aren't careful.
 	header("Location: index.php?page=login");
+}
+elseif ($isLoggedIn && !isset($_GET["page"]))
+{
+	$_GET["page"] = "main";
 }
 
 // Test page existance.
@@ -65,6 +74,9 @@ else
 // $parser = new GirafScriptParser("login");
 
 // echo $parser->parseTemplate(null, true);
+
+// Some header fun.
+header('Content-Type: text/html; charset=utf-8');
 
 // New method. Change into the directory to relative references work locally.
 include_once($theme_dir . $_GET['page'] . ".php");

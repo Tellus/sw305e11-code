@@ -60,7 +60,6 @@ foreach($kids as $child)
 
 ?>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>GIRAF Admin</title>
 	<link rel="stylesheet" type="text/css" href="<?php echo $p; ?>/css/css.css" />
@@ -151,6 +150,39 @@ foreach($kids as $child)
 							}
 						}
 			});
+			
+			$("#uploadimage0").change(function(){addFileInput();});
+			
+		}
+		
+		function addFileInput()
+		{
+			// Check to see if the counter has been initialized
+			if ( typeof addFileInput.counter == 'undefined' )
+			{
+				// It has not, perform the initilization
+				addFileInput.counter = 0;
+			}
+			
+			preCount = addFileInput.counter;
+			postCount = preCount + 1;
+			
+			html = '<input class="imageUpload" type="file" name="uploadImage' + postCount + '" id="uploadimage';
+			html_post = '">';
+			
+			theId = "#uploadimage" + preCount;
+			
+			targetContent = html + postCount + html_post;
+			
+			// alert(theId); 
+			
+			$(theId).after(targetContent);
+			
+			// Register new event handler.
+			$("#uploadimage" + postCount).change(function(){addFileInput();});
+			
+			// Finally, iterate.
+			addFileInput.counter += 1;
 		}
 	});</script>
 	

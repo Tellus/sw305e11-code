@@ -3,10 +3,7 @@
 require_once("theme.conf");
 require_once(INCLUDE_PATH . "cbmessage.class.inc");
 require_once(INCLUDE_PATH . "users.func.inc");
-
-// CB add message.
-
-// echo "You called me!";
+require_once(INCLUDE_PATH . "image.class.inc");
 
 // Get proper user.
 $userId = $_POST["user"];
@@ -44,6 +41,19 @@ if ($newMess == false)
 	die("Error occurred creating message.");
 }
 
+// Handle uploaded images. We do this now because we didn't know the
+// message id beforehand.
+foreach ($_FILES as $file)
+{
+	$path = __DIR__ . "/../../content/img/" . $file["name"];
+	// var_dump($file["tmp_name"]);
+	$res = move_uploaded_file($file["tmp_name"], $path);
+	// if ($res != true) die("Error during save.");
+	// Save to database.
+	GirafImage::createMessageImage($path, $newMess, "Billedtekst mangler.");
+}
+
+// Redirect back to the main page. Messy, but functional.
 header("Location: index.php?page=main");
 
 ?>

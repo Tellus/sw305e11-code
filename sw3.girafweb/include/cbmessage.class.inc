@@ -44,6 +44,26 @@ class ContactbookMessage extends GirafRecord
 	}
 	
 	/**
+	 * Retrieves all images associated with the message.
+	 * \return Array of paths to images.
+	 * */
+	public function getImages()
+	{
+		// Get references.
+		$result = sql_helper::selectQuery("SELECT imgKey FROM cbMsgImages WHERE msgKey=" . $this->id);
+		
+		// Traverse the result, getting all the paths.
+		$images = array();
+		
+		while ($row = $result->fetch_assoc())
+		{
+			$images[] = sql_helper::simpleQuery("SELECT imgUri FROM imageResources WHERE imgId=" . $row["imgKey"]);
+		}
+		
+		return $images;
+	}
+	
+	/**
 	 * Retrieves a set of messages.
 	 * \param $cond Condition for retrieval.
 	 * \param $order The order of the entries, sorted on their date.

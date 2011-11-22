@@ -21,6 +21,7 @@ define("TABLE_KIDSPROFILE_ABILITIES", "kidsProfile_abilities");
 define("TABLE_APPS" , "applications");
 define("TABLE_DEVICE", "devices");
 define("TABLE_CHILD_USER", "childUserKeys");
+define("TABLE_IMAGE_URIS", "imageResources");
 
 /** SETTINGS CONSTANTS. **/
 define("SETTING_LOCAL_IMAGE_PATH", "local_image_path");
