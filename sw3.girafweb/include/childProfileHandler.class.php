@@ -1,6 +1,7 @@
 <?php
 require_once(__DIR__ . "/record.class.inc");
 require_once(__DIR__ . "/child.class.inc"); 
+require_once(__DIR__ . "/childDevice.func.inc");
 
 /**
 * This class handles requist from the interface about the Child 
@@ -114,15 +115,28 @@ class childProfile
 	{
 		$temp = $this->child;
 		if($this->oldChildAbilities != "")
-		{   
+		{
 			$resultAbilities = $temp->commitAbilityChange($this->id, $this->oldChildAbilities, $this->childAbilities);
-			if(!$resultAbilities) return false
+			if(!$resultAbilities) return false;
 		}
 		$result=$temp->commit();
 		if(!$result) return false;
 		return $result;
 	}
-
+	//-------------others------------\\
+	
+	/**
+	* This function creates a new device which has this child's id as ownerID  
+	* \param The device identity
+	* \return The device id if succesful and false otherwise
+	*/
+	public function createNewAndConnectDevice($deviceIdent)
+	{
+		$deviceId = ChildAndDevice::createDevice($this->id, $deviceIdent);
+		if(!$deviceId) return false;
+		return $deviceId;
+		
+	}
 }
 
 ?>

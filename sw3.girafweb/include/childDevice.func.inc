@@ -11,7 +11,7 @@ class ChildAndDevice
 	/**
 	* Create a new child
 	* \param The child's name
-	* \param The child's birthday as YYYY-MM-DD
+	* \param The child's birthday as YYYY-MM-DD(2000-12-29)
 	* \param An array of the child's abilities
 	* \returns The new child's ID upon succes
 	*/
@@ -67,7 +67,7 @@ class ChildAndDevice
 	public static function createDevice($childID, $deviceIdent)
 	{
 		self::createNewDevice($childID, $deviceIdent);
-		return deviceId($childID, $deviceIdent);
+		return self::deviceId($childID, $deviceIdent);
 	}
  
 	/**
