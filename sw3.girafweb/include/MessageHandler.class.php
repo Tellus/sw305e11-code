@@ -3,7 +3,7 @@ require_once(__DIR__ . "/cbmessage.class.inc");
 require_once(__DIR__ . "/image.class.inc");
 
 /**
-*
+* class that gets the messages for the contact book, including pictures and with function to create replies and new messages
 */
 class ContactbookMessageHandler
 {
