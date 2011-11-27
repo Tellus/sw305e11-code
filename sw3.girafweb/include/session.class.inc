@@ -1,5 +1,8 @@
 <?php
 
+require_once("users.func.inc");
+require_once("auth.func.inc");
+
 /**
  * Simple class to aid in the maintenance of PHP sessions. This is particularly useful (not to mention necessary) when working with login functionality such as ours.
  * Note that this class is very basic, only slightly better than syntactic sugar as it simply wraps around existing session functions.
@@ -110,7 +113,7 @@ class GirafSession
      */ 
     public function close()
     {
-        session_destroy();
+        if (session_id() != "") session_destroy();
     }
     
     /**

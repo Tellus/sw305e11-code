@@ -10,4 +10,4 @@
 	<script src="<?=BaseUrl()?>js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
 </head>
 <body>
-<h3>Bemærk at siden fortsat er under vedligeholdelse. Fejl forekommer.</h3>
+<h3>Bemærk! Det forventes ikke at kontaktbogen fungerer før mandag aften.</h3>

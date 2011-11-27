@@ -84,4 +84,168 @@ abstract class util
 	}
 }
 
+/**
+ * Returns the base url for the site. Note this is the path to the
+ * index file, not the document root.
+ * \param Optional path to append to the url.
+ * \return String URL to the site.
+ * */
+function BaseUrl($path = "")
+{
+	return "http://giraf.homestead.dk/$path";
+}
+
+/**
+ * Finds and executes an action on a controller.
+ * \param $cont The controller to call.
+ * \param $act The action to run.
+ * \param $param Parameters to pass.
+ * */
+function CallController($cont, $act = "index", $param = null)
+{
+	// Reduce to lower-case, as per convention.
+	$cont = strtolower($cont);
+	
+	// Attempt to find the requested controller.
+	$controller_path = BASEDIR . "/controllers/$cont.php";
+	if (!file_exists($controller_path)) throw new Exception("The controller '$cont' does not exist.");
+
+	// If the controller exists, include it, then determine action.
+	require($controller_path);
+
+	// We're assuming the controller exists now, but let's just check.
+	if (!class_exists($cont)) throw new Exception ("The controller '$cont' does not exist.");
+
+	// Use reflection to get clas info.
+	$refl = new ReflectionClass($cont);
+
+	// Create a new subclass instance.
+	$newController = $refl->newInstance();
+
+	if (method_exists($newController, $act)) $newController->$act($param);
+	else $newController->fallback($act, $param);
+}
+
+/**
+ * Base function for CallController, useful for core classes that need
+ * more control.
+ * */
+function _call_controller_internal($controller, $path, $action, $parameters)
+{	
+	// Reduce to lower-case, as per convention.
+	$cont = strtolower($controller);
+	
+	// Append .php if not already there.
+	if (substr($cont, strlen($cont)-4) != ".php") $cont .= ".php";
+	
+	// Check for file existance.
+	$full_path = "$path/$controller.php";
+	if (!file_exists($full_path)) throw new Exception("The controller '$cont' does not exist.");
+
+	// If the controller exists, include it, then determine action.
+	require($full_path);
+
+	// We're assuming the controller exists now, but let's just check.
+	$cont = substr($cont, 0, strlen($cont)-4);
+	if (!class_exists($cont)) throw new Exception ("The controller '$cont' does not exist.");
+
+	// Use reflection to get clas info.
+	$refl = new ReflectionClass($cont);
+
+	// Create a new subclass instance.
+	$newController = $refl->newInstance();
+
+	if (method_exists($newController, $action)) $newController->$action($parameters);
+	else $newController->fallback($action, $parameters);
+}
+
+/**
+ * Redirects the client connection to a different URL.
+ * \param $url Either a protocol-prefixed address (http://something) or
+ * a string denoting a site path (controller/action/param). The redirect
+ * header will be instantly sent and the output buffer cleared.
+ * */
+function Redirect($url)
+{
+	$pos = strpos($url, "://");
+	if ($pos !== false && strpos($url, "://") <= 4)
+	{
+		// If it seems likely that such a pattern is part of a protocol
+		// URL, don't touch it. OTHERWISE, prepend base url.
+	}
+	else
+	{
+		if ($url[0] == '/') $url = substr($url, 1);
+		
+		$url = BaseUrl() . $url;
+	}
+	
+	header("Location: $url");
+	ob_clean();
+}
+
+/**
+ * Runs through a path variable and returns a more manageable command
+ * array.
+ * \param $path Either a string or an array to run through.
+ * \return Standardised associative array. Index 0 becomes the
+ * controller, 1 the action and all following becomes parameters.
+ * */
+function GetAssocPath($path)
+{
+	if (is_string($path))
+	{
+		$path = explode('/', $path);
+		if (count($path) > 0) array_shift($path);
+	}
+	elseif (is_array($path))
+	{
+		// No probs.
+	}
+	else
+	{
+		throw new Exception("Invalid type of path objet passed, '" . get_class($path) . "'.");
+	}
+	
+	// Go through all entries. The first and second entry will be 
+	// controller and action, respectively, while all following will be
+	// parameters.
+	$count = 0;
+	foreach ($path as $entry)
+	{
+		switch ($count)
+		{
+			case 0:
+			{
+				$path["controller"] = $entry;
+				break;
+			}
+			case 1:
+			{
+				$path["action"] = $entry;
+				break;
+			}
+			default:
+			{
+				$path["param".($count-2)] = $entry;
+				break;
+			}
+		}
+		$count++;
+	}
+	
+	return $path;
+}
+
+function GetPath($asAssoc = false)
+{
+	$path = explode('/', $_SERVER['PATH_INFO']);
+	// I've found that the first element is always a null string, so now
+	// it's fuckin' gone.
+	if (count($path) > 0) array_shift($path);
+	
+	if ($asAssoc) return GetAssocPath($path);
+	else return $path;
+}
+
 ?>
