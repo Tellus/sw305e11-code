@@ -76,10 +76,9 @@ class Main extends GirafController
 		// Invoke the views.
 		$this->view("default/header", $data);
 		$this->view("default/main_stub", $data);
-		// Here, insert the module view. We have a challenge in creating
-		// a proper modular approach that avoids having to rewrite this
-		// class every time.
-		// $this->view("default/module_$action");
+		// The view should be capable of calling the required sub modules.
+		// We need a standardisation in javascript that makes sure it
+		// knows how to replace the module section. No php there.
 		$this->view("default/footer", $data);
 	}
 }

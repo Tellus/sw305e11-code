@@ -27,26 +27,23 @@ class Module extends GirafController
 		
 		// Look for a fitting controller in the "apps" subfolder.
 		// Unsorted, we aren't utilizing advanced searching algorithms.
-		$mods = scandir(__DIR__ . "/apps", SCANDIR_SORT_NONE);
+		$mods = scandir(__DIR__ . "/apps");
 		
 		foreach ($mods as $module)
 		{
 			// Ignore folders			
 			if (is_dir(__DIR__ . "/apps/$module")) continue;
 			
-			if (strtolower($module) == $action)
+			if (strtolower($module) == "$action.php")
 			{
 				// Invoke the module.
 				// require_once(__DIR__ . "/apps/$module");
 				
 				// Remove the Module controller part.
 				// Get a new non-associative path and remove the controller piece.
-				$newPath = GetPath(false);
-				array_shift($newPath);
 				// Turn it associative.
-				$newPath = GetAssocPath($newPath);
 				
-				_call_controller_internal($newPath["controller"], __DIR__ . "/apps/", $newPath["action"], $newPath);
+				_call_controller_internal($params["action"], __DIR__ . "/apps/", $params["param1"], $params);
 				return;
 			}
 		}

@@ -12,7 +12,10 @@ class Contactbook extends GirafController
 		die("Contactbook module cannot be called directly!");
 	}
 	
-	public function list
+	public function show($params = array())
+	{
+		echo "Woot! Showing contactbook stuffy!";
+	}
 }
 
 ?>
