@@ -11,7 +11,7 @@ class TestGirafNewsPost extends UnitTestCase
         // News relies on having an active session with a user. We need to set
         // up a fake user session we can work with.
         $session = GirafSession::getSession();
-        GirafSession::set("userId", 1);
+        $session->userId = 1;
     }
 
     function testBaseGroupNews()
@@ -59,6 +59,7 @@ class TestGirafNewsPost extends UnitTestCase
         // Get news for the currently signed in user.
         $uNews = GirafNewsPost::getUserNews();
         $this->assertNotNull($uNews);
+        
         $this->assertIsA($uNews, "array");
         if (count($uNews) > 0) $this->assertIsA($uNews[0], "int");
         
@@ -76,7 +77,9 @@ class TestGirafNewsPost extends UnitTestCase
 	
 	function tearDown()
 	{
-	    GirafSession::close();
+	    // GirafSession::close();
+	    $s = GirafSession::getSession();
+	    $s->close();
 	}
 }
 
