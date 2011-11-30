@@ -43,7 +43,9 @@ class Module extends GirafController
 				// Get a new non-associative path and remove the controller piece.
 				// Turn it associative.
 				
-				_call_controller_internal($params["action"], __DIR__ . "/apps/", $params["param1"], $params);
+				// var_dump($params);
+				
+				_call_controller_internal($params["action"], __DIR__ . "/apps/", $params["param0"], $params);
 				return;
 			}
 		}

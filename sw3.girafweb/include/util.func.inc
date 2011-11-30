@@ -210,6 +210,7 @@ function GetAssocPath($path)
 	// Go through all entries. The first and second entry will be 
 	// controller and action, respectively, while all following will be
 	// parameters.
+	$newPath = array();
 	$count = 0;
 	foreach ($path as $entry)
 	{
@@ -217,24 +218,28 @@ function GetAssocPath($path)
 		{
 			case 0:
 			{
-				$path["controller"] = $entry;
+				// $path["controller"] = $entry;
+				$newPath["controller"] = $entry;
 				break;
 			}
 			case 1:
 			{
-				$path["action"] = $entry;
+				// $path["action"] = $entry;
+				$newPath["action"] = $entry;
 				break;
 			}
 			default:
 			{
-				$path["param".($count-2)] = $entry;
+				// $path["param".($count-2)] = $entry;
+				$newPath["param".($count-2)] = $entry;
 				break;
 			}
 		}
 		$count++;
 	}
 	
-	return $path;
+	// return $path;
+	return $newPath;
 }
 
 function GetPath($asAssoc = false)
