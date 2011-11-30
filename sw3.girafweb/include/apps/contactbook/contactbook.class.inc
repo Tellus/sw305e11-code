@@ -1,8 +1,6 @@
 <?php
 
-// require_once(INCDIR . "sql_helper.inc");
 require_once(INCDIR . "record.class.inc");
-// require_once(INCDIR . "constants.inc");
 
 /**
  * Data container class for contactbook messages.

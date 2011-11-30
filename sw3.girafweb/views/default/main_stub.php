@@ -126,9 +126,4 @@ $(document).ready(function(){
 
 <div id="window">
 	<!-- ?="No module defined!"? -->
-	<?php
-		// Call the necessary sub module. For shits and giggles, hardcoded.
-		$path = array("controller" => "module", "action" => "contactbook", "param1" => "show", "param2" => "3");
-		CallController("module", "contactbook", $path);
-	?>
 </div>

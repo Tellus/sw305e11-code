@@ -46,32 +46,43 @@ class Contactbook extends GirafController
 	
 	public function show($params = array())
 	{
+		$data = array();
+		
 		if (!isset($s)) $s = GirafSession::getSession();
 
 		$userId = $s->getCurrentUser();
+		$data["userId"] = $userId;
 
 		if ($userId == null || $userId == false)
 		{
-			die("Page cannot be used without loggin in.");
+			die("Page cannot be used without logging in.");
 		}
 
 		$userData = GirafUser::getGirafUser($userId);
+		$data["userData"] = $userData;
 
-		if (array_key_exists("message", $_GET)) $msgId = $_GET["message"];
-		else die("Ingen besked ID efterspurgt!");
+		// By definition the parameter right after the action is the
+		// message id. That index is param0.
+		if (!isset($params["param0"])) die("Ingen besked ID efterspurgt!");
+		else $msgId = $params["param0"];
 
 		// Get message data.
 		$messageData = ContactbookMessage::getMessage($msgId);
+		$data["message"] = $messageData;
+		// Image data.
+		$data["images"] = $messageData->getImages();
 
 		// Get OP data.
-		$poster = GirafUser::getGirafUser($messageData->msgUserKey);
+		$data["poster"] = GirafUser::getGirafUser($messageData->msgUserKey);
 
 		// Get current user.
 		if (!isset($s)) $s = GirafSession::getSession();
 		$userId = $s->getCurrentUser();
 
 		// Get replies.
-		$replies = $messageData->getReplies();
+		$data["replies"] = $messageData->getReplies();
+		
+		$this->view("apps/contactbook/show", $data);
 	}
 	
 	/**
@@ -95,7 +106,7 @@ class Contactbook extends GirafController
 		$data["messages"] = ContactbookMessage::getMessages($cond, null, ContactbookMessage::RETURN_RECORD);
 		$data["username"] = $userData->username;
 		
-		$this->view("apps/contactbook/allMessages.php", $data);
+		$this->view("apps/contactbook/list.php", $data);
 	}
 	
 	/**
