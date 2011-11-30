@@ -102,7 +102,7 @@ class ContactbookMessage extends GirafRecord
 					" (NULL, '$cId', '$uId', '$subject', '$body')";
 		}
 				
-		var_dump($sql);
+		// var_dump($sql);
 				
 		$res = sql_helper::insertQuery($sql);
 		

@@ -65,6 +65,7 @@ $replies = $messageData->getReplies();
 		
 		foreach ($imgs as $image)
 		{
+			// var_dump($image);
 			echo "<image class=\"cb-image\" src=\"content/img/" . basename($image) . "\"/><br/>";
 		}
 		
