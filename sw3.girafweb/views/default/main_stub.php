@@ -1,94 +1,54 @@
-<?php // Injecting js. ?>
 <script>
 $(document).ready(function(){
-	$(".app-select").hide();
+	$(".app-item").hide();
 	
-	$(".child-picker").button().click(function(){
-		var callerId = event.target.id;
-		var childId = callerId.substring(callerId.length-1);
+	$(".child-item").click(function(){
+		var cId = event.target.id;
+		var childId = cId.substring(cId.lastIndexOf("-")+1);
 		var name = ".app-for-child-" + childId;
+		// console.debug(name);
 		
 		// Pretty, but glitchy.
 		// $(".app-select").slideUp('fast', function(){$(".for-child-" + childId).slideDown('fast');});
 		
 		// Functional, but poppy.
-		$(".app-select").hide();
+		$(".app-item").hide();
 		$(name).show();;
 	});
 	
-	$(".app-picker").button().click(function(){
-		var callerId = event.target.id;
-		var appId = getAppIdFromAppButton(callerId);
-		var kidId = getChildIdFromAppButton(callerId);
+	$(".app-item").click(function(){
+		var cId = event.target.id;
+		// console.debug(cId);
+		var appId = getAppIdFromAppButton(cId);
+		var kidId = getChildIdFromAppButton(cId);
 		
 		// alert(appId + " and " + kidId);
-		$.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
+		// $.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
+		var gUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
+		// console.debug(gUrl);
+		$.get(gUrl, {}, printModule);
 	});
 	
-	function getChildIdFromAppButton(fullId)
-	{
-		return fullId.substring(fullId.indexOf("-")+1, fullId.lastIndexOf("-"));
+	function getChildIdFromAppButton(fullId)	{
+		return fullId.substring(0, fullId.indexOf("-"));
 	}
 	
-	function getAppIdFromAppButton(fullId)
-	{
+	function getAppIdFromAppButton(fullId){
 		return fullId.substring(fullId.lastIndexOf("-") + 1);
 	}
 	
-	function printModule(contents, ignore, ignoreToo)
-	{
+	/**
+	 * This function is used as a callback to AJAX calls when loading
+	 * sub modules (subcontrollers) for applications tied to single
+	 * children.
+	 * (guess what we use ignore and ignoreToo for).
+	 */
+	function printModule(contents, ignore, ignoreToo){
 		// Fill window.
 		$("#window").html(contents);
-		
-		// Re-initialize some jquery stuff.
-		// We need a really neat way of adding a new script element
-		// to the document when loading modules. We need something
-		// simple to easily add javascript to a loaded module. Easy
-		// in principle.
-		$("#accordion").accordion({
-			collapsible: true,
-			//active: false
-		});
-
-		$("#newpost").accordion({
-			collapsible: true,
-			active: false
-		});
-		
-		$(".readmoreButton").button().click(function(){
-			// alert("Getting more for more.");
-			// $("#readMessageDialog").dialog("open");
-			// Load data.
-			var msgId = event.target.id;
-			msgId = msgId.substring(msgId.indexOf("-")+1);
-			$.get("themes/default/cbMessage.tpl.php", { message : msgId }, function(contents, ign, ignToo)
-			{
-				$("#messageDialogContents").html(contents);
-				$("#readMessageDialog").dialog("open");
-				// alert("Changing " + $("#readMessageDialog").attr("title") + " to " + $("#messageSubject").html());
-				$("#readMessageDialog").dialog('option', 'title', $("#messageSubject").html());
-			});
-		});
-		
-		$( "#readMessageDialog").dialog({
-			autoOpen: false,
-			modal: true,
-			height: 480,
-			width: 640,
-			buttons: {
-						Ok: function()
-						{
-								$ (this).dialog("close");
-						}
-					}
-		});
-		
-		$("#uploadimage0").change(function(){addFileInput();});
-		
 	}
 	
-	function addFileInput()
-	{
+	function addFileInput(){
 		// Check to see if the counter has been initialized
 		if ( typeof addFileInput.counter == 'undefined' )
 		{
@@ -118,31 +78,27 @@ $(document).ready(function(){
 	}
 });
 	</script>
-<div id="header"><h1 id="GIRAFTitle">Logo + Title</h1>
-
+<div id="header">
+	<h1 id="GIRAFTitle">Logo + Title</h1>
 	<div id="accountbox">
-		<img src="<?php echo $p; ?>/face-icon.png" id="accpic" />
-			<!--Evt et profilbillede, ikke besluttet om skal implementeres-->
-		<br/>
-		<li />My Account
-			<!-- Skal åbne popup med account settings-->
+		<li>My Account</li>
 		<li><a href="index.php?page=login&action=logout">Log out</a></li>
-			<!-- Skal logge brugeren af -->
 	</div>
 </div>
 <div id="menu">
 	<div id="childlist">
-		<?php
-			foreach($kids as $child)
-			{
-				$id = "\"childPicker-" . $child->id . "\"";
-		?>
-			<div class="child-select">
-				<a class="child-picker menu-image" href="#" id=<?php echo $id; ?> ><?php echo $child->getFirstName(); ?></a>
+		<?php foreach($kids as $child){	
+			$c = $child->id;
+			?>
+			<div class="menu-item child-item" id="child-<?=$c?>">
+				<div class="image-div" id="image-div-<?=$c?>">
+					<img class="menu-image" id="image-<?=$c?>" src="<?=BaseUrl() . '/img/profile-photo.jpg'?>" />
+				</div>
+				<div class="menu-item-title" id="name-<?=$c?>">
+					<?=$child->getFirstName()?>
+				</div>
 			</div>
-		<?php
-			}
-		?>
+		<?php } ?>
 	</div>
 	<div id="applist">
 		<?php
@@ -154,9 +110,11 @@ $(document).ready(function(){
 		{
 			foreach ($apps as $app)
 			{
+				$an = $app->applicationName;
+				$ai = $app->id;
 			?>
-			<div class="app-select app-for-child-<?php echo $kidId; ?>">
-				<a class="app-picker menu-image" id="app-<?php echo $kidId . "-" . $app->id; ?>"/><?php echo $app->applicationName; ?></a>
+			<div class="menu-item app-item app-<?=$ai?> app-for-child-<?=$kidId?>" id="<?="$kidId-$ai"?>">
+				<span id="<?="$kidId-$ai"?>"><?=$an?></span>
 			</div>
 			<?php
 			}

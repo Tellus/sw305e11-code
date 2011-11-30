@@ -1,6 +1,6 @@
 <?php
 
-require_once(INCDIR . "apps/contactbook.class.inc";
+require_once(INCDIR . "apps/contactbook/contactbook.class.inc");
 
 /**
  * Sub-controller for the Contactbook application. By definition cannot
@@ -14,15 +14,64 @@ class Contactbook extends GirafController
 		die("Contactbook module cannot be called directly!");
 	}
 	
+	/**
+	 * We allow fallback to perform a default-type action with the
+	 * action parameter if it is a numeric character. In this case we
+	 * request a default action from the subcontroller tied to a child
+	 * id.
+	 * */
 	public function fallback($action, $params = array())
 	{
-		if (strtolower($action) == "list") $this->_list($params);
+		if (is_numeric($action)) $this->_default($action, $params);
+		elseif (strtolower($action) == "list") $this->_list($params);
 		else parent::fallback($action, $params);
+	}
+	
+	/**
+	 * This function is called by fallback if the action was given as
+	 * an integer. In this case, it is assumed that the calling client
+	 * requests the results of an index action tied to a specific child.
+	 * */
+	public function _default($action, $params = array())
+	{
+		// echo "Echoing default data for $action.";
+		// The default action is _list :D
+		
+		// We fake-construct a new path for the action to use.
+		// I'm thinking we can smooth this process with CURRENTCONTROLLER
+		// constants and optional _default action callbacks.
+		$path = "/contactbook/list/$action";
+		$this->_list(GetAssocPath($path));
 	}
 	
 	public function show($params = array())
 	{
-		echo "Woot! Showing contactbook stuffy!";
+		if (!isset($s)) $s = GirafSession::getSession();
+
+		$userId = $s->getCurrentUser();
+
+		if ($userId == null || $userId == false)
+		{
+			die("Page cannot be used without loggin in.");
+		}
+
+		$userData = GirafUser::getGirafUser($userId);
+
+		if (array_key_exists("message", $_GET)) $msgId = $_GET["message"];
+		else die("Ingen besked ID efterspurgt!");
+
+		// Get message data.
+		$messageData = ContactbookMessage::getMessage($msgId);
+
+		// Get OP data.
+		$poster = GirafUser::getGirafUser($messageData->msgUserKey);
+
+		// Get current user.
+		if (!isset($s)) $s = GirafSession::getSession();
+		$userId = $s->getCurrentUser();
+
+		// Get replies.
+		$replies = $messageData->getReplies();
 	}
 	
 	/**
@@ -33,48 +82,20 @@ class Contactbook extends GirafController
 	 * */
 	public function _list($params = array())
 	{
+		$data = array();
+		
 		if (!isset($s)) $s = GirafSession::getSession();
 
 		$userId = $s->getCurrentUser();
 		$userData = GirafUser::getGirafUser($userId);
-		
-		/**
-		 * Get current user.
-		 * Get chosen child.
-		 * Get all primary messages in reversed order.
-		 * Loop basic look.
-		 * */
 
-		// $_SESSION["currentChild"] = 1; // For dah tests.
-		// $child = $_SESSION["currentChild"];
-		$child = $_GET["child"];
+		$data["childId"] = $params["param0"];
+		$cond = 'msgChildKey=' . $data["childId"] . ' AND msgParentKey IS NULL';
 
-		$cond = "msgChildKey=$child AND msgParentKey IS NULL";
+		$data["messages"] = ContactbookMessage::getMessages($cond, null, ContactbookMessage::RETURN_RECORD);
+		$data["username"] = $userData->username;
 		
-		// var_dump($child, $cond);
-
-		// Retrieve all PRIME message.
-		$msgs = ContactbookMessage::getMessages($cond, null, ContactbookMessage::RETURN_RECORD);
-		
-		if(count($msgs) > 0)
-		{
-			foreach ($msgs as $msg)
-			{
-				?>
-				<h3><a href="#"><?php echo $msg->msgTimestamp; ?> <?php echo $msg->msgSubject; ?><span id="new">New</span></a></h3>
-				<div>
-					<?php echo $msg->msgBody; ?>
-					<input id=<?php echo '"message-' . $msg->id . '"'; ?> class="readmoreButton" type="button" value="Læs mere"/>
-				</div>
-				<?php
-			}
-		}
-		else
-		{
-			?>
-			<div>Der er ingen beskeder i barnets kontaktbog. Opret eventuelt en besked.</div>
-			<?php
-		}
+		$this->view("apps/contactbook/allMessages.php", $data);
 	}
 	
 	/**

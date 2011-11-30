@@ -1,7 +1,7 @@
 <?php
 
-require_once(__DIR__ . "/record.class.inc"); //parent class
-require_once(__DIR__ . "/constants.inc"); // table constants
+require_once("record.class.inc"); //parent class
+require_once("constants.inc"); // table constants
 
 /**
 * Class used for handeling application data

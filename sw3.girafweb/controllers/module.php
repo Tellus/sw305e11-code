@@ -1,6 +1,7 @@
 <?php
 
 require_once(INCDIR . "controller.php");
+require_once(INCDIR . "application.class.inc");
 
 /**
  * The Module controller is intended to act as a sub-controller invoked
@@ -22,7 +23,24 @@ class Module extends GirafController
 	public function fallback($action, $params = array())
 	{
 		// Action should match exactly the application module we're
-		// looking for.
+		// looking for, either in lowercase string OR appId.
+		if (is_numeric($action))
+		{
+			// Identify based on app id.
+			$app = GirafApplication::getApplication($action);
+			if ($app === null || $app === false) throw new Exception("AppId $action does not exist. At all.");
+			
+			$action = $app->applicationSystemName;
+		}
+		elseif (is_string($action))
+		{
+			// Take it on face value.
+		}
+		else
+		{
+			throw new Exception("Invalid app identifier passed, '" . get_class($action) . "'");
+		}
+		
 		$action = strtolower($action);
 		
 		// Look for a fitting controller in the "apps" subfolder.
@@ -43,9 +61,15 @@ class Module extends GirafController
 				// Get a new non-associative path and remove the controller piece.
 				// Turn it associative.
 				
-				// var_dump($params);
+				$path = implode('/', $params);
+				// Remove the first part of the path, the original controller.
+				$path = substr($path, strpos($path, '/'));
+				// var_dump($path);
+				$newPath = GetAssocPath($path);
 				
-				_call_controller_internal($params["action"], __DIR__ . "/apps/", $params["param0"], $params);
+				// _call_controller_internal($params["action"], __DIR__ . "/apps/", $params["param0"], $params);
+				$newPath["controller"] = $action; // Slight override. We want string, not id.
+				_call_controller_internal($newPath["controller"], __DIR__ . "/apps/", $newPath["action"], $newPath);
 				return;
 			}
 		}
