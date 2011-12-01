@@ -1,8 +1,38 @@
 <script>
+var lastModuleUrl = "";
+
+function getChildIdFromAppButton(fullId)
+{
+	return fullId.substring(0, fullId.indexOf("-"));
+}
+
+function getAppIdFromAppButton(fullId)
+{
+	return fullId.substring(fullId.lastIndexOf("-") + 1);
+}
+
+/**
+ * This function is used as a callback to AJAX calls when loading
+ * sub modules (subcontrollers) for applications tied to single
+ * children.
+ * (guess what we use ignore and ignoreToo for).
+ */
+function printModule(contents)
+{
+	// Fill window.
+	$("#window").html(contents);
+}
+
+function refreshModule()
+{
+	$.get(lastModuleUrl, {}, printModule);
+}
+
 $(document).ready(function(){
 	$(".app-item").hide();
 	
-	$(".child-item").click(function(){
+	$(".child-item").click(function()
+	{
 		var cId = event.target.id;
 		var childId = cId.substring(cId.lastIndexOf("-")+1);
 		var name = ".app-for-child-" + childId;
@@ -16,7 +46,8 @@ $(document).ready(function(){
 		$(name).show();;
 	});
 	
-	$(".app-item").click(function(){
+	$(".app-item").click(function()
+	{
 		var cId = event.target.id;
 		// console.debug(cId);
 		var appId = getAppIdFromAppButton(cId);
@@ -24,62 +55,15 @@ $(document).ready(function(){
 		
 		// alert(appId + " and " + kidId);
 		// $.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
-		var gUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
+		// var gUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
+		lastModuleUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
 		// console.debug(gUrl);
-		$.get(gUrl, {}, printModule);
+		refreshModule();
 	});
-	
-	function getChildIdFromAppButton(fullId)	{
-		return fullId.substring(0, fullId.indexOf("-"));
-	}
-	
-	function getAppIdFromAppButton(fullId){
-		return fullId.substring(fullId.lastIndexOf("-") + 1);
-	}
-	
-	/**
-	 * This function is used as a callback to AJAX calls when loading
-	 * sub modules (subcontrollers) for applications tied to single
-	 * children.
-	 * (guess what we use ignore and ignoreToo for).
-	 */
-	function printModule(contents, ignore, ignoreToo){
-		// Fill window.
-		$("#window").html(contents);
-	}
-	
-	function addFileInput(){
-		// Check to see if the counter has been initialized
-		if ( typeof addFileInput.counter == 'undefined' )
-		{
-			// It has not, perform the initilization
-			addFileInput.counter = 0;
-		}
-		
-		preCount = addFileInput.counter;
-		postCount = preCount + 1;
-		
-		html = '<input class="imageUpload" type="file" name="uploadImage' + postCount + '" id="uploadimage';
-		html_post = '">';
-		
-		theId = "#uploadimage" + preCount;
-		
-		targetContent = html + postCount + html_post;
-		
-		// alert(theId); 
-		
-		$(theId).after(targetContent);
-		
-		// Register new event handler.
-		$("#uploadimage" + postCount).change(function(){addFileInput();});
-		
-		// Finally, iterate.
-		addFileInput.counter += 1;
-	}
-});
-	</script>
+});</script>
+<div id="site-box">
 <div id="header">
-	<h1 id="GIRAFTitle">Logo + Title</h1>
+	<h1 id="GIRAFTitle">GIRAF v1.0a</h1>
 	<div id="accountbox">
 		<li>My Account</li>
 		<li><a href="index.php?page=login&action=logout">Log out</a></li>
@@ -126,4 +110,5 @@ $(document).ready(function(){
 
 <div id="window">
 	<!-- ?="No module defined!"? -->
+</div>
 </div>

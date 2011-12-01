@@ -1,3 +1,35 @@
+<script>
+// AJAX form handling for replies.
+$(document).ready(function()
+{
+	// alert("Sub-page loaded.");
+	$("#replySubmit").click(function(){
+		// alert("AJAX'ing onwards.");
+		if (verifyForm("#replyBody") == false) return;
+		$.post(
+			"<?=BaseUrl()?>module/contactbook/add/<?=$message->id?>/",
+			{
+				parent: "<?=$message->id?>",
+				subject: "<?=$message->msgSubject?>",
+				child: "<?=$message->msgChildKey?>",
+				user: "<?=$userId?>",
+				body: $("#replyBody").val()
+			},
+			onLoaded
+		);
+	});
+	
+	// Callback for when a new message has been posted.
+	function onLoaded(data)
+	{
+		if (data == "success")
+		{
+			// Reload this entire piece of stuff.
+			reloadModule();
+		}
+	}
+});
+</script>
 <div id="messageSubject" style="visibility:hidden;"><?=$message->msgSubject?></div>
 <div>
 	<h3><?php echo $poster->username; ?> | <?=$message->msgTimestamp?></h3>
@@ -14,50 +46,21 @@
 	</tr>
 	</table>
 	<hr/>
-	<?php
-	
-	// Alright, let's get the replies, too.
-	
-	foreach($replies as $reply)
-	{
+	<?php foreach($replies as $reply) {
 		// Get the op.
 		$user = GirafUser::getGirafUser($reply->msgUserKey); 
-		
 		?>
-		<div>
-			<!-- h3><?php echo $reply->msgSubject; ?></h3 -->
-			<h3><?php echo $user->username . " | " . $reply->msgTimestamp; ?></h3>
-			<hr/>
-			<table>
-			<tr>
-		<td style="vertical-align: top;"><?php echo $reply->msgBody; ?></td>
-		<td>
-		<?php
-		
-		// For each image, show it!
-		
-		$imgs = $reply->getImages();
-		
-		foreach ($imgs as $image)
-		{
-			echo "<image class=\"cb-image\" src=\"content/img/" . basename($image) . "\"/><br/>";
-		}
-		
-		?>
-		</td>
-	</tr>
-	</table>
+		<h3><?=$user->username . " | " . $reply->msgTimestamp?></h3>
 		<hr/>
-		<?php
-	}
-	
-	?>
+		<table>
+		<tr>
+			<td style="vertical-align: top;"><?=$reply->msgBody?></td>
+		</tr>
+		</table>
+		<hr/>
+		<?php } ?>
 	<div>
-		<form id="messageReplyForm" action="index.php?page=cbAddMessage" method="POST">
-		<input type="hidden" name="subject" value=<?="\"SV: " . $message->msgSubject . '"'?> />
-		<input type="hidden" name="parent" value=<?='"' . $message->id . '"'?> />
-		<input type="hidden" name="child" value=<?='"' . $message->msgChildKey . '"'?> />
-		<input type="hidden" name="user" value=<?='"' . $userId . '"'?> />
+		<form id="messageReplyForm" action="<?=BaseUrl()?>module/contactbook/add/<?=$message->id?>/" method="POST">
 			<table>
 				<tr>
 					<td>Svar fra: </td><td><input type="text" disabled="true" name="userDisplay" value=<?php echo '"' . $userData->username . '"' ?> /></td>
@@ -66,9 +69,9 @@
 					<td>Besked: </td>
 				</tr>
 				<tr>
-					<td colspan="2"><textarea name="body" id="newMessageBody"></textarea></td>
+					<td colspan="2"><textarea class="input-textbox" rows="7" name="replyBody" id="replyBody"></textarea></td>
 				</tr>
-				<tr><td><input type="submit" value="Send" /></td></tr>
+				<tr><td><input id="replySubmit" type="button" value="Send" /></td></tr>
 			</table>
 		</form>
 	</div>

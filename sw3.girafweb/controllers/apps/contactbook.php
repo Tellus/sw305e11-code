@@ -105,6 +105,7 @@ class Contactbook extends GirafController
 
 		$data["messages"] = ContactbookMessage::getMessages($cond, null, ContactbookMessage::RETURN_RECORD);
 		$data["username"] = $userData->username;
+		$data["userId"] = $userId;
 		
 		$this->view("apps/contactbook/list.php", $data);
 	}
@@ -126,7 +127,29 @@ class Contactbook extends GirafController
 	 * */
 	public function add($params = array())
 	{
+		if (!isset($_POST["user"], $_POST["child"], $_POST["subject"], $_POST["body"]))
+		{
+			echo "failure";
+			return;
+		}
+		$msgId = ContactbookMessage::createNewMessage(	$_POST["user"],
+														$_POST["child"],
+														$_POST["subject"],
+														$_POST["body"],
+														isset($_POST["parent"]) ? $_POST["parent"] : null);
 		
+		// Handle uploaded images. We do this now because we didn't know the
+		// message id beforehand.
+		foreach ($_FILES as $file)
+		{
+			// $path = __DIR__ . "/../../content/img/" . $file["name"];
+			$path = BASEDIR . "img/" . $file["name"];
+			$res = move_uploaded_file($file["tmp_name"], $path);
+			// Save to database.
+			GirafImage::createMessageImage($path, $newMess, "Billedtekst mangler.");
+		}		
+		
+		echo "success";
 	}
 }
 

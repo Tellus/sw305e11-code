@@ -1,50 +1,134 @@
 <script>
-		// Re-initialize some jquery stuff.
-		// We need a really neat way of adding a new script element
-		// to the document when loading modules. We need something
-		// simple to easily add javascript to a loaded module. Easy
-		// in principle.
-		$("#accordion").accordion({
-			collapsible: true,
-			//active: false
-		});
+// Adds a new file input thingy to the form.
+function addFileInput()
+{
+	// Check to see if the counter has been initialized
+	if ( typeof addFileInput.counter == 'undefined' )
+	{
+		// It has not, perform the initilization
+		addFileInput.counter = 0;
+	}
+	
+	preCount = addFileInput.counter;
+	postCount = preCount + 1;
+	
+	html = '<br/><input class="imageUpload" type="file" name="uploadImage' + postCount + '" id="uploadimage';
+	html_post = '">';
+	
+	theId = "#uploadimage" + preCount;
+	
+	targetContent = html + postCount + html_post;
+	
+	// alert(theId); 
+	
+	$(theId).after(targetContent);
+	
+	// Register new event handler.
+	$("#uploadimage" + postCount).change(function(){addFileInput();});
+	
+	// Finally, iterate.
+	addFileInput.counter += 1;
+}
 
-		$("#newpost").accordion({
-			collapsible: true,
-			active: false
-		});
-		
-		$(".readmoreButton").button().click(function(){
-			// alert("Getting more for more.");
-			// $("#readMessageDialog").dialog("open");
-			// Load data.
-			var msgId = event.target.id;
-			msgId = msgId.substring(msgId.indexOf("-")+1);
-			// $.get("themes/default/cbMessage.tpl.php", { message : msgId }, function(contents, ign, ignToo)
-			$.get("<?=BaseUrl()?>module/contactbook/show/"+msgId, {}, function(contents)
-			{
-				$("#messageDialogContents").html(contents);
-				$("#readMessageDialog").dialog("open");
-				// alert("Changing " + $("#readMessageDialog").attr("title") + " to " + $("#messageSubject").html());
-				$("#readMessageDialog").dialog('option', 'title', $("#messageSubject").html());
-			});
-		});
-		
-		$( "#readMessageDialog").dialog({
-			autoOpen: false,
-			modal: true,
-			height: 480,
-			width: 640,
-			buttons: {
-						Ok: function()
-						{
-								$ (this).dialog("close");
-						}
+// Reloads the message window with data from the requested message id.
+function showMessage(id)
+{
+	var d = "#readMessageDialog";
+	var c = "#messageDialogContents";
+	if ($(d).dialog("isOpen")) $(d).dialog("close");
+	$.get("<?=BaseUrl()?>module/contactbook/show/"+id, {}, function(contents)
+	{
+		$(c).html(contents);
+		$(d).dialog("open");
+		$(d).dialog('option', 'title', $("#messageSubject").html());
+	});
+}
+
+// Verifies that the data in a form element is sufficient.
+// Highlights form elements that are not properly filled out. 
+function verifyForm(id, minlen)
+{
+	if (!id) return false; // Bad in all cases.
+	if (!minlen) minlen = 10;
+	var len = $(id).val().length;
+	if (len < minlen)
+	{
+		$(id).effect("highlight", { mode: "show" }, 6000);
+		return false;
+	}
+	else
+	{
+		$(id).effect("highlight", { mode: "hide" }, 1);
+		return true;
+	}
+}
+
+function onNewMessageCreated(data)
+{
+	if (data == "success")
+	{
+		// alert ("Message posted succesfully.");
+		refreshModule();
+	}
+	else
+	{
+		alert("Server reported error during post action.");
+		console.debug(data);
+	}
+}	
+	
+$(document).ready(function(){
+	$("#accordion").accordion({
+		collapsible: true,
+		//active: false
+	});
+
+	$("#newpost").accordion({
+		collapsible: true,
+		active: false
+	});
+	
+	// Define behaviour for buttons that open single messages.
+	$(".readmoreButton").button().click(function(){
+		// Load data.
+		var msgId = event.target.id;
+		msgId = msgId.substring(msgId.indexOf("-")+1);
+		showMessage(msgId);
+	});
+	
+	// Create the dialog box to contain further messages.
+	$("#readMessageDialog").dialog({
+		autoOpen: false,
+		modal: true,
+		height: 480,
+		width: 640,
+		buttons: {
+					Ok: function()
+					{
+							$ (this).dialog("close");
 					}
-		});
-		
-		$("#uploadimage0").change(function(){addFileInput();});
-</script>
+				}
+	});
+	
+	// Handler for the first image to upload.
+	$("#uploadimage0").change(function(){addFileInput();});
+	
+	$("#newMessageSubmitButton").click(function(){
+		if (verifyForm("#newMessageSubject", 3) == false) return;
+		if (verifyForm("#newMessageBody", 10) == false) return;
+		$("#newMessageForm").ajaxSubmit(onNewMessageCreated);
+		/*$.post(
+			"<?=BaseUrl()?>module/contactbook/add",
+			{
+				subject: $("#newMessageSubject").val(),
+				child: "<?=$childId?>",
+				body: $("#newMessageBody").val(),
+				user: <?=$userId?>
+			},
+			onNewMessageCreated
+		);*/
+	});
+});</script>
 <div id="contactbookupperbar">
 </div>
 
@@ -53,22 +137,23 @@
 	<div id="newpost">
 		<h3><a href="#">Nyt indlæg</a></h3>
 		<div>
-			<form name="newMessageForm" action="module/contactbook/add/<?=$childId?>" index.php?page=cbAddMessage" method="POST" enctype="multipart/form-data">
-			<input type="hidden" name="child" value=<?php echo '"' . $childId . '"'; ?> id="newMessageChildId" />
+			<form id="newMessageForm" name="newMessageForm" action="module/contactbook/add" method="POST" enctype="multipart/form-data">
+			<input type="hidden" name="user" value="<?=$userId?>" />
+			<input type="hidden" name="child" value="<?=$childId?>" />
 			<table>
 				<tr>
-					<td>Oprettet af: </td><!-- Automantisk indsættes brugernavn-->
-					<td><input type="text" name="user" value=<?php echo '"' . $username . '"'; ?> readonly="readonly"/></td>
+					<td>Oprettet af: </td>
+					<td><input type="text" value="<?=$username?>" readonly="readonly"/></td>
 				</tr>
 				<tr>
-					<td>Overskrift: </td><!-- Overskrift, som skal være synlig fra oversigten-->
-					<td><input name="subject" type="text" /></td>
+					<td>Overskrift: </td>
+					<td><input id="newMessageSubject" type="text" name="subject" /></td>
 				</tr>
 				<tr>
-					<td colspan="2"><textarea class="newpostinput" name="body"></textarea></td>
+					<td colspan="2"><textarea rows="5" class="input-textbox" name="body" id="newMessageBody"></textarea></td>
 				</tr>
-			<tr><td><input class="imageUpload" type="file" name="uploadImage0" id="uploadimage0" /></td></tr>
-			<tr><td><input type="submit" name="submit" value="Send" /></td></tr>
+			<tr><td><input class="imageUpload" type="file" id="uploadimage0" name="uploadimage0" /></td></tr>
+			<tr><td><input type="button" id="newMessageSubmitButton" value="Send" /></td></tr>
 			</table>
 			</form>
 		</div>

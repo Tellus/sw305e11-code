@@ -25,6 +25,11 @@ a:active {	text-decoration:none;
 			color: #000000;
 }
 
+#site-box {
+			padding-left: 10%;
+			padding-right: 10%;
+}
+
 #main {		
 			width: 1024px;
 			height: 670px;
@@ -42,6 +47,7 @@ a:active {	text-decoration:none;
 }
 
 #GIRAFTitle {
+			margin: 15px;
 			float: left;
 			color: #555555;
 }
@@ -75,7 +81,7 @@ a:active {	text-decoration:none;
 
 /* --- Menu settings --- */
 #menu {		background-color: #FFFFFF;
-			width: 30%;
+			width: 15%;
 			height: 540px;
 			float: left;
 			margin-right: 10px;
@@ -84,8 +90,8 @@ a:active {	text-decoration:none;
 			
 }
 
-#childlist {	background-color: #99eeaa;
-			width: 48%;
+#childlist {background-color: #99eeaa;
+			width: 50%;
 			height: 100%;
 			float: left;
 			border-top-left-radius: 10px;
@@ -99,7 +105,7 @@ a:active {	text-decoration:none;
 }*/
 
 #applist {	background-color: #Fea99F;
-			width: 48%;
+			width: 50%;
 			height: 100%;
 			float: right;
 
@@ -128,9 +134,9 @@ a:active {	text-decoration:none;
 
 /* --- Window settings --- */ 
 #window {	background-color: #FFFFFF;
-			width: 69%;
+			width: 84%;
 			height: 540px;
-			float: left;
+			float: right;
 			border-radius: 10px;
 
 
@@ -267,7 +273,7 @@ a:active {	text-decoration:none;
 	background-color: yellow;
 	vertical-align: middle;
 	text-align: center;
-	width: 100%;
+	width: 80%;
 	height: 84px;
 	margin: 8px;
 	padding: 5px;
@@ -291,6 +297,12 @@ a:active {	text-decoration:none;
     margin: auto;
     padding: 10px;
     vertical-align: middle;
+}
+
+.input-textbox
+{
+	width: 550px;
+	margin: 15px;
 }
 
 .center-box-header
