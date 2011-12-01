@@ -40,7 +40,7 @@ $(document).ready(function()
 		<td>
 		<?php
 		foreach ($images as $image){
-			echo "<image class=\"cb-image\" src=\"content/img/" . basename($image) . "\"/><br/>";
+			echo "<image class=\"cb-image\" src=\"" . BaseUrl() . "/img/" . basename($image) . "\"/><br/>";
 		}?>
 		</td>
 	</tr>
@@ -63,7 +63,7 @@ $(document).ready(function()
 		<form id="messageReplyForm" action="<?=BaseUrl()?>module/contactbook/add/<?=$message->id?>/" method="POST">
 			<table>
 				<tr>
-					<td>Svar fra: </td><td><input type="text" disabled="true" name="userDisplay" value=<?php echo '"' . $userData->username . '"' ?> /></td>
+					<td>Svar fra: </td><td><input type="text" readonly="readonly"	 name="userDisplay" value=<?php echo '"' . $userData->username . '"' ?> /></td>
 				</tr>
 				<tr>
 					<td>Besked: </td>

@@ -175,12 +175,24 @@ class GirafImage extends GirafRecord
     public static function createMessageImage($path, $msgId, $text)
     {
 		// Resource.
-		sql_helper::insertQuery("INSERT INTO " . self::getSourceTable() . " (imgUri) VALUES ('$path')");
+		$sql = "INSERT INTO " . self::getSourceTable() . " (imgUri) VALUES ('$path')";
+		// var_dump($sql);
 		
-		$imgId = sql_helper::simpleQuery("SELECT " . self::getPrimaryKey() . " FROM " . self::getSourceTable() . " WHERE imgUri='$path'");
+		sql_helper::insertQuery($sql);
+		
+		$sql = "SELECT " . self::getPrimaryKey() . " FROM " . self::getSourceTable() . " WHERE imgUri='$path'";
+		// var_dump($sql);
+		
+		$imgId = sql_helper::simpleQuery($sql);
+		
+		$sql = "INSERT INTO cbMsgImages (msgKey, imgKey, imgText) VALUES ($msgId, $imgId, '$text')";
+		// var_dump($sql);
 		
 		// Link.
-		sql_helper::insertQuery("INSERT INTO cbMsgImages (msgKey, imgKey, imgText) VALUES ($msgId, $imgId, '$text')");
+		sql_helper::insertQuery($sql);
+		
+		// var_dump($imgId, sql_helper::getErrMsg());
+		// die();
 		
 		return $imgId;
 	}

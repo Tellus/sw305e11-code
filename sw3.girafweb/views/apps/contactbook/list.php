@@ -128,6 +128,9 @@ $(document).ready(function(){
 			onNewMessageCreated
 		);*/
 	});
+	
+	// Add the new stylesheet.
+	$("head").append('<link rel="stylesheet" href="<?=BaseUrl()?>css/apps/contactbook/stylesheet.css" type="text/css" />');
 });</script>
 <div id="contactbookupperbar">
 </div>

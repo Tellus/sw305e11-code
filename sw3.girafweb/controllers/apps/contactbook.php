@@ -1,6 +1,7 @@
 <?php
 
 require_once(INCDIR . "apps/contactbook/contactbook.class.inc");
+require_once(INCDIR . "image.class.inc");
 
 /**
  * Sub-controller for the Contactbook application. By definition cannot
@@ -112,18 +113,6 @@ class Contactbook extends GirafController
 	
 	/**
 	 * Creates a new contactbook message.
-	 * Parameters are expected to be found in $_POST as follows:
-	 * childId => integer id of the child the message belongs to.
-	 * groupId => if this is used *instead* of childId, all children
-	 * in that group will receive the message.
-	 * msgId => if the message is a reply to a message, use this
-	 * instead.
-	 * msgSubject => Subject of the message. If omitted for a reply,
-	 * a standardised reply subject is used.
-	 * msgBody => Text-part of the message.
-	 * imageX (X being an integer) => an image resource in the POST
-	 * data.
-	 * Invokes the show action affecting the 
 	 * */
 	public function add($params = array())
 	{
@@ -144,9 +133,10 @@ class Contactbook extends GirafController
 		{
 			// $path = __DIR__ . "/../../content/img/" . $file["name"];
 			$path = BASEDIR . "img/" . $file["name"];
+			// var_dump($path, $file["tmp_name"]);
 			$res = move_uploaded_file($file["tmp_name"], $path);
 			// Save to database.
-			GirafImage::createMessageImage($path, $newMess, "Billedtekst mangler.");
+			GirafImage::createMessageImage($path, $msgId, "Billedtekst mangler.");
 		}		
 		
 		echo "success";
