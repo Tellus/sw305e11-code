@@ -1,20 +1,35 @@
 <script type="text/javascript">
+// Makes a fadeout/fadein switch between two elements.
+function fadeSwitch(to, toFocus)
+{
+	$(".shown").fadeOut('fast', function()
+	{
+			$(to).fadeIn('fast', function()
+			{
+				setFocus(toFocus);
+			});
+	});
+	$(".shown").removeClass("shown");
+	$(to).addClass("shown");
+	
+	
+}
+
+// Checks entered login details for consistency.
+function registerCheck()
+{
+	return true;
+}
+
+function setFocus(id)
+{
+	$(id).focus();
+}
+
 $(document).ready(function(){ 
 	$("#loginButton").button().click(function()
 	{
 		$("#loginForm").submit();
-	});
-
-	// Checks entered login details for consistency.
-	function registerCheck()
-	{
-		return true;
-	}
-
-	$("#openRegisterFormButton").button().click(function()
-	{
-		$("#loginBox").fadeOut('fast', function(){$("#registerBox").fadeIn('fast')});
-		
 	});
 
 	$("#registerBox").hide();
@@ -28,32 +43,25 @@ $(document).ready(function(){
 		}
 	});
 
-	$(".fade-in-on-init").fadeIn('slow');
+	$("#forgotFormSubmit").button();
 
 	$(".topMenu").buttonset();
 
 	$("#radioLogin").click(function()
 	{
-		fadeSwitch("#loginBox");
+		fadeSwitch("#loginBox", "#loginFormUser");
 	});
 
 	$("#radioNew").click(function()
 	{
-		fadeSwitch("#registerBox");
+		fadeSwitch("#registerBox", "#registerFormUser");
 	});
 
 	$("#radioForgot").click(function()
 	{
-		fadeSwitch("#forgotPassBox");
+		fadeSwitch("#forgotPassBox", "#forgotFormMail");
+		$("#forgotMailInput").focus();
 	});
-
-	// Makes a fadeout/fadein switch between two elements.
-	function fadeSwitch(to)
-	{
-		$(".shown").fadeOut('fast', function(){$(to).fadeIn('fast')});
-		$(".shown").removeClass("shown");
-		$(to).addClass("shown");
-	}
 });
 </script>
 <div class="topMenu">
@@ -71,9 +79,13 @@ $(document).ready(function(){
 	<div class="ui-widget-header center-box-header">Log ind</div>
 	<form id="loginForm" name="login" action="<?=BaseUrl("login/login")?>" method="POST" >
 	<table>
-	<tr><td>Brugernavn:</td><td><input type="text" name="username" /></td></tr>
+	<tr><td>Brugernavn:</td><td><input type="text" name="username" id="loginFormUser" /></td></tr>
 	<tr><td>Password:</td><td><input type="password" name="password" /></td></tr>
-	<tr><td colspan="2" align="right"><a id="loginButton" href="#">Login</a></td></tr>
+	<tr>
+		<td colspan="2" align="right">
+			<input type="submit" id="loginButton" value="Login" />
+		</td>
+	</tr>
 	</table>
 	</form>
 	</div>
@@ -84,11 +96,15 @@ $(document).ready(function(){
 	<div class="ui-widget-header center-box-header">registrer ny bruger</div>
 	<form id="registerForm" name="register" action="<?=BaseUrl("login/register")?>" method="POST" >
 	<table>  
-	<tr><td>Brugernavn: </td><td><input type="text" name="username" />
+	<tr><td>Brugernavn: </td><td><input type="text" name="username" id="registerFormUser"/>
 	<tr><td>Email:</td> <td><input type="text" name="mail" /></td></tr>
 	<tr><td>Ønsket kodeord:</td><td><input type="password" name="password" /></td></tr>
 	<tr><td>Gentag kodeord:</td><td><input type="password" name="password_check" /></td></tr>
-	<tr><td colspan="2" align="center"><a id="registerButton" href="#">Registrer</a></td></tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input type="submit" id="registerButton" value="Registrer" />
+		</td>
+	</tr>
 	</table>
 	</form>
 	</div>
@@ -100,7 +116,10 @@ $(document).ready(function(){
 		<form id="forgotPassForm" name="forgot" action="<?=BaseUrl("login/forgot")?>" method="POST">
 			<table>
 				<tr>
-					<td>E-mail-adresse: </td><td><input type="text" name="mail" /></td>
+					<td>E-mail-adresse: </td><td><input type="text" id="forgotFormMail" name="mail" /></td>
+				</tr>
+				<tr>
+					<td><input id="forgotFormSubmit" type="submit" value="Send" /></td>
 				</tr>
 			</table>
 		</form>

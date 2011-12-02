@@ -117,16 +117,6 @@ $(document).ready(function(){
 		if (verifyForm("#newMessageSubject", 3) == false) return;
 		if (verifyForm("#newMessageBody", 10) == false) return;
 		$("#newMessageForm").ajaxSubmit(onNewMessageCreated);
-		/*$.post(
-			"<?=BaseUrl()?>module/contactbook/add",
-			{
-				subject: $("#newMessageSubject").val(),
-				child: "<?=$childId?>",
-				body: $("#newMessageBody").val(),
-				user: <?=$userId?>
-			},
-			onNewMessageCreated
-		);*/
 	});
 	
 	// Add the new stylesheet.

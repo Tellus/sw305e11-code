@@ -28,6 +28,27 @@ $(document).ready(function()
 			reloadModule();
 		}
 	}
+	
+	$(".cb-image").click(function(){
+		var id = event.target.id;
+		var src = event.target.src;
+		console.debug(event.target.src);
+		// console.debug($("img"));
+		// console.debug($("img 
+		$("#cb-image-box-src").attr("src", src);
+		$("#cb-image-box").dialog("open");
+		$("#cb-image-box").dialog("option", {position: [25, 25]});
+	});
+	
+	$("#cb-image-box").dialog({
+		autoOpen: false,
+		buttons:
+		{
+			Luk: function(){$(this).dialog("close")}
+		},
+		width: 'auto',
+		modal: true
+	});
 });
 </script>
 <div id="messageSubject" style="visibility:hidden;"><?=$message->msgSubject?></div>
@@ -40,8 +61,9 @@ $(document).ready(function()
 		<td>
 		<?php
 		foreach ($images as $image){
-			echo "<image class=\"cb-image\" src=\"" . BaseUrl() . "/img/" . basename($image) . "\"/><br/>";
-		}?>
+			$n = basename($image); ?>
+			<img class="cb-image" src="<?=BaseUrl()?>img/<?=$n?>" id="img_<?=$n?>" />
+		<?php } ?>
 		</td>
 	</tr>
 	</table>
@@ -75,4 +97,7 @@ $(document).ready(function()
 			</table>
 		</form>
 	</div>
+</div>
+<div id="cb-image-box">
+	<img id="cb-image-box-src" src="." />
 </div>
