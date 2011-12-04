@@ -159,7 +159,9 @@ $(document).ready(function(){
 			foreach ($messages as $msg)
 			{
 				?>
-				<h3><a href="#"><?php echo $msg->msgTimestamp; ?> <?php echo $msg->msgSubject; ?><span id="new">New</span></a></h3>
+				<h3><a href="#"><?php echo $msg->msgTimestamp; ?> <?php echo $msg->msgSubject; ?><?php
+																									if (!$msg->isRead($userId)) echo '<span id="new">Ulæst</span>';
+																								?></a></h3>
 				<div>
 					<?php echo $msg->msgBody; ?>
 					<input id=<?php echo '"message-' . $msg->id . '"'; ?> class="readmoreButton" type="button" value="Læs mere"/>

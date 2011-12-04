@@ -69,6 +69,9 @@ class Contactbook extends GirafController
 
 		// Get message data.
 		$messageData = ContactbookMessage::getMessage($msgId);
+		// Mark it read. We loaded it, yeh?
+		$messageData->setRead($userId);
+		
 		$data["message"] = $messageData;
 		// Image data.
 		$data["images"] = $messageData->getImages();
