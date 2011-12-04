@@ -10,7 +10,16 @@ require_once("base.php");
 class when extends GirafScriptCommand
 {
     public $condition;
+    
+    /**
+     * Contains all text of the marker.
+     */
     public $whenText;
+    
+    /**
+     * Contains all the text of the marker except the first, full marker
+     * (the WHEN, part). Used for proxied changes.
+     * */
 	public $sub;
 	
     /**
@@ -29,11 +38,9 @@ class when extends GirafScriptCommand
 		$length = $this->parent->getBalancedText($this->whenText, '${', '}');
 		$this->sub = substr($this->whenText, strlen($length));
 		
-		//var_dump($length); 
-		//var_dump($this->sub); ?> <br /> <?php
+		// First thing we do is retrieve the WHEN condition and test it.
 		
-		//var_dump($this->whenText);
-		//var_dump($this->full_marker);
+		self::getCondition($
 		
 		$evalCond = "return " . $this->condition . ";";
 		
@@ -87,16 +94,17 @@ class when extends GirafScriptCommand
 		
 		$truth = eval("return ($con);");
 		
-		echo "<hr/>";
+		/*echo "<hr/>";
 		var_dump(("null" == null && "1" == 1) || "Myass" == null);
 		echo "<hr/>";
+		
 		
 		var_dump($con);
 		var_dump($truth);
 		
-		$con_string = "return ($con);";
+		die();*/
 		
-		var_dump($con_string);
+		$con_string = "return ($con);";
 		
 		if (eval($con_string) === true)
 		{
@@ -112,6 +120,17 @@ class when extends GirafScriptCommand
 		
         return "";
     }
+    
+    /**
+     * Takes a complete WHEN condition (everything from | to }) and
+     * attempts to properly discern its truth value.
+     * \param The full condition.
+     * \return True if the condition evaluates to true, false otherwise.
+     */
+    public static function condValue($input)
+    {
+		
+	}
     
     public function getParameters()
     {

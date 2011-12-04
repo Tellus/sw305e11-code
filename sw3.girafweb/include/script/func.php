@@ -71,7 +71,21 @@ class func extends GirafScriptCommand
         }
         else
         {
-            throw new UnknownClassException($this->cmdClass);
+			// Try and find the class.
+			$className = strtolower($this->cmdClass);
+			$files = scandir(__DIR__ . "/../");
+			$hit = 0;
+			foreach ($files as $file)
+			{
+					$hit = preg_match("/$file(?=\.php)/", $file);
+					if ($hit > 0)
+					{
+						// Think we may have found a good file for inclusion.
+						require_once($file);
+					}
+					return $this->invokeNoReplace($unused);
+			}
+            if ($hit < 1) throw new UnknownClassException($this->cmdClass);
         }
     }
     

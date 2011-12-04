@@ -30,10 +30,12 @@ class GirafNewsPost extends GirafRecord
     public static function getGroupNews($gId = null, $return_as = self::RETURN_PRIMARYKEY)
     {
         // If group id was not set, set it to the id of the group "Users", our default group that all users belong to.
-        $sql = "SELECT " . GirafGroup::getPrimaryKey() . " FROM " . GirafGroup::getSourceTable() . " WHERE groupName='Users'";
+        if (!isset($gId))
+        {
+			$sql = "SELECT " . GirafGroup::getPrimaryKey() . " FROM " . GirafGroup::getSourceTable() . " WHERE groupName='Users'";
         
-        if (!isset($gId)) $gId = sql_helper::simpleQuery($sql);
-
+			$gId = sql_helper::simpleQuery($sql);
+		}
         // Pass the remainder of execution to the base class.
         return parent::getRecords("groupKey=$gId", $return_as);
     }
@@ -53,14 +55,13 @@ class GirafNewsPost extends GirafRecord
     {
         if (!isset($uId))
         {
-            $uId = GirafSession::get("userId");
-            if ($uId == null) return false;
+			$s = GirafSession::getSession();
+            $uId = $s->getCurrentUser();
+            if ($uId === null) return false;
         }
         
         // Retrieve the user so we can get a simple list of group keys.
         $user = GirafUser::getGirafUser($uId);
-        
-        // var_dump($user);
         
         // Get all of the users' groups now. This is through the keys.
         $sql = "SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey=$uId";
@@ -74,17 +75,11 @@ class GirafNewsPost extends GirafRecord
         // in the key return array.
         while($group = $groups->fetch_row())
         {
-            $tmp_news = getGroupNews($group, self::RETURN_PRIMARYKEY);
+            $tmp_news = self::getGroupNews($group[0], $return_as);
             $news_ids = array_merge($news_ids, $tmp_news);
         }
         
-        // At this point $news_ids should contain all news ids of news belonging
-        // to all the users' groups.
-        if ($return_as == self::RETURN_PRIMARYKEY) return $news_ids;
-        
-        // Fuck me if we get here. Exception for now.
-        
-        throw new Exception("getUserNews with record return is not yet implemented.");
+        return $news_ids;
     }
 }
 

@@ -4,7 +4,8 @@
  * purposes.
  */
 
-require_once(__DIR__ . "/sql_helper.inc");
+require_once("sql_helper.inc");
+require_once("user.class.inc");
 
 class users
 {
