@@ -12,7 +12,7 @@ require_once(__DIR__ . "/user.class.inc");
  * \todo Implement static initialisation of all subclasses of GirafRecord, so
  * their primary keys and table names can be accessed without an instance.
  */
-abstract class GirafRecord
+abstract class GirafRecord implements GirafRecordInterface
 {
     /**
      * Used when needing a recordset returned only as primary keys.
@@ -23,7 +23,7 @@ abstract class GirafRecord
      * Used when needing a recordset returned as full records.
      */
     const RETURN_RECORD = 1;
-   
+    
     /**
      * Contains the actual data from the database.
      */
@@ -47,7 +47,106 @@ abstract class GirafRecord
      * \sa GirafRecord::setSourceTable()
      */
     private $sourceTable = null;
-      
+     
+    /**
+     * Global array of associations between classes. It's an array
+     * structured as thus:
+     * $classAssociations[parentClass][childClass] = GirafRecordAssociation.
+     * */
+    private static $classAssociations = array();
+   
+    /**
+     * Retrieves the association that connects this GirafRecord and a
+     * passed record.
+     * \param $forRecord The record to find associations for. Can be
+     * either a class or an object of the class.
+     * \return A GirafRecordAssociation object that details how the
+     * association fits. False if no such association exists.
+     * */
+    public static function getAssociation($forRecord)
+    {
+		// Figure out which class we're in.
+		$pClass = get_called_class();
+		
+		// Get the correct subarray.
+		$assocs = self::getClassAssociations();
+		if ($assocs == false) return false;
+		
+		// See if there is an association.
+		if (!array_key_exists($forRecord, $assocs)) return false;
+		return $assocs[$forRecord];
+	}
+    
+    /**
+     * Retrieves all the current class' associations.
+     * \return Array of associations, keyed by the child class. False
+     * is returned if no associations exist.
+     * */
+    private static function getClassAssociations()
+    {
+		$n = get_called_class();
+		
+		if (array_key_exists(get_called_class(), self::$classAssociations))
+			return self::$classAssociations[$n];
+		else
+			return false;
+	}
+    
+    /**
+     * Adds a new association to the current class.
+     * \param $toClass Child class of the association.
+     * \param $assocTable String name of the table in the database.
+     * \param $pKey String name of the column for parent class key.
+     * \param $cKey String name of the column for child class key.
+     * */
+    protected static function addAssociation($toClass, $assocTable, $pKey, $cKey)
+    {
+		$name = get_called_class();
+		if (!is_string($toClass)) $childClass = get_class($toClass);
+		else $childClass = $toClass;
+		
+		// Create the association array if it didn't already exist.
+		if (self::getClassAssociations() == false) self::$classAssociations[$name] = array();
+		
+		self::$classAssociations[$name][$childClass] = new GirafRecordAssociation($assocTable, $pKey, $cKey);
+	}
+    
+    /**
+     * Retrieves a particular group of child records for the current
+     * record.
+     * \param $childType String name of the child type to retrieve for.
+     * \param $returnAs Type to return as. Defaults to primary keys.
+     * \return Array of children, type determined by $returnAs
+     * parameter. False is returned if the association doesn't exist.
+     * */
+    public function getChildRecords($childType, $returnAs = self::RETURN_PRIMARYKEY)
+    {
+		// Un-committed new records can by definition not have children.
+		if ($this->isNewRecord()) return false;
+		
+		$assocObject = self::getAssociation($childType);
+		
+		if ($assocObject == false) return false;
+		
+		$children = $assocObject->getChildIds($this->id);
+		
+		if ($returnAs == self::RETURN_PRIMARYKEY) return $children;
+		
+		// Create an empty instance for the static functions.
+        $refl = new ReflectionClass($childType);
+        
+        // Create a new subclass instance.
+        $emptyInstance = $refl->newInstance();
+		
+		$ret = array();
+		foreach($children as $child)
+		{
+			$ret[] = $emptyInstance::getInstance($child);
+		}
+		
+		return $ret;
+	}
+    
     /**
      * Whether the current record object is new (that is, not yet in the
      * database) or old (that is, pulled from the database.).
@@ -80,9 +179,11 @@ abstract class GirafRecord
     
     public function __construct()
     {
+		
         // echo "Constructing from " . get_called_class();
         $this->subclass = get_called_class();
         $this->setSourceTable(static::getSourceTable());
+        static::setAssociations();
     }
     
     /**
@@ -213,7 +314,6 @@ abstract class GirafRecord
         // Quick stop. If no ID was requested. Quickly create something new.
         if (!isset($id))
         {
-            // $newU->__set(self::$primaryKey, -1); // Set the primary key to a known invalid value, -1.
             $newU->setId(-1);
             return $newU;
         }
@@ -269,7 +369,7 @@ abstract class GirafRecord
         {
             if($isDirty)
             {
-                $sql .= "$name= '" . $this->data[$name] ."', ";
+                $sql .= "$name= '" . sql_helper::escapeString($this->data[$name]) ."', ";
             }
         }
         $sql = substr($sql, 0, strlen($sql) - 2); // Remove final colon.
@@ -291,6 +391,7 @@ abstract class GirafRecord
         foreach ($this->data as $name=>$val)
         {
             $sql .= "$name, ";
+            $val = sql_helper::escapeString($val);
             $values .= "'$val',";
         }
         
@@ -320,6 +421,7 @@ abstract class GirafRecord
      *  Valid options are RETURN_PRIMARYKEY (which returns an array of keys) and
      *  RETURN_RECORD (which returns an array of SimpleRecord objects, each containing one record).
      * \warning On sufficiently large tables, using RETURN_RECORD (and at some point RETURN_PRIMARYKEY) <br>will</br> result in errors. Be sure to place proper restrictions with $condition beforehand.
+     * \warning Since this function allows a very open condition structure, we must expect the calling environment to escape the conditions securely.
      */
     public function getRecords($condition = null, $return_as = self::RETURN_PRIMARYKEY)
     {
@@ -367,6 +469,11 @@ abstract class GirafRecord
     }
 }
 
+interface GirafRecordInterface
+{
+	static function setAssociations();
+}
+
 /**
  * First iteration of ?-to-? associations in the model. By defining
  * parent and child classes we implicitly get their corresponding tables
@@ -389,7 +496,7 @@ class GirafRecordAssociation
 	
 	public function getChildIds($p)
 	{
-		$sql = "SELECT $this->childKey FROM $this->assocTable WHERE $this->parentKey = $p";
+		$sql = "SELECT $this->childKey FROM $this->assocTable WHERE $this->parentKey=$p";
 		
 		$result = sql_helper::selectQuery($sql);
 		
@@ -400,9 +507,6 @@ class GirafRecordAssociation
 		
 		return $ret;
 	}
-	
-	public function getChildRecords()
-	{}
 }
 
 ?>

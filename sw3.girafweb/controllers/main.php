@@ -41,15 +41,55 @@ class Main extends GirafController
 		$groups = $currentUserData->getGroups(GirafRecord::RETURN_RECORD);
 		
 		// 2. Get children for each group.
-		$kids = array();
-		$apps = array();
-		foreach ($groups as $group)
+		$children = array();
+		
+		foreach($groups as $group)
 		{
-			$gId = $group->id;
-			$kids[$gId] = $group->getChildren(GirafRecord::RETURN_RECORD);
-			foreach($kids[$gId] as $child)
+			$children[$group->id] = $group->getChildren(GirafRecord::RETURN_RECORD);
+		}
+		
+		// 3. Get apps for each child.
+		// 3a. Get devices for each child.
+		// 3b. Get apps for each device.
+		$apps = array(); // Key: childId, value: array of apps.
+		foreach ($children as $child)
+		{
+			$apps[$child->id] = array(); // Initialize.
+			
+			// We try to reduce the overhead of double-entry apps, so we
+			// start by getting unique app ID's THEN getting records.
+			
+			foreach($child as $subarr)
 			{
 				
+			}
+			
+			if (is_array($child))
+			{
+				foreach ($child as $child_arr)
+				{
+					$devices = $child_arr->getDevices();
+					
+					$dev_apps = array();
+					
+					foreach ($devices as $dev)
+					{
+						$dev_apps_temp = $dev->getApps();
+						$dev_apps = array_merge($dev_apps_temp, $dev_apps);
+					}
+				}
+			}
+			else
+			{
+				$devices = $child->getDevices();
+				
+				
+				
+				foreach ($devices as $dev)
+				{
+					$dev_apps_temp = $dev->getApps();
+					$dev_apps = array_merge($dev_apps_temp, $dev_apps);
+				}
 			}
 		}
 
@@ -57,41 +97,10 @@ class Main extends GirafController
 		// Even more bruteforce. Get *all* children.
 		// $kids = GirafChild::getGirafChildren(null, GirafChild::RETURN_RECORD);
 		// Pop them into the view data array.
-		$data["kids"] = $kids;
-
-		$kidsApps = array(); // Array with children and their apps.
-		// Get all apps on all devices for all the children.
-		foreach($kids as $child)
-		{
-			// Get devices.
-			$devs = GirafDevice::getDevices("ownerId=" . $child->id, GirafRecord::RETURN_RECORD);
-			$childApps = array(); // Key = appId.
-			// Get apps for each device.
-			
-			// For each device, get the apps.
-			foreach ($devs as $device)
-			{
-				$apps = GirafDevice::getAppsOnDevice($device->id);
-				// For each app id, retrieve app data and give to the top childApps array.
-				
-				foreach ($apps as $appId)
-				{
-					$appData = GirafApplication::getApplication($appId);
-					// Only add the app if it is not null and it hasn't already been added.
-					if ($appData != null)
-					{
-						if (!array_key_exists($appId, $childApps)) $childApps[$appId] = $appData;
-					}
-				}
-			}
-			
-			// At this point, we should have all unique apps for a cihld in
-			// childApps.
-			$kidsApps[$child->id] = $childApps;
-		}
+		$data["kids"] = $children;
 		
 		// Toss kidsApps into the data array as well.
-		$data["kidsApps"] = $kidsApps;
+		$data["apps"] = $apps;
 		
 		// Invoke the views.
 		$this->view("default/header", $data);

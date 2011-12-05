@@ -18,6 +18,7 @@ abstract class GirafSettings
      */
     public static function getSetting($name, $expand = true)
     {
+		$name = sql_helper::escapeString($name);
         $result = sql_helper::selectQuery("SELECT settingValue, settingDefault FROM " . TABLE_SETTINGS . " WHERE settingName='$name'");
         
         if ($result->num_rows == 0) return null;

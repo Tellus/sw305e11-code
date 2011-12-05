@@ -64,6 +64,11 @@ class GirafImage extends GirafRecord
 		return "imgId";
 	}
     
+    public static function setAssociations()
+    {
+		// Images have no associations as they are quite base.
+	}
+    
     /**
      * Creates a new GirafImage based on data uploaded through the POST
      * mechanism.
@@ -93,7 +98,8 @@ class GirafImage extends GirafRecord
     
         // Register the new image with the database. We do this before saving it
         // to disk in case a sudden error occurs. We don't want random junk.
-        sql_helper::insertQuery("INSERT INTO " . TABLE_IMAGE_RESOURCES . " (imgPath) VALUES (file://$finalpath)");
+        $finalPath = sql_helper::escapeString("file://$finalPath");
+        sql_helper::insertQuery("INSERT INTO " . TABLE_IMAGE_RESOURCES . " (imgPath) VALUES ('$finalPath')");
 
         move_uploaded_file($postData, $finalpath);
         

@@ -31,9 +31,12 @@ class users
     {
         $sql = "INSERT INTO " . TABLE_USERS . " (username, password, userMail";
         
+        $fullname = sql_helper::escapeString($fullname);
         if ($fullname != "") $sql .= ", fullname";
         if ($userrole > -1) $sql .= ", userRole";
 
+		$username = sql_helper::escapeString($username);
+		$email = sql_helper::escapeString($email);
         $sql .= ") VALUES ('$username', '$password', '$email'";
         
         if ($fullname != "") $sql .= ", '$fullname'";
@@ -77,6 +80,7 @@ class users
 	*/
 	public static function getUserId($username)
 	{
+		$username = sql_helper::escapeString($username);
 		$result = sql_helper::selectQuery("SELECT " . GirafUser::getPrimaryKey() . " FROM " . GirafUser::getSourceTable() . " WHERE username='$username'");
 		
 		if (!$result) return false;

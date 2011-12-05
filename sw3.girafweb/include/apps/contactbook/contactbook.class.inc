@@ -32,6 +32,18 @@ class ContactbookMessage extends GirafRecord
         return "messageId";
     }
     
+    public static function setAssociations()
+    {
+		/**
+		 * Messages are associated with:
+		 * - users who have read the message.
+		 * - images in the message.
+		 * */
+		
+		self::addAssociation("GirafImage", "cbMsgImages", "msgKey", "imgKey");
+		self::addAssociation("GirafUser", "cbMessagesRead", "msgKey", "userKey");
+	}
+    
     /**
      * Retrieves a contactbook message with the given ID.
      * \return The message in question.
@@ -110,17 +122,21 @@ class ContactbookMessage extends GirafRecord
 	 * */
 	public static function createNewMessage($uId, $cId, $subject, $body, $parent = null)
 	{
+		// We escape the string parameters.
+		$subject = sql_helper::escapeString($subject);
+		$body = sql_helper::escapeString($body);
+		
 		if (isset($parent))
 		{
 			$sql = "INSERT INTO " . self::getSourceTable() .
 					" (msgParentKey, msgChildKey, msgUserKey, msgSubject, msgBodY) VALUES " .
-					" ('$parent', '$cId', '$uId', '$subject', '$body')";
+					" ($parent, $cId, $uId, '$subject', '$body')";
 		}
 		else
 		{
 			$sql = "INSERT INTO " . self::getSourceTable() .
 					" (msgParentKey, msgChildKey, msgUserKey, msgSubject, msgBodY) VALUES " .
-					" (NULL, '$cId', '$uId', '$subject', '$body')";
+					" (NULL, $cId, $uId, '$subject', '$body')";
 		}
 				
 		// var_dump($sql);

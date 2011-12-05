@@ -16,6 +16,11 @@ class GirafNewsPost extends GirafRecord
         return TABLE_NEWSPOSTS;
     }
     
+    public static function setAssociations()
+    {
+		// Has no implementation.
+	}
+    
     /**
      * Retrieves all news related to a particular group.
      * \param $gId ID of the group whos news is requested. If omitted or set to 

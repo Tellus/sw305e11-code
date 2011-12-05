@@ -25,7 +25,8 @@ class GirafChild extends GirafRecord
      * */
     public function getDevices($returnAs = GirafRecord::RETURN_PRIMARYKEY)
     {
-		
+		// Thanks to new architecture, we proxy this downwards. Woot!
+		return self::getChildRecords("GirafChild", $returnAs);
 	}
     
     public static function getPrimaryKey()
@@ -37,6 +38,17 @@ class GirafChild extends GirafRecord
     {
         return TABLE_CHILDREN;
     }
+    
+    public static function setAssociations()
+    {
+		/**
+		 * Children are associated downwards with devices (and thus
+		 * applications) and upwards with groups *and* users.
+		 **/
+		self::addAssociation("GirafDevice", TABLE_DEVICE, "ownerId", self::getPrimaryKey());
+		self::addAssociation("GirafUser", TABLE_CHILD_USER_KEYS, "childKey", "userKey");
+		self::addAssociation("GirafGroup", TABLE_CHILD_GROUP_KEYS, "childKey", "groupKey");
+	}
     
     /**
      * Creates a new GirafChild instance with the data found under the given

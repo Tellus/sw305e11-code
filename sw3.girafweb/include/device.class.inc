@@ -29,14 +29,24 @@ class GirafDevice extends GirafRecord
 		return parent::getRecords($cond, $return_as);
 	}
 	
+	public static function setAssociations()
+	{
 		/**
-	* Function used for getting applications related to a specific device.
-	* \param $deviceId The id of the device you wish to locate applications at.
-	* \return Returns an array of applicationsid's which is installed at the input device.
-	*/
+		 * Devices are upwards associated with children and downwards
+		 * with apps.
+		 **/
+		self::addAssociation("GirafChild", TABLE_DEVICE, self::getPrimaryKey, "ownerId");
+		self::addAssociation("GirafApplication", TABLE_DEVICE_APPS, "deviceKey", "applicationKey");
+	}
+	
+	/**
+	 * Function used for getting applications related to a specific device.
+	 * \param $deviceId The id of the device you wish to locate applications at.
+	 * \return Returns an array of applicationsid's which is installed at the input device.
+	 */
 	public static function getAppsOnDevice($deviceId)
 	{
-		$sql = "SELECT applicationKey FROM " . TABLE_DEVICE_APPS . " WHERE deviceKey=" . $deviceId;
+		$sql = "SELECT applicationKey FROM " . TABLE_DEVICE_APPS . " WHERE deviceKey=$deviceId";
 		
 		// var_dump($sql);
 		
@@ -58,7 +68,10 @@ class GirafDevice extends GirafRecord
 		return $appsIds;
 	}
 	
-	
+	public function getApps($returnAs = self::RETURN_PRIMARYKEY)
+	{
+		return static::getChildRecords("GirafApplication", $returnAs);
+	}	
 }
 
 ?>

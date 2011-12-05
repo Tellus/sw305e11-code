@@ -32,6 +32,7 @@ class ChildAndDevice
 	*/
 	public static function getChildId($profileName, $profileBirthday)
 	{
+		$profileName = sql_helper::escapeString($profileName);
 		$result = sql_helper::selectQuery("SELECT profileId FROM " . TABLE_CHILDREN . " WHERE profileName = '$profileName' AND profileBirthday='$profileBirthday'"); //.$profileName);
 		if ($row = $result->fetch_assoc()) 
 		{
@@ -47,6 +48,8 @@ class ChildAndDevice
 	*/
 	private static function createNewChild($profileName, $profileBirthday)
 	{
+		$profileName = sql_helper::escapeString($profileName);
+		$profileBirthday = sql_helper::escapeString($profileBirthday);
 		$sql = "INSERT INTO " . TABLE_CHILDREN . " (profileName, profileBirthday) VALUES ('$profileName','$profileBirthday')";
 		$result = sql_helper::insertQuery($sql);
 			
@@ -78,7 +81,8 @@ class ChildAndDevice
 	*/
 	private static function createNewDevice($childID, $deviceIdent)
 	{
-		$sql = "INSERT INTO " . TABLE_DEVICE . " (ownerId, deviceIdent) VALUES ('$childID','$deviceIdent')";
+		$deviceIdent = sql_helper::escapeString($deviceIdent);
+		$sql = "INSERT INTO " . TABLE_DEVICE . " (ownerId, deviceIdent) VALUES ($childID,'$deviceIdent')";
 		$result = sql_helper::insertQuery($sql);
 			
 		if (!$result)
@@ -97,10 +101,11 @@ class ChildAndDevice
 	*/
 	public static function deviceId($childID, $deviceIdent)
 	{
-		$result = sql_helper::selectQuery("SELECT deviceId  FROM " . TABLE_DEVICE . " WHERE ownerId = '$childID' AND deviceIdent='$deviceIdent'"); 
-		if ($row = $result->fetch_assoc()) 
+		$deviceIdent = sql_helper::escapeString($deviceIdent);
+		$result = sql_helper::selectQuery("SELECT deviceId  FROM " . TABLE_DEVICE . " WHERE ownerId=$childID AND deviceIdent='$deviceIdent'"); 
+		if ($row = $result->fetch_row()) 
 		{
-			return $row["deviceId"];
+			return $row[0];
 		}
 		return null;
 	}
@@ -114,7 +119,7 @@ class ChildAndDevice
 	*/
 	public static function connectChildAndUser($childId, $userId)
 	{
-		$sql = "INSERT INTO " . TABLE_CHILD_USER . " (childKey, userKey) VALUES ('$childId','$userId')";
+		$sql = "INSERT INTO " . TABLE_CHILD_USER_KEYS . " (childKey, userKey) VALUES ($childId,$userId)";
 		$result = sql_helper::insertQuery($sql);
 			
 		if (!$result)
@@ -132,7 +137,7 @@ class ChildAndDevice
 	*/
 	public static function connectAppDevice($applicationKey, $deviceKey)
 	{
-		$sql = "INSERT INTO " . TABLE_DEVICE_APPS ." (applicationKey, deviceKey) VALUES ('$applicationKey','$deviceKey')";
+		$sql = "INSERT INTO " . TABLE_DEVICE_APPS ." (applicationKey, deviceKey) VALUES ($applicationKey,$deviceKey)";
 				$result = sql_helper::insertQuery($sql);
 			
 		if (!$result)

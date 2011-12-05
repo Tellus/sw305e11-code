@@ -28,6 +28,14 @@ class GirafApplication extends GirafRecord
 		return parent::getRecord($cond, $return_as);
 	}
 	
+	public static function setAssociations()
+	{
+		/**
+		 * Applications have direct associations to devices.
+		 **/
+		self::addAssociation("GirafDevice", "devAppKeys", "applicationKey", "deviceKey");
+	}
+	
 /**
 	* Function used for finding the devices a specific applications is installed at
 	* \param $appId The id of the specific application
@@ -35,8 +43,8 @@ class GirafApplication extends GirafRecord
 	*/	
 	public static function getDevicesWithInstalledApp($appId)
 	{
-	
-		$result = sql_helper::selectQuery("SELECT deviceKey FROM " . TABLE_DEVICE_APPS . " WHERE applicationKey= '$appId'");
+		$appId = sql_helper::escapeString($appId);
+		$result = sql_helper::selectQuery("SELECT deviceKey FROM " . TABLE_DEVICE_APPS . " WHERE applicationKey=$appId");
 	
 		if(!$result) return false;
 		$devIds = Array();		

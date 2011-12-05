@@ -45,6 +45,15 @@ class GirafUser extends GirafRecord
         return "userId";
     }
     
+    public static function setAssociations()
+    {
+		/**
+		 * Users are associated with groups and children.
+		 **/
+		self::addAssociation("GirafChild", TABLE_CHILD_USER_KEYS, "userKey", "childKey");
+		self::addAssociation("GirafGroup", TABLE_USER_GROUP_KEYS, "userKey", "groupKey");
+	}
+    
     /**
      * Attempts to retrieve an existing user from the database and returns them
      * as a GirafUser instance.
@@ -81,25 +90,13 @@ class GirafUser extends GirafRecord
     }
     
     /**
-     * Retrieves a list of the groups that this user is a member of.
+     * Retrieves an array of the groups that this user is a member of.
+     * \param $returnAs The desired return type.
      * \return Array of groupIds.
      */
-    public function getUserGroups()
+    public function getGroups($returnAs = self::RETURN_PRIMARYKEY)
     {
-        $sql = "SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey=" . $this->id;
-        // echo $sql;
-        $keys = sql_helper::selectQuery($sql);
-        
-        // We shouldn't expect this error.
-        if(!$keys) die(sql_helper::getErrMsg());
-        
-        $ret = array();
-        while($row = $keys->fetch_row())
-        {
-            $ret[] = $row[0];
-        }
-        
-        return $ret;
+		return static::getChildRecords("GirafGroup", $returnAs);
     }
     
     /**
@@ -117,6 +114,7 @@ class GirafUser extends GirafRecord
             $g = GirafGroup::getGirafGroup($gId);
         else
         {
+			$gId = sql_helper::escapeString($gId);
             $gk = sql_helper::simpleQuery("SELECT " . GirafGroup::getPrimaryKey() . " FROM " . TABLE_GROUPS . " WHERE groupName='$gId'");
             $g = GirafGroup::getGirafGroup($gId);
         }
@@ -137,20 +135,7 @@ class GirafUser extends GirafRecord
     public function removeFromGroup($gId)
     {
     
-    }
-    
-    /**
-     * Retrieves array of applications installed on the child's devices.
-     * \param $dev Optional. Set a single device to pull apps for.
-     * \param $returnAs Define return type, array of app objects or
-     * array of primary keys.
-     * */
-    public function getApps($dev = null, $returnAs = self::RETURN_PRIMARYKEY)
-    {
-		
-	}
-    
-    
+    }    
 }
 
 ?>
