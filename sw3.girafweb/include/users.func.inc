@@ -88,5 +88,31 @@ class users
 		return $row[GirafUser::getPrimaryKey()];
 	
 	}
+	
+	/**
+	 * Get groups that this user is bound to.
+	 * */
+	public function getGroups($returnAs = GirafRecord::RETURN_PRIMARYKEY)
+	{
+		$g = sql_helper::selectQuery("SELECT groupKey FROM " . TABLE_USER_GROUP_KEYS . " WHERE userKey=" . $this->id);
+		
+		$ret = array();
+		if ($g === false) return $ret;
+		
+		if ($returnAs == GirafRecord::RETURN_PRIMARYKEY)
+		{
+			while ($row = $g->fetch_row()) $ret[] = $row[0];
+		}
+		elseif ($returnAs == GirafRecord::RETURN_RECORD)
+		{
+			while ($row = $g->fetch_row()) $ret[] = GirafGroup::getGirafGroup($row[0]);
+		}
+		else
+		{
+			throw new Exception ("Invalid return type $returnAs requested.");
+		}
+		
+		return $ret;
+	}
 }
 ?>

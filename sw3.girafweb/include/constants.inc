@@ -11,7 +11,7 @@ define("TABLE_CHILDREN", "profiles");
 define("TABLE_ABILITY_DEFINITIONS", "abilityDefinitions");
 define("TABLE_CBMESSAGES","cbMessages");
 define("TABLE_APP_SETTINGS", "appSetings");
-define("TABLE_CHILD_GROUP", "childGroupKey");
+define("TABLE_CHILD_GROUP_KEYS", "childGroupKey");
 define("TABLE_IMAGE_RESOURCES", "imageResources");
 define("TABLE_USER_GROUP_KEYS", "userGroupKeys");
 define("TABLE_NEWSPOSTS", "newsPosts");

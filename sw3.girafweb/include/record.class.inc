@@ -78,7 +78,7 @@ abstract class GirafRecord
      */
     protected static final function staticConstructor(){}
     
-    public function __construct()//, $subclass)
+    public function __construct()
     {
         // echo "Constructing from " . get_called_class();
         $this->subclass = get_called_class();
@@ -366,4 +366,43 @@ abstract class GirafRecord
         return $records;
     }
 }
+
+/**
+ * First iteration of ?-to-? associations in the model. By defining
+ * parent and child classes we implicitly get their corresponding tables
+ * and columns/keys. Furthermore, we need three pieces of info. An
+ * association table, and which columns in that table define parent and
+ * child foreign keys, respectively.
+ * */
+class GirafRecordAssociation
+{
+	public $assocTable;
+	public $parentKey;
+	public $childKey;
+	
+	public function __construct($aTable, $pKey, $cKey)
+	{
+		$this->assocTable = $aTable;
+		$this->parentKey = $pKey;
+		$this->childKey = $cKey;
+	}
+	
+	public function getChildIds($p)
+	{
+		$sql = "SELECT $this->childKey FROM $this->assocTable WHERE $this->parentKey = $p";
+		
+		$result = sql_helper::selectQuery($sql);
+		
+		if ($result === false) throw new Exception("The hell?!: " . sql_helper::getErrMsg());
+		
+		$ret = array();
+		while ($row = $result->fetch_row()) $ret[] = $row[0];
+		
+		return $ret;
+	}
+	
+	public function getChildRecords()
+	{}
+}
+
 ?>

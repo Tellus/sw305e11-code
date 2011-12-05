@@ -30,12 +30,32 @@ class Main extends GirafController
 
 		$currentUserData = GirafUser::getGirafUser($s->getCurrentUser());
 
-		// Alright, time constraint.
-		// We're gonna bruteforce the fuck out of this thing.
+		// In order to make the data more digestible to the view, we'll
+		// order the necessary data in the following nesting:
+		// Groups -> Children -> Apps. Although apps and children are
+		// currently just mass-read into arrays, the implementation may
+		// make AJAX/JSON loading later more easily supported. So
+		// without further ado:
+		
+		// 1. Get groups.
+		$groups = $currentUserData->getGroups(GirafRecord::RETURN_RECORD);
+		
+		// 2. Get children for each group.
+		$kids = array();
+		$apps = array();
+		foreach ($groups as $group)
+		{
+			$gId = $group->id;
+			$kids[$gId] = $group->getChildren(GirafRecord::RETURN_RECORD);
+			foreach($kids[$gId] as $child)
+			{
+				
+			}
+		}
 
 		// Get all children for this user's groups.
 		// Even more bruteforce. Get *all* children.
-		$kids = GirafChild::getGirafChildren(null, GirafChild::RETURN_RECORD);
+		// $kids = GirafChild::getGirafChildren(null, GirafChild::RETURN_RECORD);
 		// Pop them into the view data array.
 		$data["kids"] = $kids;
 

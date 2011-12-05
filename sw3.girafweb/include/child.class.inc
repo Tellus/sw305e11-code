@@ -13,10 +13,20 @@ class GirafChild extends GirafRecord
      * \return A GirafDevice associated with the child, or null.
      * \todo{Write the function}
      */
-    public static function getDevice()
+    public function getDevice()
     {
         return null;
     }
+    
+    /**
+     * Retrieves all devices associated with the child.
+     * \param $returnAs Return type.
+     * \return Array of devices of the requested type.
+     * */
+    public function getDevices($returnAs = GirafRecord::RETURN_PRIMARYKEY)
+    {
+		
+	}
     
     public static function getPrimaryKey()
     {
