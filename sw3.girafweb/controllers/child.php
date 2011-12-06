@@ -33,9 +33,20 @@ class Child extends GirafController
 		$selector = $params["param0"];
 		if ($selector == "group")
 		{
-			$group = GirafGroup::getGirafGroup($params["param1"]);
+			// Special case: "my kids".
+			if ($params["param1"] == -1)
+			{
+				$s = GirafSession::getSession();
+				$user = $s->getCurrentUser();
+				$user = GirafUser::getGirafUser($user);
+				$kids = $user->getChildren($rType);
+			}
+			else
+			{
+				$group = GirafGroup::getGirafGroup($params["param1"]);
 			
-			$kids = $group->getChildren($rType);
+				$kids = $group->getChildren($rType);
+			}
 		}
 		elseif ($selector == "user")
 		{

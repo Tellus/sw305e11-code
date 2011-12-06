@@ -64,17 +64,24 @@ function printDevices(data)
 	
 	$(n).empty();
 	
-	$(n).append("<option value=-1>Alle enheder</option>");
+	// $(n).append("<option value=-1>Alle enheder</option>");
 	for (i=0;i<data.length;i++)
 	{
 		// console.debug(innerData);
 		innerData = data[i];
 		gId = innerData[0];
 		gName = innerData[1];
-		$(n).append('<option value="' + gId + '">' + gName + '</option>');
+		$(n).append('<option id="device-' + gId + '" value="' + gId + '">' + gName + '</option>');
 	}
 	
 	// console.debug("Done printing devices.");
+	
+	// Load the first device.
+	$("#deviceSelector").show();
+	
+	firstDev = $("#deviceSelector").children("option:first").attr("id");
+	firstDev = firstDev.substring(firstDev.indexOf("-")+1);
+	selectDevice(firstDev); // Default to first device.
 }
 
 /**
@@ -182,6 +189,18 @@ function appClicked(eventdata)
 	refreshModule();	
 }
 
+function selectGroup(id)
+{
+	showLoader("#inner-child-list");
+	$.getJSON("<?=BaseUrl()?>child/list/group/" + id + "/<?=GirafRecord::RETURN_RECORD?>", {}, printChildren);
+}
+
+function selectDevice(id)
+{
+	showLoader("#inner-app-list");
+	$.getJSON("<?=BaseUrl()?>app/list/device/" + id + "/<?=GirafRecord::RETURN_RECORD?>", {}, printApps);
+}
+
 $(document).ready(function(){
 	$(".app-item").hide();
 	
@@ -190,16 +209,16 @@ $(document).ready(function(){
 	$.getJSON("<?=BaseUrl()?>group/list/<?=$userId?>/<?=GirafRecord::RETURN_RECORD?>", {}, printGroups);
 	
 	$("#groupSelector").change(function(event){
-		var group = event.target.value;
-		showLoader("#inner-child-list");
-		$.getJSON("<?=BaseUrl()?>child/list/group/" + group + "/<?=GirafRecord::RETURN_RECORD?>", {}, printChildren);
+		selectGroup(event.target.value);
 	});
 	
 	$("#deviceSelector").change(function(event){
-		var device = event.target.value;
-		showLoader("#inner-app-list");
-		$.getJSON("<?=BaseUrl()?>app/list/device/" + device + "/<?=GirafRecord::RETURN_RECORD?>", {}, printApps);
+		selectDevice(event.target.value);
 	});
+	
+	selectGroup(-1);
+	
+	$("#deviceSelector").hide();
 });</script>
 <div id="site-box">
 <div id="header">
@@ -212,17 +231,13 @@ $(document).ready(function(){
 <div id="menu">
 	<div id="childlist">
 		<div id="groupSelectorDiv">
-			<select id="groupSelector">
-				
-			</select>
+			<select id="groupSelector"></select>
 		</div>
 		<div id="inner-child-list"></div>
 	</div>
 	<div id="applist">
 		<div id="deviceSelectorDiv">
-			<select id="deviceSelector">
-				<option value="0">Vælg enhed</option>
-			</select>
+			<select id="deviceSelector"></select>
 		</div>
 		<div id="inner-app-list"></div>
 	</div>

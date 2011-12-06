@@ -136,6 +136,11 @@ class GirafUser extends GirafRecord
     {
     
     }    
+    
+    public function getChildren($returnAs = self::RETURN_PRIMARYKEY)
+    {
+		return static::getChildRecords("GirafChild", $returnAs);
+	}
 }
 
 ?>
