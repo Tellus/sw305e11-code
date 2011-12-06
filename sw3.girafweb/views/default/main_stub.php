@@ -51,10 +51,38 @@ function printGroups(data)
 }
 
 /**
+ * Reprints the selection box with devices.
+ */
+function printDevices(data)
+{
+	// console.debug("Printing devices.");
+	
+	// Empty the previous list.
+	var n = "#deviceSelector";
+
+	hideLoader("#applist");
+	
+	$(n).empty();
+	
+	$(n).append("<option value=-1>Alle enheder</option>");
+	for (i=0;i<data.length;i++)
+	{
+		// console.debug(innerData);
+		innerData = data[i];
+		gId = innerData[0];
+		gName = innerData[1];
+		$(n).append('<option value="' + gId + '">' + gName + '</option>');
+	}
+	
+	// console.debug("Done printing devices.");
+}
+
+/**
  * Reprints the list of children based on 
  */
 function printChildren(data)
 {
+	// console.debug("Printing kids");
 	var n = "#inner-child-list";
 	
 	hideLoader(n);
@@ -63,16 +91,51 @@ function printChildren(data)
 	
 	for(i=0;i<data.length;i++)
 	{
-		console.debug(data[i]);
+		// console.debug(data[i]);
 
 		var base = '<div id="giraf-child-base"><div class="menu-item child-item" id="child-__CHILD__ID__"><div class="image-div" id="image-div-__CHILD__ID__"><img class="menu-image" id="image-__CHILD__ID__" src="<?=BaseUrl() . '/img/profile-photo.jpg'?>" /></div><div class="menu-item-title" id="name-__CHILD__ID__">__FIRST__NAME__</div></div></div>';
 
 		base = base.replace(/__CHILD__ID__/g, data[i][0]).replace(/__FIRST__NAME__/g, data[i][1]);
 		
-		console.debug(base);
+		// console.debug(base);
 
 		$(n).append(base);
 	}
+	
+	$(".child-item").click(function(){childClicked(event)});
+	
+	// console.debug("Done printing kids.");
+}
+var curChild = null;
+
+/**
+ * Reprints the list of applications for a specific device.
+ */
+function printApps(data)
+{
+	// console.debug("Printing Apps");
+	var n = "#inner-app-list";
+	
+	hideLoader(n);
+	
+	$(n).empty();
+	
+	for(i=0;i<data.length;i++)
+	{
+		// console.debug(data[i]);
+
+		var base = '<div class="menu-item app-item app-__APP__ID__ app-for-child-'+curChild+'" id="'+curChild+'-__APP__ID__"><span id="'+curChild+'__APP__ID__">__APP__NAME__</span></div>';
+
+		base = base.replace(/__APP__ID__/g, data[i][0]).replace(/__APP__NAME__/g, data[i][1]);
+		
+		// console.debug(base);
+
+		$(n).append(base);
+	}
+	
+	$(".app-item").click(function(){appClicked(event)});
+	
+	// console.debug("Done printing kids.");
 }
 
 /**
@@ -85,10 +148,38 @@ function showLoader(target)
 	$(target).append('<img id="girafLoader" src="<?=BaseUrl()?>img/ajax-loader.gif"/>');
 }
 
+/**
+ * Hides the AJAX loading icon again. Unscrupulously, all child elements
+ * will be shown again.
+ */
 function hideLoader(target)
 {
 	$(target).children().show();
 	$(target + " #girafLoader").remove();
+}
+
+function childClicked(eventdata)
+{
+	var cId = event.target.id;
+	var childId = cId.substring(cId.lastIndexOf("-")+1);
+	var name = ".app-for-child-" + childId;
+	
+	// Perform device loading and load the first device on the list.
+	showLoader("#applist");
+	$.getJSON("<?=BaseUrl()?>device/list/" + childId + "/<?=GirafRecord::RETURN_RECORD?>", {}, printDevices);	
+	
+	curChild = childId;
+}
+
+function appClicked(eventdata)
+{
+	var cId = event.target.id;
+	var appId = getAppIdFromAppButton(cId);
+	var kidId = getChildIdFromAppButton(cId);
+	
+	lastModuleUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
+	
+	refreshModule();	
 }
 
 $(document).ready(function(){
@@ -96,42 +187,18 @@ $(document).ready(function(){
 	
 	$("#giraf-child-base").hide();
 	
-	$(".child-item").click(function()
-	{
-		var cId = event.target.id;
-		var childId = cId.substring(cId.lastIndexOf("-")+1);
-		var name = ".app-for-child-" + childId;
-		// console.debug(name);
-		
-		// Pretty, but glitchy.
-		// $(".app-select").slideUp('fast', function(){$(".for-child-" + childId).slideDown('fast');});
-		
-		// Functional, but poppy.
-		$(".app-item").hide();
-		$(name).show();;
-	});
-	
-	$(".app-item").click(function()
-	{
-		var cId = event.target.id;
-		// console.debug(cId);
-		var appId = getAppIdFromAppButton(cId);
-		var kidId = getChildIdFromAppButton(cId);
-		
-		// alert(appId + " and " + kidId);
-		// $.get("themes/default/cbMessages.tpl.php", { child : kidId}, printModule);
-		// var gUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
-		lastModuleUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
-		// console.debug(gUrl);
-		refreshModule();
-	});
-	
 	$.getJSON("<?=BaseUrl()?>group/list/<?=$userId?>/<?=GirafRecord::RETURN_RECORD?>", {}, printGroups);
 	
 	$("#groupSelector").change(function(event){
 		var group = event.target.value;
 		showLoader("#inner-child-list");
 		$.getJSON("<?=BaseUrl()?>child/list/group/" + group + "/<?=GirafRecord::RETURN_RECORD?>", {}, printChildren);
+	});
+	
+	$("#deviceSelector").change(function(event){
+		var device = event.target.value;
+		showLoader("#inner-app-list");
+		$.getJSON("<?=BaseUrl()?>app/list/device/" + device + "/<?=GirafRecord::RETURN_RECORD?>", {}, printApps);
 	});
 });</script>
 <div id="site-box">
@@ -149,8 +216,7 @@ $(document).ready(function(){
 				
 			</select>
 		</div>
-		<div id="inner-child-list">
-		</div>
+		<div id="inner-child-list"></div>
 	</div>
 	<div id="applist">
 		<div id="deviceSelectorDiv">
@@ -158,9 +224,7 @@ $(document).ready(function(){
 				<option value="0">Vælg enhed</option>
 			</select>
 		</div>
-		<div id="inner-app-list">
-		<!-- No content -->
-		</div>
+		<div id="inner-app-list"></div>
 	</div>
 </div>
 

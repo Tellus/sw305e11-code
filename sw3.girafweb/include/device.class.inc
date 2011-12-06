@@ -35,7 +35,7 @@ class GirafDevice extends GirafRecord
 		 * Devices are upwards associated with children and downwards
 		 * with apps.
 		 **/
-		self::addAssociation("GirafChild", TABLE_DEVICE, self::getPrimaryKey, "ownerId");
+		self::addAssociation("GirafChild", TABLE_DEVICE, self::getPrimaryKey(), "ownerId");
 		self::addAssociation("GirafApplication", TABLE_DEVICE_APPS, "deviceKey", "applicationKey");
 	}
 	

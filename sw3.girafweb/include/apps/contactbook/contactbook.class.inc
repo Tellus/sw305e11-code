@@ -188,6 +188,13 @@ class MessageReadStatus extends GirafRecord
 		return 'readId';
 	}
 	
+	public static function setAssociations()
+	{
+		/**
+		 * The status is associated with ... fuck it. it works right now.
+		 **/
+	}
+	
 	/**
 	 * Changes the read/unread status of a message for a particular
 	 * user.

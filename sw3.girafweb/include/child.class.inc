@@ -1,7 +1,8 @@
 <?php
 
-require_once(__DIR__ . "/record.class.inc"); // Base class.
-require_once(__DIR__ . "/constants.inc"); // Table constants.
+require_once(INCDIR . "/record.class.inc"); // Base class.
+require_once(INCDIR . "/constants.inc"); // Table constants.
+require_once(INCDIR . "/device.class.inc");
 
 /**
  * Data container class for a child in the system.
@@ -26,7 +27,7 @@ class GirafChild extends GirafRecord
     public function getDevices($returnAs = GirafRecord::RETURN_PRIMARYKEY)
     {
 		// Thanks to new architecture, we proxy this downwards. Woot!
-		return self::getChildRecords("GirafChild", $returnAs);
+		return self::getChildRecords("GirafDevice", $returnAs);
 	}
     
     public static function getPrimaryKey()
@@ -45,7 +46,7 @@ class GirafChild extends GirafRecord
 		 * Children are associated downwards with devices (and thus
 		 * applications) and upwards with groups *and* users.
 		 **/
-		self::addAssociation("GirafDevice", TABLE_DEVICE, "ownerId", self::getPrimaryKey());
+		self::addAssociation("GirafDevice", TABLE_DEVICE, "ownerId", GirafDevice::getPrimaryKey());
 		self::addAssociation("GirafUser", TABLE_CHILD_USER_KEYS, "childKey", "userKey");
 		self::addAssociation("GirafGroup", TABLE_CHILD_GROUP_KEYS, "childKey", "groupKey");
 	}

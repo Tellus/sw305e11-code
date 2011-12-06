@@ -46,6 +46,11 @@ class sql_helper
         {
             self::$lastError = self::$connection->error();
         }
+        else
+        {
+			// Set stuff.
+			self::$connection->set_charset('utf8');
+		}
     }
     
     /**

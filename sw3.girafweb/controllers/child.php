@@ -50,7 +50,7 @@ class Child extends GirafController
 		
 		// var_dump($kids);
 		
-		if ($rType == GirafRecord::RETURN_PRIMARYKEY) $output = json_encode($kids);
+		if ($rType == GirafRecord::RETURN_PRIMARYKEY) $output = $kids;
 		elseif ($rType == GirafRecord::RETURN_RECORD)
 		{
 			$output = array();

@@ -33,11 +33,32 @@ $(document).ready(function()
 		var id = event.target.id;
 		var src = event.target.src;
 		console.debug(event.target.src);
-		// console.debug($("img"));
-		// console.debug($("img 
+		
 		$("#cb-image-box-src").attr("src", src);
 		$("#cb-image-box").dialog("open");
 		$("#cb-image-box").dialog("option", {position: [25, 25]});
+		
+		var image = $("#cb-image-box-src");
+		console.debug(image);
+		
+		var newImg = new Image();
+		newImg.src = src;
+		var height = newImg.height;
+		var width = newImg.width;
+		// alert ('The image size is '+width+'*'+height);
+		
+		if (height > 768)
+		{
+			$("#cb-image-box-src").height("768");
+			$("#cb-image-box-src").width("auto");
+		}
+		else if (width > 1024)
+		{
+			$("#cb-image-box-src").height("auto");
+			$("#cb-image-box-src").width("1024");
+		}
+		
+		$("#cb-image-box").dialog("option", {position: 'center'});
 	});
 	
 	$("#cb-image-box").dialog({

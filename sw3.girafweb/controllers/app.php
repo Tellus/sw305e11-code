@@ -31,57 +31,28 @@ class App extends GirafController
 		else $rType = $params["param2"];
 		
 		$selector = $params["param0"];
-		if ($selector == "child")
+		if ($selector == "device")
 		{
-			$child = GirafChild::getGirafChild($params["param1"]);
+			$dev = GirafDevice::getDevice($params["param1"]);;
 			
-			$apps 
-		}
-		elseif ($selector == "device")
-		{
-			$user = GirafUser::getGirafUser($params["param1"]); // Requested user.
-			
-			$kids = $user->getChildren($rType);
+			$apps = $dev->getApps($rType);
 		}
 		else
 		{
 			throw new Exception("Invalid selector type '$selector' requested.");
 		}
 		
-		// var_dump($kids);
-		
-		if ($rType == GirafRecord::RETURN_PRIMARYKEY) $output = json_encode($kids);
+		if ($rType == GirafRecord::RETURN_PRIMARYKEY) $output = json_encode($apps);
 		elseif ($rType == GirafRecord::RETURN_RECORD)
 		{
 			$output = array();
-			foreach ($kids as $kid)
+			foreach ($apps as $app)
 			{
-				$output[] = array($kid->id, $kid->profileName);
+				$output[] = array($app->id, $app->applicationName);
 			}
 		}
 		
 		echo json_encode($output);
-	}
-}
-
-?>
-
-<?php
-
-// PHP: print out all apps with class/id that determines child.
-// js: hide/show depending on picked child.
-
-foreach($kidsApps as $kidId => $apps)
-{
-	foreach ($apps as $app)
-	{
-		$an = $app->applicationName;
-		$ai = $app->id;
-	?>
-	<div class="menu-item app-item app-<?=$ai?> app-for-child-<?=$kidId?>" id="<?="$kidId-$ai"?>">
-		<span id="<?="$kidId-$ai"?>"><?=$an?></span>
-	</div>
-	<?php
 	}
 }
 
