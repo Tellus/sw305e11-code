@@ -28,8 +28,73 @@ function refreshModule()
 	$.get(lastModuleUrl, {}, printModule);
 }
 
+/**
+ * Reprints the list of groups this user has access to.
+ */
+function printGroups(data)
+{
+	// Empty the previous list.
+	var n = "#groupSelector";
+
+	hideLoader(n);
+	
+	$(n).empty();
+	
+	$(n).append("<option value=-1>Dine børn</option>");
+	for (i=0;i<data.length;i++)
+	{
+		innerData = data[i];
+		gId = innerData[0];
+		gName = innerData[1];
+		$(n).append('<option value="' + gId + '">' + gName + '</option>');
+	}
+}
+
+/**
+ * Reprints the list of children based on 
+ */
+function printChildren(data)
+{
+	var n = "#inner-child-list";
+	
+	hideLoader(n);
+	
+	$(n).empty();
+	
+	for(i=0;i<data.length;i++)
+	{
+		console.debug(data[i]);
+
+		var base = '<div id="giraf-child-base"><div class="menu-item child-item" id="child-__CHILD__ID__"><div class="image-div" id="image-div-__CHILD__ID__"><img class="menu-image" id="image-__CHILD__ID__" src="<?=BaseUrl() . '/img/profile-photo.jpg'?>" /></div><div class="menu-item-title" id="name-__CHILD__ID__">__FIRST__NAME__</div></div></div>';
+
+		base = base.replace(/__CHILD__ID__/g, data[i][0]).replace(/__FIRST__NAME__/g, data[i][1]);
+		
+		console.debug(base);
+
+		$(n).append(base);
+	}
+}
+
+/**
+ * Shows the AJAX loading icon within a typed element. All child
+ * elements will be hidden until hideLoader() is called.
+ */
+function showLoader(target)
+{
+	$(target).children().hide();
+	$(target).append('<img id="girafLoader" src="<?=BaseUrl()?>img/ajax-loader.gif"/>');
+}
+
+function hideLoader(target)
+{
+	$(target).children().show();
+	$(target + " #girafLoader").remove();
+}
+
 $(document).ready(function(){
 	$(".app-item").hide();
+	
+	$("#giraf-child-base").hide();
 	
 	$(".child-item").click(function()
 	{
@@ -60,6 +125,14 @@ $(document).ready(function(){
 		// console.debug(gUrl);
 		refreshModule();
 	});
+	
+	$.getJSON("<?=BaseUrl()?>group/list/<?=$userId?>/<?=GirafRecord::RETURN_RECORD?>", {}, printGroups);
+	
+	$("#groupSelector").change(function(event){
+		var group = event.target.value;
+		showLoader("#inner-child-list");
+		$.getJSON("<?=BaseUrl()?>child/list/group/" + group + "/<?=GirafRecord::RETURN_RECORD?>", {}, printChildren);
+	});
 });</script>
 <div id="site-box">
 <div id="header">
@@ -71,40 +144,23 @@ $(document).ready(function(){
 </div>
 <div id="menu">
 	<div id="childlist">
-		<?php foreach($kids as $child){	
-			$c = $child->id;
-			?>
-			<div class="menu-item child-item" id="child-<?=$c?>">
-				<div class="image-div" id="image-div-<?=$c?>">
-					<img class="menu-image" id="image-<?=$c?>" src="<?=BaseUrl() . '/img/profile-photo.jpg'?>" />
-				</div>
-				<div class="menu-item-title" id="name-<?=$c?>">
-					<?=$child->getFirstName()?>
-				</div>
-			</div>
-		<?php } ?>
+		<div id="groupSelectorDiv">
+			<select id="groupSelector">
+				
+			</select>
+		</div>
+		<div id="inner-child-list">
+		</div>
 	</div>
 	<div id="applist">
-		<?php
-		
-		// PHP: print out all apps with class/id that determines child.
-		// js: hide/show depending on picked child.
-		
-		foreach($kidsApps as $kidId => $apps)
-		{
-			foreach ($apps as $app)
-			{
-				$an = $app->applicationName;
-				$ai = $app->id;
-			?>
-			<div class="menu-item app-item app-<?=$ai?> app-for-child-<?=$kidId?>" id="<?="$kidId-$ai"?>">
-				<span id="<?="$kidId-$ai"?>"><?=$an?></span>
-			</div>
-			<?php
-			}
-		}
-		
-		?>
+		<div id="deviceSelectorDiv">
+			<select id="deviceSelector">
+				<option value="0">Vælg enhed</option>
+			</select>
+		</div>
+		<div id="inner-app-list">
+		<!-- No content -->
+		</div>
 	</div>
 </div>
 

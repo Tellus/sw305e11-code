@@ -37,70 +37,7 @@ class Main extends GirafController
 		// make AJAX/JSON loading later more easily supported. So
 		// without further ado:
 		
-		// 1. Get groups.
-		$groups = $currentUserData->getGroups(GirafRecord::RETURN_RECORD);
-		
-		// 2. Get children for each group.
-		$children = array();
-		
-		foreach($groups as $group)
-		{
-			$children[$group->id] = $group->getChildren(GirafRecord::RETURN_RECORD);
-		}
-		
-		// 3. Get apps for each child.
-		// 3a. Get devices for each child.
-		// 3b. Get apps for each device.
-		$apps = array(); // Key: childId, value: array of apps.
-		foreach ($children as $child)
-		{
-			$apps[$child->id] = array(); // Initialize.
-			
-			// We try to reduce the overhead of double-entry apps, so we
-			// start by getting unique app ID's THEN getting records.
-			
-			foreach($child as $subarr)
-			{
-				
-			}
-			
-			if (is_array($child))
-			{
-				foreach ($child as $child_arr)
-				{
-					$devices = $child_arr->getDevices();
-					
-					$dev_apps = array();
-					
-					foreach ($devices as $dev)
-					{
-						$dev_apps_temp = $dev->getApps();
-						$dev_apps = array_merge($dev_apps_temp, $dev_apps);
-					}
-				}
-			}
-			else
-			{
-				$devices = $child->getDevices();
-				
-				
-				
-				foreach ($devices as $dev)
-				{
-					$dev_apps_temp = $dev->getApps();
-					$dev_apps = array_merge($dev_apps_temp, $dev_apps);
-				}
-			}
-		}
-
-		// Get all children for this user's groups.
-		// Even more bruteforce. Get *all* children.
-		// $kids = GirafChild::getGirafChildren(null, GirafChild::RETURN_RECORD);
-		// Pop them into the view data array.
-		$data["kids"] = $children;
-		
-		// Toss kidsApps into the data array as well.
-		$data["apps"] = $apps;
+		$data["userId"] = $currentUserData->id;
 		
 		// Invoke the views.
 		$this->view("default/header", $data);

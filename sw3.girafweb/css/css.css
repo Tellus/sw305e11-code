@@ -321,3 +321,8 @@ a:active {	text-decoration:none;
     color: red;
     background-color: #BBBBBB;
 }
+
+#girafLoader
+{
+	margin-left: 45%;
+}
