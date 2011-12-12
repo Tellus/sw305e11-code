@@ -23,7 +23,7 @@ function printModule(contents)
 	$("#window").html(contents);
 }
 
-function refreshModule()
+function reloadAppModule()
 {
 	$.get(lastModuleUrl, {}, printModule);
 }
@@ -186,7 +186,7 @@ function appClicked(eventdata)
 	
 	lastModuleUrl = "<?=BaseUrl()?>module/"+appId+"/"+kidId;
 	
-	refreshModule();	
+	reloadAppModule();	
 }
 
 function selectGroup(id)

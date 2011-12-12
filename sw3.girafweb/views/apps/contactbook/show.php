@@ -80,8 +80,8 @@ $(document).ready(function()
 		<td>
 		<?php
 		foreach ($images as $image){
-			$n = basename($image); ?>
-			<img class="cb-image" src="<?=BaseUrl()?>img/<?=$n?>" id="img_<?=$n?>" />
+			$n = basename($image->imgUri); ?>
+			<img class="cb-image" src="<?=BaseUrl()."image/view/$image->id"?>" id="img_<?=$n?>" />
 		<?php } ?>
 		</td>
 	</tr>

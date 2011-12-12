@@ -39,7 +39,7 @@ $crypt_salt = "ergf0h34280hufdg097h324";
 $crypt_rounds = 5000;
 
 // Define the base url so we don't have to figure it out.
-$base_url = "giraf.homestead.dk";
+$base_url = "http://giraf.homestead.dk/";
 
 // Defines to make them globally available constants.
 define("db_user", $db_user);
