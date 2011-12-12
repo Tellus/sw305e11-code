@@ -507,6 +507,24 @@ class GirafRecordAssociation
 		
 		return $ret;
 	}
+	
+	/**
+	 * Method overloading to automagically support "getSubClass" methods
+	 * in subclasses. This makes the semantically pleasing methods
+	 * available without further implementations.
+	 * \param $name Name of the method being called.
+	 * \param $params Array of parameters to pass to it.
+	 **/
+	public static function __callStatic($name, $params)
+	{
+		if (!is_array($params)) throw new Exception("Parameters were not passed as array.");
+		if ($name == 'get'.get_class())
+		{
+			return static::getInstance($params[0]);
+		}
+		// Final solution. Der Ent-...dinge
+		return parent::__call($name, $params);
+	}
 }
 
 ?>

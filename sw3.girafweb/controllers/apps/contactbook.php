@@ -151,13 +151,22 @@ class Contactbook extends GirafController
 		// Handle uploaded images. We do this now because we didn't know the
 		// message id beforehand.
 		foreach ($_FILES as $file)
-		{
-			// $path = __DIR__ . "/../../content/img/" . $file["name"];
-			$path = BASEDIR . "img/" . $file["name"];
-			// var_dump($path, $file["tmp_name"]);
-			$res = move_uploaded_file($file["tmp_name"], $path);
-			// Save to database.
-			GirafImage::createMessageImage($path, $msgId, "Billedtekst mangler.");
+		{			
+			$tmp_name = $file['tmp_name'];
+			$imgFile = fopen($tmp_name, 'r');
+			$imgRaw = addslashes(fread($imgFile, filesize($tmp_name)));
+			fclose($imgFile);
+			
+			$sql = "
+				INSERT INTO imageResources
+				(imgUri, imageMimeType, imageSize, imageData)
+					VALUES
+				('$path','".$file['type']."',".$file['size'].", '$imgRaw')";
+			
+			sql_helper::insertQuery($sql);
+			$imgId = sql_helper::simpleQuery("SELECT imgId FROM imageResources WHERE imgUri='$path'");
+			
+			sql_helper::insertQuery("INSERT INTO cbMsgImages (imgKey, msgKey) VALUES ($imgId, $msgId)");
 		}		
 		
 		echo "success";

@@ -154,9 +154,7 @@ class GirafImage extends GirafRecord
      */
     public static function getGirafImage($imageId)
     {
-        parent::getInstance($imageId);
-        
-        
+        return parent::getInstance($imageId);
     }
     
     /**
