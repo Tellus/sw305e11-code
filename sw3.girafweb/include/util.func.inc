@@ -92,7 +92,8 @@ abstract class util
  * */
 function BaseUrl($path = "")
 {
-	return "http://giraf.homestead.dk/$path";
+	// return "http://giraf.homestead.dk/$path";
+	return SITE_BASE_URL;
 }
 
 /**
