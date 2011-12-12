@@ -1,4 +1,12 @@
+<div id="cb-show-dialog-box">
 <script>
+var cb_module_url = "<?=BaseUrl()?>module/contactbook/show/<?=$message->id?>";
+
+function cb_reload()
+{
+	$.get(cb_module_url, {}, function(data){$("#cb-show-dialog-box").html(data)});
+}
+	
 // AJAX form handling for replies.
 $(document).ready(function()
 {
@@ -15,19 +23,9 @@ $(document).ready(function()
 				user: "<?=$userId?>",
 				body: $("#replyBody").val()
 			},
-			onLoaded
+			cb_reload
 		);
 	});
-	
-	// Callback for when a new message has been posted.
-	function onLoaded(data)
-	{
-		if (data == "success")
-		{
-			// Reload this entire piece of stuff.
-			reloadModule();
-		}
-	}
 	
 	$(".cb-image").click(function(){
 		var id = event.target.id;
@@ -121,4 +119,5 @@ $(document).ready(function()
 </div>
 <div id="cb-image-box">
 	<img id="cb-image-box-src" src="." />
+</div>
 </div>

@@ -10,6 +10,12 @@ require_once(INCDIR . "image.class.inc");
  * */
 class Contactbook extends GirafController
 {
+	public function __construct()
+	{
+		parent::__construct();
+		header("Content-type: text/html");
+	}
+	
 	public function index()
 	{
 		die("Contactbook module cannot be called directly!");
@@ -90,6 +96,17 @@ class Contactbook extends GirafController
 	}
 	
 	/**
+	 * Retrieves the application's unique ID. As this can vary from one
+	 * GIRAFAdmin installation to the next (or even within the same
+	 * install), a method to retrieve it is useful.
+	 * \return The ID if found, false (BAAAD!) otherwise.
+	 **/
+	private function getAppId()
+	{
+		return sql_helper::simpleQuery("SELECT " . GirafApplication::getPrimaryKey() . " FROM " . GirafApplication::getSourceTable() . " WHERE applicationSystemName='contactbook'");
+	}
+	
+	/**
 	 * I wants me a friggin' list function actually NAMED list!
 	 * However, "list" is a reserved word in PHP, so we shadow the
 	 * name and call the function through the fallback function
@@ -98,6 +115,7 @@ class Contactbook extends GirafController
 	public function _list($params = array())
 	{
 		$data = array();
+		$data["appId"] = $this->getAppId();
 		
 		if (!isset($s)) $s = GirafSession::getSession();
 

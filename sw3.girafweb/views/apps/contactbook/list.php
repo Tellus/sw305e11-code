@@ -1,4 +1,12 @@
+<div id="cb-message-list-div">
 <script>
+var cb_message_list_url = "<?=BaseUrl()."module/$appId/$childId"?>";
+	
+function reloadMessageList()
+{
+	$.get(cb_message_list_url, {}, function(data){$("#cb-message-list-div").html(data)});
+}
+	
 // Adds a new file input thingy to the form.
 function addFileInput()
 {
@@ -68,7 +76,7 @@ function onNewMessageCreated(data)
 	if (data == "success")
 	{
 		// alert ("Message posted succesfully.");
-		refreshModule();
+		reloadMessageList();
 	}
 	else
 	{
@@ -188,4 +196,5 @@ $(document).ready(function(){
 
 <div id="readMessageDialog" title="%subject%">
 <div id="messageDialogContents">This will write out some neat contactbook information!</div>
+</div>
 </div>
