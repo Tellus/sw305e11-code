@@ -1,0 +1,66 @@
+*******************************************************************************
+GIRAFADMIN 20111218
+
+System Requirements:
+- Web server with rewrite features (Apache2 or lighttpd should work)
+- PHP (version 5.3 or higher)
+	- must be compiled to support mysqli (default in most binary installations)
+- MySQL (version 5.1 or higher)
+
+SETUP:
+------
+
+Site configuration:
+The file config.php in the include subdirectory contains all relevant
+configuration options. All options should be self-explanatory, and must be set
+prior to taking the system into use.
+
+Web server configuration:
+The system expects your web server to rewrite all requests to the document
+root to the index.php file, except those of the subdirectories css and js.
+Given the many web servers available we cannot supply a working universal
+configuration for each. The following can be used as a host configuration for
+lighttpd (tested on version 1.4):
+
+$HTTP["host"] =~ "PUT_YOUR_DOMAIN_NAME_HERE" {
+        server.document-root = "PUT_THE_PATH_TO_THIS_DIR_HERE"
+
+        url.rewrite-once = (
+                "/(.*)\.(.*)" => "$0",
+                "/(css|files|img|js|stats)/" => "$0",
+                "^/([^.]+)$" => "/index.php/$1"
+        )
+}
+
+This requires the rewrite module to be loaded in your lighttpd configuration.
+In Apache, use the mod_rewrite module. We leave this up to the users to handle.
+
+Database:
+The file girafplace.sql.gz contains the entire database structure of the site.
+Run it on your database to install it ready for use. Note that no data is
+created for your use. That must be done manually.
+
+USAGE:
+------
+
+As described in the report, there are no interfaces for working with children,
+groups, devices or applications.
+
+Insert data into these tables:
+	- profiles (children)
+	- groups
+	- devices (reference created children in ownerId)
+	- applications (create a contactbook entry. Values are irrelevant EXCEPT
+	  for applicationSystemName. This must be 'contactbook')
+
+Afterwards, insert relationship data into these tables:
+	- childGroupKeys (connecting children you inserted to groups you inserted)
+	- childUserKeys (connecting children to users - make sure to create a user
+	  in the login screen)
+	- devAppKeys (devices to applications)
+	- userGroupKeys
+	
+DEMO:
+-----
+We suggest using the demo site residing on http://giraf.homestead.dk to look at
+functionality instead of trying to install.
