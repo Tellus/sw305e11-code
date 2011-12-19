@@ -6,16 +6,16 @@
 
 /** Database values **/
 // Username for the MySQL database.
-$db_user = "giraf_web";
+$db_user = "";
 
 // Password for that user.
-$db_pass = "cookie";
+$db_pass = "";
 
 // The database to work from.
-$db_db = "girafplace";
+$db_db = "";
 
 // The hostname of the database.
-$db_host = "homestead.dk";
+$db_host = "localhost";
 
 // Optionally, the port.
 $db_port = 3306;
@@ -29,7 +29,7 @@ $db_table_prefix = "";
  * this AFTER taking the system into use will immediately make all existing
  * logins impossible to access without admin intervention.
  */
-$crypt_salt = "ergf0h34280hufdg097h324";
+$crypt_salt = "RandomStringOfLettersAndNumbersEtcPlease";
 
 /**
  * Define number of rounds the crypt function should run a string before
@@ -41,7 +41,7 @@ $crypt_rounds = 5000;
 
 // Define the base url so we don't have to figure it out.
 // MUST end in a slash.
-$base_url = "http://giraf.homestead.dk/";
+$base_url = "";
 
 // Defines to make them globally available constants.
 define("db_user", $db_user);
