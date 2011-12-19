@@ -11,9 +11,10 @@ SETUP:
 ------
 
 Site configuration:
-The file config.php in the include subdirectory contains all relevant
+The file config.php.example in the include subdirectory contains all relevant
 configuration options. All options should be self-explanatory, and must be set
 prior to taking the system into use.
+The must be renamed (or copied) to config.php before it will be used by the code.
 
 Web server configuration:
 The system expects your web server to rewrite all requests to the document
